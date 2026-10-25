@@ -85,19 +85,3 @@ jobs:
             .next/static
             public
           retention-days: 3
-
-  deploy:
-    name: Deploy Snapshot (Optional)
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/working' || github.ref == 'refs/heads/dev')
-
-    steps:
-      - name: Trigger Render Deploy Hook
-        run: |
-          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
-            echo "RENDER_DEPLOY_HOOK secret is not configured; skipping snapshot deployment."
-            exit 0
-          fi
-          echo "Triggering Render deployment webhook..."
-          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"

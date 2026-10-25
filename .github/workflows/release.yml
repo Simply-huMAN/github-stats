@@ -141,19 +141,22 @@ jobs:
             ### Highlights
             - **GitHub Stats API Route** (`/api/stats`): Ingests followers, public repos, stargazers count, and active 90-day contributions.
             - **Performance Tiers**: Algorithmic scoring evaluating Bronze, Gold, and Mythic developer ranks.
-            - **Aesthetic Cards**: Bespoke Tailwind gradients, glows, and custom verified watermark badge.
+            - **Custom Card Builder & 8 City Themes**: Handcrafted palettes for Tokyo, Berlin, Bangalore, Hyderabad, SF, Paris, Frankfurt, and Shanghai.
+            - **Modular Aesthetics**: Configurable avatar frames, badges, background textures, and persistent URL sharing.
+            - **Mobile-First Design**: Optimized layout, touch targets, and typography for mobile and desktop screens.
             - **Retina PNG Export**: One-click 3x retina card export via `html-to-image` with CORS handling.
-            - **Docker & Render Ready**: Multi-stage standalone Alpine container and Render Blueprint `render.yaml`.
+            - **Docker & Render Ready**: Multi-stage standalone Node 22 Alpine container and Render Blueprint `render.yaml`.
           draft: false
           prerelease: false
 
   deploy:
     name: Deploy to Render
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build, release]
     if: |
       always() &&
       needs.build.result == 'success' &&
+      (needs.release.result == 'success' || needs.release.result == 'skipped') &&
       github.ref == 'refs/heads/main'
 
     steps:

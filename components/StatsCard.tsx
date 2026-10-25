@@ -189,7 +189,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
       ref={ref}
       style={{ backgroundImage: resolvedTheme.ambientBg }}
       className={cn(
-        "relative w-full max-w-[540px] rounded-3xl p-7 md:p-8 overflow-hidden select-none transition-all duration-300",
+        "relative w-full max-w-[540px] rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 overflow-hidden select-none transition-all duration-300",
         resolvedTheme.outerContainer,
         resolvedTheme.borderGlow,
         className
@@ -198,7 +198,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
       {/* Background Texture Overlay (Cyber Grid, Mesh, or Glassmorphic) */}
       <div
         className={cn(
-          "pointer-events-none absolute inset-0 rounded-3xl transition-opacity",
+          "pointer-events-none absolute inset-0 rounded-2xl sm:rounded-3xl transition-opacity",
           bgConfig.overlayClass
         )}
         style={bgConfig.overlayStyle}
@@ -208,8 +208,8 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
       <div className={cn("absolute top-0 left-0 right-0 h-1 z-10", resolvedTheme.topStripe)} />
 
       {/* Header: User Avatar, Name, Handle, and Badge */}
-      <div className="relative z-10 flex items-start justify-between gap-4">
-        <div className="flex items-center gap-4 min-w-0">
+      <div className="relative z-10 flex items-start justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <div className="relative flex-shrink-0">
             {/* User Avatar with selected Frame Shape */}
             <div className={cn("overflow-hidden transition-all", frameConfig.wrapperClassName)}>
@@ -219,7 +219,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
                 alt={user.name || user.username}
                 crossOrigin="anonymous"
                 className={cn(
-                  "w-16 h-16 md:w-18 md:h-18 object-cover border-2 shadow-md transition-all",
+                  "w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 object-cover border-2 shadow-md transition-all",
                   frameConfig.imgClassName,
                   resolvedTheme.avatarBorder
                 )}
@@ -229,7 +229,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
             {/* Custom Avatar Badge */}
             <div
               className={cn(
-                "absolute -bottom-1.5 -right-1.5 p-1 rounded-full text-white shadow-md bg-zinc-900 border border-white/20 transition-all",
+                "absolute -bottom-1 -right-1 sm:-bottom-1.5 sm:-right-1.5 p-0.5 sm:p-1 rounded-full text-white shadow-md bg-zinc-900 border border-white/20 transition-all scale-90 sm:scale-100",
                 resolvedTheme.glowDot
               )}
             >
@@ -238,15 +238,15 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           </div>
 
           <div className="min-w-0">
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight truncate text-white">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight truncate text-white">
               {user.name || user.username}
             </h2>
-            <div className="flex items-center gap-2 text-sm text-zinc-400">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-zinc-400 flex-wrap">
               <span className="font-mono text-zinc-400">@{user.username}</span>
               {joinYear && (
                 <>
                   <span className="opacity-40">•</span>
-                  <span className="flex items-center gap-1 text-xs text-zinc-400">
+                  <span className="flex items-center gap-1 text-[11px] sm:text-xs text-zinc-400">
                     <Calendar className="w-3 h-3" />
                     {joinYear}
                   </span>
@@ -259,7 +259,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
         {/* Theme or Tier Badge */}
         <div
           className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase backdrop-blur-md flex-shrink-0 shadow-sm",
+            "flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold tracking-wider uppercase backdrop-blur-md flex-shrink-0 shadow-sm",
             resolvedTheme.badgeStyle
           )}
         >
@@ -270,90 +270,90 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
 
       {/* Bio */}
       {user.bio && (
-        <p className="relative z-10 mt-4 text-xs md:text-sm text-zinc-300/90 line-clamp-2 leading-relaxed">
+        <p className="relative z-10 mt-3 sm:mt-4 text-xs md:text-sm text-zinc-300/90 line-clamp-2 leading-relaxed">
           &ldquo;{user.bio}&rdquo;
         </p>
       )}
 
       {/* Rank Classification Box */}
-      <div className="relative z-10 mt-5 p-3.5 rounded-2xl bg-black/35 backdrop-blur-md border border-white/10">
-        <div className="flex items-center justify-between">
-          <span className="text-xs uppercase font-mono tracking-wider text-zinc-400">
+      <div className="relative z-10 mt-3.5 sm:mt-5 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-black/35 backdrop-blur-md border border-white/10">
+        <div className="flex items-center justify-between gap-1">
+          <span className="text-[10px] sm:text-xs uppercase font-mono tracking-wider text-zinc-400">
             Rank Classification
           </span>
-          <span className={cn("text-xs font-bold font-mono tracking-wider", resolvedTheme.accentGradient)}>
+          <span className={cn("text-[10px] sm:text-xs font-bold font-mono tracking-wider", resolvedTheme.accentGradient)}>
             Score: {tierDetails.score.toLocaleString()} pts
           </span>
         </div>
-        <div className={cn("text-base font-extrabold mt-0.5", resolvedTheme.accentGradient)}>
+        <div className={cn("text-sm sm:text-base font-extrabold mt-0.5", resolvedTheme.accentGradient)}>
           {tierDetails.title}
         </div>
-        <p className="text-[11px] text-zinc-400 mt-1 leading-snug">
+        <p className="text-[10px] sm:text-[11px] text-zinc-400 mt-1 leading-snug">
           {tierDetails.description}
         </p>
       </div>
 
       {/* Metrics Grid */}
-      <div className="relative z-10 grid grid-cols-2 gap-3 mt-4">
+      <div className="relative z-10 grid grid-cols-2 gap-2 sm:gap-3 mt-3 sm:mt-4">
         {/* Stars */}
-        <div className={cn("p-3.5 rounded-2xl transition-colors backdrop-blur-sm", resolvedTheme.metricCardBg)}>
+        <div className={cn("p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl transition-colors backdrop-blur-sm", resolvedTheme.metricCardBg)}>
           <div className="flex items-center justify-between text-zinc-400 mb-1">
-            <span className="text-[11px] font-medium tracking-wide">Total Stars</span>
-            <Star className={cn("w-4 h-4 fill-current/20", resolvedTheme.metricIconColor)} />
+            <span className="text-[10px] sm:text-[11px] font-medium tracking-wide">Total Stars</span>
+            <Star className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current/20", resolvedTheme.metricIconColor)} />
           </div>
-          <div className="text-xl md:text-2xl font-black tracking-tight text-white font-mono">
+          <div className="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white font-mono">
             {formatNumber(stats.totalStars)}
           </div>
-          <span className="text-[10px] text-zinc-500 font-mono">earned across repos</span>
+          <span className="text-[9px] sm:text-[10px] text-zinc-500 font-mono truncate block">earned across repos</span>
         </div>
 
         {/* Followers */}
-        <div className={cn("p-3.5 rounded-2xl transition-colors backdrop-blur-sm", resolvedTheme.metricCardBg)}>
+        <div className={cn("p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl transition-colors backdrop-blur-sm", resolvedTheme.metricCardBg)}>
           <div className="flex items-center justify-between text-zinc-400 mb-1">
-            <span className="text-[11px] font-medium tracking-wide">Followers</span>
-            <Users className={cn("w-4 h-4", resolvedTheme.metricIconColor)} />
+            <span className="text-[10px] sm:text-[11px] font-medium tracking-wide">Followers</span>
+            <Users className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4", resolvedTheme.metricIconColor)} />
           </div>
-          <div className="text-xl md:text-2xl font-black tracking-tight text-white font-mono">
+          <div className="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white font-mono">
             {formatNumber(stats.followers)}
           </div>
-          <span className="text-[10px] text-zinc-500 font-mono">developer reach</span>
+          <span className="text-[9px] sm:text-[10px] text-zinc-500 font-mono truncate block">developer reach</span>
         </div>
 
         {/* Repositories */}
-        <div className={cn("p-3.5 rounded-2xl transition-colors backdrop-blur-sm", resolvedTheme.metricCardBg)}>
+        <div className={cn("p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl transition-colors backdrop-blur-sm", resolvedTheme.metricCardBg)}>
           <div className="flex items-center justify-between text-zinc-400 mb-1">
-            <span className="text-[11px] font-medium tracking-wide">Repositories</span>
-            <GitFork className={cn("w-4 h-4", resolvedTheme.metricIconColor)} />
+            <span className="text-[10px] sm:text-[11px] font-medium tracking-wide">Repositories</span>
+            <GitFork className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4", resolvedTheme.metricIconColor)} />
           </div>
-          <div className="text-xl md:text-2xl font-black tracking-tight text-white font-mono">
+          <div className="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white font-mono">
             {formatNumber(stats.publicRepos)}
           </div>
-          <span className="text-[10px] text-zinc-500 font-mono">public projects</span>
+          <span className="text-[9px] sm:text-[10px] text-zinc-500 font-mono truncate block">public projects</span>
         </div>
 
         {/* Active Contributions */}
-        <div className={cn("p-3.5 rounded-2xl transition-colors backdrop-blur-sm", resolvedTheme.metricCardBg)}>
+        <div className={cn("p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl transition-colors backdrop-blur-sm", resolvedTheme.metricCardBg)}>
           <div className="flex items-center justify-between text-zinc-400 mb-1">
-            <span className="text-[11px] font-medium tracking-wide">Active Activity</span>
-            <Flame className={cn("w-4 h-4 fill-current/20", resolvedTheme.metricIconColor)} />
+            <span className="text-[10px] sm:text-[11px] font-medium tracking-wide">Active Activity</span>
+            <Flame className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current/20", resolvedTheme.metricIconColor)} />
           </div>
-          <div className="text-xl md:text-2xl font-black tracking-tight text-white font-mono">
+          <div className="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white font-mono">
             {formatNumber(stats.activeContributions)}
           </div>
-          <span className="text-[10px] text-zinc-500 font-mono">recent contributions</span>
+          <span className="text-[9px] sm:text-[10px] text-zinc-500 font-mono truncate block">recent contributions</span>
         </div>
       </div>
 
       {/* Footer: Verified & Watermark */}
-      <div className="relative z-10 mt-5 pt-3 border-t border-white/10 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 text-xs">
-        <div className="flex items-center gap-1.5 text-zinc-400 text-[10px] md:text-[11px]">
+      <div className="relative z-10 mt-3.5 sm:mt-5 pt-2.5 sm:pt-3 border-t border-white/10 flex flex-wrap sm:flex-nowrap items-center justify-between gap-1.5 sm:gap-2 text-xs">
+        <div className="flex items-center gap-1.5 text-zinc-400 text-[9px] sm:text-[11px]">
           <span>Verified via GitHub API</span>
         </div>
 
         {/* Watermark */}
         <div
           className={cn(
-            "flex items-center gap-1.5 text-[9px] md:text-[10px] font-mono select-none transition-opacity",
+            "flex items-center gap-1 sm:gap-1.5 text-[8.5px] sm:text-[10px] font-mono select-none transition-opacity",
             resolvedTheme.watermarkColor
           )}
         >

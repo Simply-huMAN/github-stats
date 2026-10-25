@@ -28,6 +28,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Retina PNG Export Engine (`components/DownloadButton.tsx`)**:
   - Integrates `html-to-image` rendering at 3x pixel ratio for print and social media sharing.
   - Automated download trigger with dynamic naming convention: `${username}-github-${tier}-card.png`.
+- **Custom Card Builder & City Themes (`components/builder/CustomizerToolbar.tsx`, `lib/themes/`)**:
+  - 8 handcrafted city-inspired visual theme palettes: Tokyo (cyberpunk neon), Berlin (underground techno monochrome), Bangalore (tech hub saffron/emerald), Hyderabad (regal gold & cyan), San Francisco (foggy ocean teal), Paris (champagne lavender), Frankfurt (financial high-tech slate), and Shanghai (high-contrast red & gold neon).
+  - Modular Avatar Frame shapes: Squircle, Circle, Cyber Hexagon, Neon Ring, and Brushed Metal.
+  - Custom Avatar Badges: Performance Tier Rank, Minimal Shield, Star Contributor, and Neon Sparkle.
+  - Card Background Textures: Ambient Glow, Cyber Grid pattern, Dot Matrix, and Glassmorphic blur.
+  - Deep linking & sharing support via URL query parameters (`?user=...&theme=...&frame=...&badge=...&bg=...`).
+- **Mobile-First Responsive Design**:
+  - Fluid padding and responsive typography across all card and toolbar components for seamless viewing on mobile and tablet devices.
+  - Full-width touch targets and iOS Safari auto-zoom prevention on input focus.
 - **Interactive Test Harness (`app/page.tsx`)**:
   - Search input with quick-load presets (`@torvalds`, `@shadcn`, `@kentcdodds`, `@octocat`).
   - Live tier preview switcher enabling instant preview of all three themes.

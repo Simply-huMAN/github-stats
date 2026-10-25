@@ -70,6 +70,7 @@ export default function HomePage() {
 
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // Sync URL query params on mount or options change
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
@@ -98,22 +99,6 @@ export default function HomePage() {
     if (!userToFetch.trim()) return;
     setIsLoading(true);
     setErrorMessage(null);
-
-    try {
-      const res = await fetch(`/api/stats?username=${encodeURIComponent(userToFetch.trim())}`);
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.details || data.error || "Failed to fetch GitHub stats");
-      }
-
-      setStatsData(data);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
-      setErrorMessage(msg);
-    } finally {
-      setIsLoading(false);
-    }
   }
 
   function handleSearch(e: FormEvent) {
@@ -140,26 +125,29 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col items-center px-4 py-10 md:py-16 selection:bg-indigo-500/40">
+    <main className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col items-center px-3 sm:px-4 py-8 sm:py-10 md:py-16 selection:bg-indigo-500/40">
+      {/* Background ambient lighting */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-indigo-600/10 blur-[130px]" />
         <div className="absolute top-1/3 -right-40 w-96 h-96 rounded-full bg-cyan-500/10 blur-[140px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
-        <div className="text-center space-y-2 mb-8">
+        {/* App Title */}
+        <div className="text-center space-y-2 mb-6 sm:mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-800/80 border border-zinc-700/60 text-xs font-mono text-zinc-300">
             <Github className="w-3.5 h-3.5" />
             <span>GitHub Stats &amp; City Customizer</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white">
             Custom Developer Card Builder
           </h1>
-          <p className="text-sm md:text-base text-zinc-400 max-w-xl mx-auto">
+          <p className="text-xs sm:text-sm md:text-base text-zinc-400 max-w-xl mx-auto px-2">
             Personalize your GitHub stats with city-inspired themes (Tokyo, Berlin, Bangalore, Hyderabad), custom frames, badges, and export high-res PNGs.
           </p>
         </div>
 
+        {/* Username Search Form */}
         <form onSubmit={handleSearch} className="w-full max-w-md flex items-center gap-2 mb-3">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
@@ -168,19 +156,20 @@ export default function HomePage() {
               value={usernameInput}
               onChange={(e) => setUsernameInput(e.target.value)}
               placeholder="Enter GitHub username (e.g. torvalds)"
-              className="w-full pl-10 pr-4 py-2.5 bg-zinc-900/90 border border-zinc-800 rounded-xl text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all font-mono"
+              className="w-full pl-10 pr-4 py-2.5 bg-zinc-900/90 border border-zinc-800 rounded-xl text-base sm:text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all font-mono"
             />
           </div>
           <button
             type="submit"
             disabled={isLoading || !usernameInput.trim()}
-            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 disabled:opacity-50 disabled:pointer-events-none text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2"
+            className="px-4 sm:px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 disabled:opacity-50 disabled:pointer-events-none text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2 flex-shrink-0"
           >
             {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Fetch"}
           </button>
         </form>
 
-        <div className="flex items-center gap-2 text-xs text-zinc-500 mb-8 flex-wrap justify-center">
+        {/* Quick Sample Links */}
+        <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-zinc-500 mb-6 sm:mb-8 flex-wrap justify-center">
           <span>Quick profiles:</span>
           {["shadcn", "torvalds", "kentcdodds", "leerob", "gaearon"].map((handle) => (
             <button
@@ -197,6 +186,7 @@ export default function HomePage() {
           ))}
         </div>
 
+        {/* Error Display */}
         {errorMessage && (
           <div className="w-full max-w-md mb-6 p-4 rounded-xl bg-red-950/40 border border-red-800/60 text-red-300 text-xs flex items-start gap-3">
             <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-400" />
@@ -207,7 +197,8 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="w-full flex justify-center py-2">
+        {/* Live Card Canvas */}
+        <div className="w-full flex justify-center py-2 px-1">
           <StatsCard
             ref={cardRef}
             data={statsData}
@@ -215,17 +206,19 @@ export default function HomePage() {
           />
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        {/* Action Controls: Download & Share */}
+        <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 w-full max-w-sm sm:max-w-none">
           <DownloadButton
             cardRef={cardRef}
             username={statsData.user.username}
             tier={customizerOptions.themeMode === "auto" ? statsData.tier.tier : customizerOptions.themeMode}
+            className="w-full sm:w-auto"
           />
 
           <button
             type="button"
             onClick={handleCopyShareLink}
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 border border-zinc-700 shadow-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 border border-zinc-700 shadow-sm"
           >
             {copiedLink ? (
               <>
@@ -241,6 +234,7 @@ export default function HomePage() {
           </button>
         </div>
 
+        {/* Interactive Customizer Toolbar */}
         <div className="w-full mt-10 flex justify-center">
           <CustomizerToolbar
             options={customizerOptions}
@@ -249,6 +243,7 @@ export default function HomePage() {
           />
         </div>
 
+        {/* Footer info */}
         <div className="mt-14 text-center text-xs text-zinc-600 max-w-md space-y-1.5">
           <p>
             City themes: Tokyo, Berlin, Bangalore, Hyderabad, San Francisco, Paris, Frankfurt, Shanghai.
