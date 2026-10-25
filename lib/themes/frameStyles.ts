@@ -66,30 +66,30 @@ export const AVATAR_BADGE_CONFIG: Record<AvatarBadgeStyle, BadgeStyleConfig> = {
     id: "tier-icon",
     label: "Tier Rank",
     renderIcon: (tier) => {
-      if (tier === "Mythic") return <Sparkles className="w-3.5 h-3.5" />;
-      if (tier === "Gold") return <Award className="w-3.5 h-3.5" />;
-      return <ShieldCheck className="w-3.5 h-3.5" />;
+      if (tier === "Mythic") return React.createElement(Sparkles, { className: "w-3.5 h-3.5" });
+      if (tier === "Gold") return React.createElement(Award, { className: "w-3.5 h-3.5" });
+      return React.createElement(ShieldCheck, { className: "w-3.5 h-3.5" });
     },
   },
   "verified-check": {
     id: "verified-check",
     label: "Verified",
-    renderIcon: () => <CheckCircle2 className="w-3.5 h-3.5" />,
+    renderIcon: () => React.createElement(CheckCircle2, { className: "w-3.5 h-3.5" }),
   },
   fire: {
     id: "fire",
     label: "Velocity",
-    renderIcon: () => <Flame className="w-3.5 h-3.5 fill-current" />,
+    renderIcon: () => React.createElement(Flame, { className: "w-3.5 h-3.5 fill-current" }),
   },
   "royal-crest": {
     id: "royal-crest",
     label: "Royal Crest",
-    renderIcon: () => <Crown className="w-3.5 h-3.5" />,
+    renderIcon: () => React.createElement(Crown, { className: "w-3.5 h-3.5" }),
   },
   "minimal-dot": {
     id: "minimal-dot",
     label: "Status Dot",
-    renderIcon: () => <CircleDot className="w-3.5 h-3.5" />,
+    renderIcon: () => React.createElement(CircleDot, { className: "w-3.5 h-3.5" }),
   },
 };
 
