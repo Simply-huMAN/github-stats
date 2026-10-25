@@ -17,6 +17,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Ensure public directory exists even if empty in repo
+RUN mkdir -p public
+
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
@@ -36,7 +39,7 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # Set correct ownership for nextjs cache & runtime
-RUN mkdir .next && chown nextjs:nodejs .next
+RUN mkdir -p .next && chown nextjs:nodejs .next
 
 # Copy public assets and standalone output traces
 COPY --from=builder /app/public ./public
