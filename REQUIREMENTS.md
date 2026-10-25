@@ -49,7 +49,7 @@ $$\text{Score} = (\text{Total Stars} \times 3.0) + (\text{Followers} \times 1.5)
   - Stats grid: Followers, Stars, Repositories, Estimated Contributions
   - Calculated performance tier score
   - Member since year / active period
-  - **Watermark**: Minimalist, elegant text watermark in the bottom corner (e.g., `gitstats.dev • verified profile` or `GitHub Performance Tier`).
+  - **Watermark**: Minimalist, elegant text watermark in the bottom corner (`github-stats-s3gs.onrender.com • verified tier`).
 - **Styling Archetypes**:
   - **Bronze**: Sleek slate/zinc metallic gradient, cool brushed borders, understated silver accents.
   - **Gold**: Radiant amber/honey dual-gradient, subtle golden outer glow (`drop-shadow` / `box-shadow`), warm metallic badges.

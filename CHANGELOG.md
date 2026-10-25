@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Client Stats Card Component (`components/StatsCard.tsx`)**:
   - Responsive, retina-ready card design with forwardRef for DOM capture.
   - CORS-compliant avatar rendering (`crossOrigin="anonymous"`).
-  - Minimalist verified text watermark in the bottom-right corner (`gitstats.dev • verified tier`).
+  - Minimalist verified text watermark in the bottom-right corner (`github-stats-s3gs.onrender.com • verified tier`).
 - **Retina PNG Export Engine (`components/DownloadButton.tsx`)**:
   - Integrates `html-to-image` rendering at 3x pixel ratio for print and social media sharing.
   - Automated download trigger with dynamic naming convention: `${username}-github-${tier}-card.png`.

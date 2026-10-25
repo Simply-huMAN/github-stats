@@ -117,6 +117,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
 ) {
   const { user, stats } = data;
 
+  // 1. Calculate raw user tier
   const tierDetails = useMemo(() => {
     if (forceTier) {
       const current = assignTier(stats);
@@ -127,20 +128,19 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
 
   const activeTier = tierDetails.tier;
 
+  // 2. Resolve Active Visual Theme (City Theme vs Tier Theme)
   const resolvedTheme = useMemo(() => {
     const selectedMode = customizerOptions?.themeMode || "auto";
 
     if (selectedMode !== "auto" && selectedMode in CITY_THEMES) {
       const city = CITY_THEMES[selectedMode as keyof typeof CITY_THEMES];
       return {
-        isCityTheme: true,
-        cityName: city.name,
         outerContainer: city.outerContainer,
         ambientBg: city.ambientBg,
         borderGlow: city.borderGlow,
         topStripe: city.topStripe,
         badgeStyle: city.badgeStyle,
-        badgeLabel: city.name.toUpperCase(),
+        badgeLabel: tierDetails.badgeLabel || `${activeTier} Tier`,
         accentGradient: city.accentGradient,
         metricCardBg: city.metricCardBg,
         metricIconColor: city.metricIconColor,
@@ -156,8 +156,6 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
         : TIER_THEME_CONFIG[activeTier];
 
     return {
-      isCityTheme: false,
-      cityName: null,
       outerContainer: tierTheme.outerContainer,
       ambientBg: tierTheme.ambientBg,
       borderGlow: tierTheme.borderGlow,
@@ -173,6 +171,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
     };
   }, [customizerOptions?.themeMode, activeTier, tierDetails.badgeLabel]);
 
+  // 3. Resolve Avatar Frame & Badge Options
   const frameConfig = AVATAR_FRAME_CONFIG[customizerOptions?.avatarFrame || "squircle"];
   const badgeConfig = AVATAR_BADGE_CONFIG[customizerOptions?.avatarBadge || "tier-icon"];
   const bgConfig = CARD_BACKGROUND_CONFIG[customizerOptions?.cardBackground || "ambient-glow"];
@@ -196,6 +195,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
         className
       )}
     >
+      {/* Background Texture Overlay (Cyber Grid, Mesh, or Glassmorphic) */}
       <div
         className={cn(
           "pointer-events-none absolute inset-0 rounded-3xl transition-opacity",
@@ -204,11 +204,14 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
         style={bgConfig.overlayStyle}
       />
 
+      {/* Decorative Top Accent Stripe */}
       <div className={cn("absolute top-0 left-0 right-0 h-1 z-10", resolvedTheme.topStripe)} />
 
+      {/* Header: User Avatar, Name, Handle, and Badge */}
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div className="flex items-center gap-4 min-w-0">
           <div className="relative flex-shrink-0">
+            {/* User Avatar with selected Frame Shape */}
             <div className={cn("overflow-hidden transition-all", frameConfig.wrapperClassName)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -223,6 +226,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
               />
             </div>
 
+            {/* Custom Avatar Badge */}
             <div
               className={cn(
                 "absolute -bottom-1.5 -right-1.5 p-1 rounded-full text-white shadow-md bg-zinc-900 border border-white/20 transition-all",
@@ -252,6 +256,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           </div>
         </div>
 
+        {/* Theme or Tier Badge */}
         <div
           className={cn(
             "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase backdrop-blur-md flex-shrink-0 shadow-sm",
@@ -263,12 +268,14 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
         </div>
       </div>
 
+      {/* Bio */}
       {user.bio && (
         <p className="relative z-10 mt-4 text-xs md:text-sm text-zinc-300/90 line-clamp-2 leading-relaxed">
           &ldquo;{user.bio}&rdquo;
         </p>
       )}
 
+      {/* Rank Classification Box */}
       <div className="relative z-10 mt-5 p-3.5 rounded-2xl bg-black/35 backdrop-blur-md border border-white/10">
         <div className="flex items-center justify-between">
           <span className="text-xs uppercase font-mono tracking-wider text-zinc-400">
@@ -286,7 +293,9 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
         </p>
       </div>
 
+      {/* Metrics Grid */}
       <div className="relative z-10 grid grid-cols-2 gap-3 mt-4">
+        {/* Stars */}
         <div className={cn("p-3.5 rounded-2xl transition-colors backdrop-blur-sm", resolvedTheme.metricCardBg)}>
           <div className="flex items-center justify-between text-zinc-400 mb-1">
             <span className="text-[11px] font-medium tracking-wide">Total Stars</span>
@@ -298,6 +307,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           <span className="text-[10px] text-zinc-500 font-mono">earned across repos</span>
         </div>
 
+        {/* Followers */}
         <div className={cn("p-3.5 rounded-2xl transition-colors backdrop-blur-sm", resolvedTheme.metricCardBg)}>
           <div className="flex items-center justify-between text-zinc-400 mb-1">
             <span className="text-[11px] font-medium tracking-wide">Followers</span>
@@ -309,6 +319,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           <span className="text-[10px] text-zinc-500 font-mono">developer reach</span>
         </div>
 
+        {/* Repositories */}
         <div className={cn("p-3.5 rounded-2xl transition-colors backdrop-blur-sm", resolvedTheme.metricCardBg)}>
           <div className="flex items-center justify-between text-zinc-400 mb-1">
             <span className="text-[11px] font-medium tracking-wide">Repositories</span>
@@ -320,6 +331,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           <span className="text-[10px] text-zinc-500 font-mono">public projects</span>
         </div>
 
+        {/* Active Contributions */}
         <div className={cn("p-3.5 rounded-2xl transition-colors backdrop-blur-sm", resolvedTheme.metricCardBg)}>
           <div className="flex items-center justify-between text-zinc-400 mb-1">
             <span className="text-[11px] font-medium tracking-wide">Active Activity</span>
@@ -332,21 +344,23 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
         </div>
       </div>
 
-      <div className="relative z-10 mt-5 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-1.5 text-zinc-400 text-[11px]">
+      {/* Footer: Verified & Watermark */}
+      <div className="relative z-10 mt-5 pt-3 border-t border-white/10 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-1.5 text-zinc-400 text-[10px] md:text-[11px]">
           <span>Verified via GitHub API</span>
         </div>
 
+        {/* Watermark */}
         <div
           className={cn(
-            "flex items-center gap-1.5 text-[10px] font-mono tracking-widest uppercase select-none transition-opacity",
+            "flex items-center gap-1.5 text-[9px] md:text-[10px] font-mono select-none transition-opacity",
             resolvedTheme.watermarkColor
           )}
         >
-          <span className={cn("w-1.5 h-1.5 rounded-full", resolvedTheme.glowDot)} />
-          <span className="font-semibold">gitstats.dev</span>
+          <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", resolvedTheme.glowDot)} />
+          <span className="font-semibold tracking-normal lowercase">github-stats-s3gs.onrender.com</span>
           <span className="opacity-40">•</span>
-          <span className="opacity-80">verified tier</span>
+          <span className="opacity-80 tracking-wider uppercase">verified tier</span>
         </div>
       </div>
     </div>

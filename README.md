@@ -24,7 +24,7 @@ A modern Next.js 14/15 application built with TypeScript and Tailwind CSS. It ca
 - **High-Quality PNG Export**:
   - Exports crisp 3x retina PNG images directly from the card DOM node.
   - Built-in CORS safeguards for GitHub avatars to prevent tainted canvas errors.
-  - Elegant, discreet watermark badge (`gitstats.dev • verified tier`).
+  - Elegant, discreet watermark badge (`github-stats-s3gs.onrender.com • verified tier`).
 
 ---
 
