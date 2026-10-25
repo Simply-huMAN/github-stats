@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.0] - 2026-10-26
+
+### Added
+- **Custom Card Builder & 8 City Themes (`components/builder/CustomizerToolbar.tsx`, `lib/themes/`)**:
+  - 8 handcrafted city-inspired visual theme palettes: Tokyo (cyberpunk neon), Berlin (underground techno monochrome), Bangalore (tech hub saffron/emerald), Hyderabad (regal gold & cyan), San Francisco (foggy ocean teal), Paris (champagne lavender), Frankfurt (financial high-tech slate), and Shanghai (high-contrast red & gold neon).
+  - Modular Avatar Frame shapes: Squircle, Circle, Cyber Hexagon, Neon Ring, and Brushed Metal.
+  - Custom Avatar Badges: Performance Tier Rank, Minimal Shield, Star Contributor, and Neon Sparkle.
+  - Card Background Textures: Ambient Glow, Cyber Grid pattern, Dot Matrix, and Glassmorphic blur.
+  - Deep linking & sharing support via URL query parameters (`?user=...&theme=...&frame=...&badge=...&bg=...`).
+- **Mobile-First Responsive Design**:
+  - Fluid padding and responsive typography across all card and toolbar components for seamless viewing on mobile and tablet devices.
+  - Full-width touch targets and iOS Safari auto-zoom prevention on input focus.
+  - Next.js 14 `viewport` metadata configuration (`width: device-width`, `initialScale: 1`).
+
+### Changed
+- Preserved authentic GitHub developer performance tier in badge label (`MYTHIC TIER`, `GOLD TIER`, `BRONZE TIER`) while applying custom city styling palettes.
+- Updated card watermark URL to live deployment domain (`github-stats-s3gs.onrender.com • verified tier`).
+- Upgraded Docker standalone container to Node 22 Alpine matching GitHub Actions CI.
+- Hardened release and deployment workflows to be strictly governed by `main`.
+
+---
+
 ## [0.1.0] - MVP Release - 2026-10-25
 
 ### Added
@@ -24,19 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Client Stats Card Component (`components/StatsCard.tsx`)**:
   - Responsive, retina-ready card design with forwardRef for DOM capture.
   - CORS-compliant avatar rendering (`crossOrigin="anonymous"`).
-  - Minimalist verified text watermark in the bottom-right corner (`github-stats-s3gs.onrender.com • verified tier`).
+  - Minimalist verified text watermark in the bottom-right corner.
 - **Retina PNG Export Engine (`components/DownloadButton.tsx`)**:
   - Integrates `html-to-image` rendering at 3x pixel ratio for print and social media sharing.
   - Automated download trigger with dynamic naming convention: `${username}-github-${tier}-card.png`.
-- **Custom Card Builder & City Themes (`components/builder/CustomizerToolbar.tsx`, `lib/themes/`)**:
-  - 8 handcrafted city-inspired visual theme palettes: Tokyo (cyberpunk neon), Berlin (underground techno monochrome), Bangalore (tech hub saffron/emerald), Hyderabad (regal gold & cyan), San Francisco (foggy ocean teal), Paris (champagne lavender), Frankfurt (financial high-tech slate), and Shanghai (high-contrast red & gold neon).
-  - Modular Avatar Frame shapes: Squircle, Circle, Cyber Hexagon, Neon Ring, and Brushed Metal.
-  - Custom Avatar Badges: Performance Tier Rank, Minimal Shield, Star Contributor, and Neon Sparkle.
-  - Card Background Textures: Ambient Glow, Cyber Grid pattern, Dot Matrix, and Glassmorphic blur.
-  - Deep linking & sharing support via URL query parameters (`?user=...&theme=...&frame=...&badge=...&bg=...`).
-- **Mobile-First Responsive Design**:
-  - Fluid padding and responsive typography across all card and toolbar components for seamless viewing on mobile and tablet devices.
-  - Full-width touch targets and iOS Safari auto-zoom prevention on input focus.
 - **Interactive Test Harness (`app/page.tsx`)**:
   - Search input with quick-load presets (`@torvalds`, `@shadcn`, `@kentcdodds`, `@octocat`).
   - Live tier preview switcher enabling instant preview of all three themes.

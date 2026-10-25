@@ -6,16 +6,16 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. 0.1.0 or 1.0.0)'
+        description: 'Release version (e.g. 0.2.0 or 1.0.0)'
         required: true
-        default: '0.1.0'
+        default: '0.2.0'
 
 permissions:
   contents: write
 
 env:
   NODE_VERSION: '22'
-  RELEASE_VERSION: ${{ github.event.inputs.version || '0.1.0' }}
+  RELEASE_VERSION: ${{ github.event.inputs.version || '0.2.0' }}
 
 jobs:
   setup:
