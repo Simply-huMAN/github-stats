@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState, useRef, FormEvent } from "react";
-import { StatsResponse, TierType } from "@/types/stats";
+import React, { useState, useRef, useEffect, FormEvent } from "react";
+import { StatsResponse } from "@/types/stats";
+import { CustomizerOptions } from "@/types/builder";
 import { StatsCard } from "@/components/StatsCard";
 import { DownloadButton } from "@/components/DownloadButton";
+import { CustomizerToolbar } from "@/components/builder/CustomizerToolbar";
 import {
   Search,
   Github,
   AlertCircle,
-  Sparkles,
-  Award,
-  ShieldCheck,
   RefreshCw,
+  Share2,
+  Check,
 } from "lucide-react";
 
 const INITIAL_DEMO_DATA: StatsResponse = {
@@ -52,14 +53,46 @@ const INITIAL_DEMO_DATA: StatsResponse = {
   fetchedAt: new Date().toISOString(),
 };
 
+const DEFAULT_OPTIONS: CustomizerOptions = {
+  themeMode: "auto",
+  avatarFrame: "squircle",
+  avatarBadge: "tier-icon",
+  cardBackground: "ambient-glow",
+};
+
 export default function HomePage() {
   const [usernameInput, setUsernameInput] = useState("leerob");
   const [statsData, setStatsData] = useState<StatsResponse>(INITIAL_DEMO_DATA);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [tierOverride, setTierOverride] = useState<TierType | undefined>(undefined);
+  const [customizerOptions, setCustomizerOptions] = useState<CustomizerOptions>(DEFAULT_OPTIONS);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const userParam = params.get("user");
+    const themeParam = params.get("theme") as CustomizerOptions["themeMode"];
+    const frameParam = params.get("frame") as CustomizerOptions["avatarFrame"];
+    const badgeParam = params.get("badge") as CustomizerOptions["avatarBadge"];
+    const bgParam = params.get("bg") as CustomizerOptions["cardBackground"];
+
+    if (userParam && userParam !== usernameInput) {
+      setUsernameInput(userParam);
+      fetchStats(userParam);
+    }
+
+    if (themeParam || frameParam || badgeParam || bgParam) {
+      setCustomizerOptions((prev) => ({
+        themeMode: themeParam || prev.themeMode,
+        avatarFrame: frameParam || prev.avatarFrame,
+        avatarBadge: badgeParam || prev.avatarBadge,
+        cardBackground: bgParam || prev.cardBackground,
+      }));
+    }
+  }, []);
 
   async function fetchStats(userToFetch: string) {
     if (!userToFetch.trim()) return;
@@ -75,7 +108,6 @@ export default function HomePage() {
       }
 
       setStatsData(data);
-      setTierOverride(undefined);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
       setErrorMessage(msg);
@@ -89,28 +121,46 @@ export default function HomePage() {
     fetchStats(usernameInput);
   }
 
+  function handleCopyShareLink() {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("user", statsData.user.username);
+    if (customizerOptions.themeMode !== "auto") {
+      url.searchParams.set("theme", customizerOptions.themeMode);
+    } else {
+      url.searchParams.delete("theme");
+    }
+    url.searchParams.set("frame", customizerOptions.avatarFrame);
+    url.searchParams.set("badge", customizerOptions.avatarBadge);
+    url.searchParams.set("bg", customizerOptions.cardBackground);
+
+    navigator.clipboard.writeText(url.toString());
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  }
+
   return (
-    <main className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col items-center px-4 py-12 md:py-16 selection:bg-indigo-500/40">
+    <main className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col items-center px-4 py-10 md:py-16 selection:bg-indigo-500/40">
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-indigo-600/10 blur-[120px]" />
-        <div className="absolute top-1/3 -right-40 w-96 h-96 rounded-full bg-amber-500/10 blur-[130px]" />
+        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-indigo-600/10 blur-[130px]" />
+        <div className="absolute top-1/3 -right-40 w-96 h-96 rounded-full bg-cyan-500/10 blur-[140px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
-        <div className="text-center space-y-3 mb-8">
+        <div className="text-center space-y-2 mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-800/80 border border-zinc-700/60 text-xs font-mono text-zinc-300">
             <Github className="w-3.5 h-3.5" />
-            <span>GitHub Stats &amp; Tier Showcase</span>
+            <span>GitHub Stats &amp; City Customizer</span>
           </div>
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white">
-            Developer Performance Tiers
+            Custom Developer Card Builder
           </h1>
           <p className="text-sm md:text-base text-zinc-400 max-w-xl mx-auto">
-            Calculate your public GitHub tier (Bronze, Gold, Mythic), preview bespoke styling, and export high-resolution PNG cards.
+            Personalize your GitHub stats with city-inspired themes (Tokyo, Berlin, Bangalore, Hyderabad), custom frames, badges, and export high-res PNGs.
           </p>
         </div>
 
-        <form onSubmit={handleSearch} className="w-full max-w-md flex items-center gap-2 mb-4">
+        <form onSubmit={handleSearch} className="w-full max-w-md flex items-center gap-2 mb-3">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input
@@ -131,8 +181,8 @@ export default function HomePage() {
         </form>
 
         <div className="flex items-center gap-2 text-xs text-zinc-500 mb-8 flex-wrap justify-center">
-          <span>Try quick samples:</span>
-          {["shadcn", "torvalds", "kentcdodds", "octocat"].map((handle) => (
+          <span>Quick profiles:</span>
+          {["shadcn", "torvalds", "kentcdodds", "leerob", "gaearon"].map((handle) => (
             <button
               key={handle}
               type="button"
@@ -157,79 +207,54 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="mb-6 flex items-center gap-2 p-1.5 rounded-2xl bg-zinc-900/80 border border-zinc-800/80 text-xs">
-          <span className="text-zinc-500 font-mono px-2 text-[11px]">Theme Preview:</span>
-          <button
-            type="button"
-            onClick={() => setTierOverride(undefined)}
-            className={`px-3 py-1.5 rounded-xl font-medium transition-all ${
-              tierOverride === undefined
-                ? "bg-zinc-800 text-white shadow-sm"
-                : "text-zinc-400 hover:text-zinc-200"
-            }`}
-          >
-            Auto ({statsData.tier.tier})
-          </button>
-          <button
-            type="button"
-            onClick={() => setTierOverride("Bronze")}
-            className={`px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 transition-all ${
-              tierOverride === "Bronze"
-                ? "bg-zinc-700 text-zinc-100 shadow-sm"
-                : "text-zinc-400 hover:text-zinc-200"
-            }`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
-            Bronze
-          </button>
-          <button
-            type="button"
-            onClick={() => setTierOverride("Gold")}
-            className={`px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 transition-all ${
-              tierOverride === "Gold"
-                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm"
-                : "text-zinc-400 hover:text-zinc-200"
-            }`}
-          >
-            <Award className="w-3.5 h-3.5 text-amber-400" />
-            Gold
-          </button>
-          <button
-            type="button"
-            onClick={() => setTierOverride("Mythic")}
-            className={`px-3 py-1.5 rounded-xl font-medium flex items-center gap-1.5 transition-all ${
-              tierOverride === "Mythic"
-                ? "bg-indigo-500/20 text-cyan-300 border border-indigo-500/30 shadow-sm"
-                : "text-zinc-400 hover:text-zinc-200"
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            Mythic
-          </button>
-        </div>
-
         <div className="w-full flex justify-center py-2">
           <StatsCard
             ref={cardRef}
             data={statsData}
-            forceTier={tierOverride}
+            customizerOptions={customizerOptions}
           />
         </div>
 
-        <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <DownloadButton
             cardRef={cardRef}
             username={statsData.user.username}
-            tier={tierOverride || statsData.tier.tier}
+            tier={customizerOptions.themeMode === "auto" ? statsData.tier.tier : customizerOptions.themeMode}
+          />
+
+          <button
+            type="button"
+            onClick={handleCopyShareLink}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 border border-zinc-700 shadow-sm"
+          >
+            {copiedLink ? (
+              <>
+                <Check className="w-4 h-4 text-emerald-400" />
+                <span className="text-emerald-300">Link Copied!</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="w-4 h-4 text-zinc-400" />
+                <span>Share Card Link</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className="w-full mt-10 flex justify-center">
+          <CustomizerToolbar
+            options={customizerOptions}
+            onChange={setCustomizerOptions}
+            onReset={() => setCustomizerOptions(DEFAULT_OPTIONS)}
           />
         </div>
 
-        <div className="mt-14 text-center text-xs text-zinc-600 max-w-md space-y-2">
+        <div className="mt-14 text-center text-xs text-zinc-600 max-w-md space-y-1.5">
           <p>
-            Scores weighted across followers, stargazers, repos, and estimated 90-day active contributions.
+            City themes: Tokyo, Berlin, Bangalore, Hyderabad, San Francisco, Paris, Frankfurt, Shanghai.
           </p>
           <p className="font-mono text-[11px] text-zinc-500">
-            Exported cards include 3x retina pixel ratio and CORS-safe avatar rendering.
+            Exported cards include 3x retina pixel ratio and full frame/theme rendering.
           </p>
         </div>
       </div>
