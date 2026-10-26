@@ -6,6 +6,8 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     name: "Tokyo",
     tagline: "Shibuya Cyberpunk Night",
     swatch: "from-cyan-400 via-indigo-500 to-fuchsia-500",
+    baseBgColor: "#080614",
+    linearGradient: "linear-gradient(135deg, #0b0816 0%, #090518 50%, #04010a 100%)",
     outerContainer:
       "bg-gradient-to-br from-[#0b0816] via-[#090518] to-[#04010a] text-cyan-50 border border-cyan-500/50 shadow-2xl shadow-indigo-950/80 ring-1 ring-fuchsia-500/30",
     ambientBg:
@@ -16,12 +18,12 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     badgeStyle:
       "bg-gradient-to-r from-cyan-500/20 via-indigo-500/25 to-pink-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.5)]",
     badgeText: "text-cyan-300",
-    accentGradient:
-      "text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-pink-300 to-purple-300",
+    accentColor: "text-cyan-300",
+    accentGradient: "text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.35)]",
     metricCardBg:
       "bg-[#0e0a24]/50 border border-indigo-700/40 hover:border-cyan-400/50",
     metricIconColor: "text-cyan-400",
-    watermarkColor: "text-cyan-400/80",
+    watermarkColor: "text-cyan-400/90",
     avatarBorder: "border-cyan-400/80 shadow-[0_0_12px_rgba(6,182,212,0.5)]",
     glowDot: "bg-cyan-400 shadow-[0_0_6px_#22d3ee]",
   },
@@ -31,6 +33,8 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     name: "Berlin",
     tagline: "Industrial Techno Minimal",
     swatch: "from-zinc-700 via-neutral-900 to-lime-400",
+    baseBgColor: "#0d0d10",
+    linearGradient: "linear-gradient(135deg, #121214 0%, #0d0d0f 50%, #08080a 100%)",
     outerContainer:
       "bg-gradient-to-br from-[#121214] via-[#0d0d0f] to-[#08080a] text-zinc-100 border border-zinc-700/70 shadow-2xl shadow-black/80 ring-1 ring-lime-400/20",
     ambientBg:
@@ -41,12 +45,12 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     badgeStyle:
       "bg-lime-950/60 text-lime-300 border border-lime-400/50 shadow-[0_0_12px_rgba(163,230,53,0.3)]",
     badgeText: "text-lime-300",
-    accentGradient:
-      "text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-lime-300 to-stone-400",
+    accentColor: "text-lime-300",
+    accentGradient: "text-lime-300 drop-shadow-[0_0_8px_rgba(163,230,53,0.35)]",
     metricCardBg:
       "bg-zinc-900/80 border border-zinc-800 hover:border-lime-500/50",
     metricIconColor: "text-lime-400",
-    watermarkColor: "text-lime-500/80",
+    watermarkColor: "text-lime-400/90",
     avatarBorder: "border-lime-400/80 shadow-[0_0_10px_rgba(163,230,53,0.35)]",
     glowDot: "bg-lime-400 shadow-[0_0_6px_#a3e635]",
   },
@@ -56,6 +60,8 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     name: "Bangalore",
     tagline: "Silicon Capital High-Velocity",
     swatch: "from-emerald-400 via-teal-500 to-cyan-500",
+    baseBgColor: "#020f0e",
+    linearGradient: "linear-gradient(135deg, #031513 0%, #020e0d 50%, #010807 100%)",
     outerContainer:
       "bg-gradient-to-br from-[#031513] via-[#020e0d] to-[#010807] text-emerald-50 border border-emerald-500/50 shadow-2xl shadow-emerald-950/70 ring-1 ring-emerald-400/20",
     ambientBg:
@@ -66,12 +72,12 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     badgeStyle:
       "bg-emerald-950/70 text-emerald-300 border border-emerald-400/60 shadow-[0_0_14px_rgba(16,185,129,0.35)]",
     badgeText: "text-emerald-300",
-    accentGradient:
-      "text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300",
+    accentColor: "text-emerald-300",
+    accentGradient: "text-emerald-300 drop-shadow-[0_0_8px_rgba(52,211,153,0.35)]",
     metricCardBg:
       "bg-emerald-950/30 border border-emerald-800/40 hover:border-emerald-400/50",
     metricIconColor: "text-emerald-400",
-    watermarkColor: "text-emerald-400/80",
+    watermarkColor: "text-emerald-400/90",
     avatarBorder: "border-emerald-400/80 shadow-[0_0_12px_rgba(16,185,129,0.4)]",
     glowDot: "bg-emerald-400 shadow-[0_0_6px_#34d399]",
   },
@@ -81,6 +87,8 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     name: "Hyderabad",
     tagline: "City of Pearls & Royal Amethyst",
     swatch: "from-purple-600 via-fuchsia-500 to-amber-300",
+    baseBgColor: "#12051f",
+    linearGradient: "linear-gradient(135deg, #1a0a2a 0%, #11051c 50%, #08020d 100%)",
     outerContainer:
       "bg-gradient-to-br from-[#1a0a2a] via-[#11051c] to-[#08020d] text-purple-50 border border-purple-500/50 shadow-2xl shadow-purple-950/70 ring-1 ring-amber-400/30",
     ambientBg:
@@ -91,12 +99,12 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     badgeStyle:
       "bg-gradient-to-r from-purple-900/60 to-amber-900/40 text-amber-300 border border-amber-400/60 shadow-[0_0_14px_rgba(251,191,36,0.3)]",
     badgeText: "text-amber-300",
-    accentGradient:
-      "text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-purple-300 to-amber-300",
+    accentColor: "text-amber-300",
+    accentGradient: "text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.35)]",
     metricCardBg:
       "bg-purple-950/30 border border-purple-800/40 hover:border-amber-400/50",
     metricIconColor: "text-amber-400",
-    watermarkColor: "text-amber-400/80",
+    watermarkColor: "text-amber-400/90",
     avatarBorder: "border-amber-400/80 shadow-[0_0_12px_rgba(251,191,36,0.4)]",
     glowDot: "bg-amber-400 shadow-[0_0_6px_#fbbf24]",
   },
@@ -106,6 +114,8 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     name: "San Francisco",
     tagline: "Golden Gate Sunset Modernism",
     swatch: "from-orange-500 via-rose-500 to-amber-400",
+    baseBgColor: "#140a08",
+    linearGradient: "linear-gradient(135deg, #1c120f 0%, #120a08 50%, #0a0504 100%)",
     outerContainer:
       "bg-gradient-to-br from-[#1c120f] via-[#120a08] to-[#0a0504] text-orange-50 border border-orange-500/50 shadow-2xl shadow-orange-950/60 ring-1 ring-rose-400/20",
     ambientBg:
@@ -116,12 +126,12 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     badgeStyle:
       "bg-gradient-to-r from-orange-500/20 to-rose-500/20 text-orange-300 border border-orange-400/60 shadow-[0_0_12px_rgba(249,115,22,0.35)]",
     badgeText: "text-orange-300",
-    accentGradient:
-      "text-transparent bg-clip-text bg-gradient-to-r from-orange-200 via-rose-300 to-amber-300",
+    accentColor: "text-orange-300",
+    accentGradient: "text-orange-300 drop-shadow-[0_0_8px_rgba(251,146,60,0.35)]",
     metricCardBg:
       "bg-orange-950/30 border border-orange-800/40 hover:border-orange-500/50",
     metricIconColor: "text-orange-400",
-    watermarkColor: "text-orange-400/80",
+    watermarkColor: "text-orange-400/90",
     avatarBorder: "border-orange-400/80 shadow-[0_0_12px_rgba(249,115,22,0.4)]",
     glowDot: "bg-orange-400 shadow-[0_0_6px_#fb923c]",
   },
@@ -131,6 +141,8 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     name: "Paris",
     tagline: "Haute Couture & Champagne Gold",
     swatch: "from-slate-800 via-neutral-900 to-amber-200",
+    baseBgColor: "#07070b",
+    linearGradient: "linear-gradient(135deg, #0b0c12 0%, #07070b 50%, #030305 100%)",
     outerContainer:
       "bg-gradient-to-br from-[#0b0c12] via-[#07070b] to-[#030305] text-amber-50 border border-amber-300/40 shadow-2xl shadow-black/80 ring-1 ring-amber-200/20",
     ambientBg:
@@ -141,12 +153,12 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     badgeStyle:
       "bg-black/60 text-amber-200 border border-amber-300/50 shadow-[0_0_12px_rgba(245,230,185,0.25)]",
     badgeText: "text-amber-200",
-    accentGradient:
-      "text-transparent bg-clip-text bg-gradient-to-r from-stone-100 via-amber-200 to-yellow-300",
+    accentColor: "text-amber-200",
+    accentGradient: "text-amber-200 drop-shadow-[0_0_8px_rgba(253,230,138,0.3)]",
     metricCardBg:
       "bg-zinc-900/60 border border-zinc-800/80 hover:border-amber-300/40",
     metricIconColor: "text-amber-200",
-    watermarkColor: "text-amber-300/70",
+    watermarkColor: "text-amber-300/90",
     avatarBorder: "border-amber-200/70 shadow-[0_0_10px_rgba(245,230,185,0.3)]",
     glowDot: "bg-amber-200 shadow-[0_0_6px_#fde68a]",
   },
@@ -156,6 +168,8 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     name: "Frankfurt",
     tagline: "Titanium Skyline & Euro Steel",
     swatch: "from-slate-600 via-sky-500 to-blue-600",
+    baseBgColor: "#050814",
+    linearGradient: "linear-gradient(135deg, #090e18 0%, #060910 50%, #020408 100%)",
     outerContainer:
       "bg-gradient-to-br from-[#090e18] via-[#060910] to-[#020408] text-sky-50 border border-sky-500/50 shadow-2xl shadow-sky-950/70 ring-1 ring-sky-400/20",
     ambientBg:
@@ -166,12 +180,12 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     badgeStyle:
       "bg-sky-950/70 text-sky-300 border border-sky-400/50 shadow-[0_0_14px_rgba(56,189,248,0.3)]",
     badgeText: "text-sky-300",
-    accentGradient:
-      "text-transparent bg-clip-text bg-gradient-to-r from-sky-200 via-blue-300 to-cyan-300",
+    accentColor: "text-sky-300",
+    accentGradient: "text-sky-300 drop-shadow-[0_0_8px_rgba(56,189,248,0.35)]",
     metricCardBg:
       "bg-sky-950/30 border border-sky-800/40 hover:border-sky-400/50",
     metricIconColor: "text-sky-400",
-    watermarkColor: "text-sky-400/80",
+    watermarkColor: "text-sky-400/90",
     avatarBorder: "border-sky-400/80 shadow-[0_0_12px_rgba(56,189,248,0.4)]",
     glowDot: "bg-sky-400 shadow-[0_0_6px_#38bdf8]",
   },
@@ -181,6 +195,8 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     name: "Shanghai",
     tagline: "The Bund Imperial Ruby & Gold",
     swatch: "from-rose-600 via-red-500 to-amber-400",
+    baseBgColor: "#140307",
+    linearGradient: "linear-gradient(135deg, #1a060a 0%, #100306 50%, #070103 100%)",
     outerContainer:
       "bg-gradient-to-br from-[#1a060a] via-[#100306] to-[#070103] text-rose-50 border border-rose-500/50 shadow-2xl shadow-rose-950/70 ring-1 ring-amber-400/30",
     ambientBg:
@@ -191,12 +207,12 @@ export const CITY_THEMES: Record<CityThemeId, CityThemeConfig> = {
     badgeStyle:
       "bg-gradient-to-r from-rose-900/60 to-red-950/70 text-rose-300 border border-rose-400/60 shadow-[0_0_14px_rgba(225,29,72,0.35)]",
     badgeText: "text-rose-300",
-    accentGradient:
-      "text-transparent bg-clip-text bg-gradient-to-r from-rose-200 via-amber-300 to-red-400",
+    accentColor: "text-rose-300",
+    accentGradient: "text-rose-300 drop-shadow-[0_0_8px_rgba(251,113,133,0.35)]",
     metricCardBg:
       "bg-rose-950/30 border border-rose-800/40 hover:border-amber-400/50",
     metricIconColor: "text-rose-400",
-    watermarkColor: "text-rose-400/80",
+    watermarkColor: "text-rose-400/90",
     avatarBorder: "border-rose-400/80 shadow-[0_0_12px_rgba(225,29,72,0.4)]",
     glowDot: "bg-rose-400 shadow-[0_0_6px_#fb7185]",
   },

@@ -44,7 +44,9 @@ export interface CityThemeConfig {
   id: CityThemeId;
   name: string;
   tagline: string;
-  swatch: string;
+  swatch: string; // CSS color or gradient for UI selector
+  baseBgColor: string; // Solid opaque base color for browser-agnostic export
+  linearGradient: string; // Theme linear gradient foundation
   outerContainer: string;
   ambientBg: string;
   borderGlow: string;
@@ -52,6 +54,7 @@ export interface CityThemeConfig {
   badgeStyle: string;
   badgeText: string;
   accentGradient: string;
+  accentColor: string; // High-contrast solid accent text color
   metricCardBg: string;
   metricIconColor: string;
   watermarkColor: string;

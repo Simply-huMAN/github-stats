@@ -14,7 +14,12 @@ export const dynamic = "force-dynamic";
 
 const GITHUB_API_BASE = "https://api.github.com";
 const GITHUB_USERNAME_REGEX = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/;
+const UPSTREAM_TIMEOUT_MS = 8000;
 
+/**
+ * Builds standard GitHub request headers, attaching an optional
+ * personal access token from process.env if available.
+ */
 function getGitHubHeaders(): HeadersInit {
   const headers: HeadersInit = {
     Accept: "application/vnd.github.v3+json",
@@ -29,6 +34,28 @@ function getGitHubHeaders(): HeadersInit {
   return headers;
 }
 
+/**
+ * Custom fetch wrapper with strict timeout support.
+ */
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeoutMs: number = UPSTREAM_TIMEOUT_MS
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function GET(request: NextRequest): Promise<NextResponse<StatsResponse | ApiError>> {
   const { searchParams } = request.nextUrl;
   const rawUsername = searchParams.get("username");
@@ -37,6 +64,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<StatsRespo
     return NextResponse.json(
       {
         error: "Missing required query parameter: username",
+        code: "INVALID_USERNAME",
         details: "Please provide a valid GitHub username, e.g. /api/stats?username=octocat",
         status: 400,
       },
@@ -44,12 +72,16 @@ export async function GET(request: NextRequest): Promise<NextResponse<StatsRespo
     );
   }
 
-  const username = rawUsername.trim();
+  let username = rawUsername.trim().replace(/^@+/, "");
+  if (username.includes("github.com/")) {
+    username = username.split("github.com/")[1]?.split("/")[0]?.replace(/^@+/, "") || username;
+  }
 
   if (!GITHUB_USERNAME_REGEX.test(username)) {
     return NextResponse.json(
       {
         error: "Invalid GitHub username format",
+        code: "INVALID_USERNAME",
         details: "GitHub usernames must contain only alphanumeric characters or single hyphens.",
         status: 400,
       },
@@ -60,7 +92,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<StatsRespo
   const headers = getGitHubHeaders();
 
   try {
-    const userRes = await fetch(`${GITHUB_API_BASE}/users/${encodeURIComponent(username)}`, {
+    // 1. Fetch User Profile with timeout
+    const userRes = await fetchWithTimeout(`${GITHUB_API_BASE}/users/${encodeURIComponent(username)}`, {
       headers,
       next: { revalidate: 3600 },
     });
@@ -69,6 +102,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<StatsRespo
       return NextResponse.json(
         {
           error: "GitHub user not found",
+          code: "NOT_FOUND",
           details: `The user '${username}' does not exist on GitHub.`,
           status: 404,
         },
@@ -84,7 +118,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<StatsRespo
       return NextResponse.json(
         {
           error: "GitHub API rate limit exceeded",
-          details: `Rate limit remaining: ${remaining ?? 0}. Limit resets at ${resetDate}. Consider adding GITHUB_TOKEN to .env.local for 5,000 req/hr.`,
+          code: "RATE_LIMITED",
+          details: `Rate limit remaining: ${remaining ?? 0}. Limit resets at ${resetDate}. Consider adding GITHUB_TOKEN to server environment for 5,000 req/hr.`,
+          resetTime: resetDate,
           status: 403,
         },
         { status: 403 }
@@ -95,6 +131,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<StatsRespo
       return NextResponse.json(
         {
           error: "GitHub API returned an error",
+          code: "SERVER_ERROR",
           details: `Status: ${userRes.status} ${userRes.statusText}`,
           status: userRes.status,
         },
@@ -104,27 +141,30 @@ export async function GET(request: NextRequest): Promise<NextResponse<StatsRespo
 
     const userData: GitHubUserRaw = await userRes.json();
 
+    // 2. Concurrently fetch Repositories (for stars) and Public Events (for active contributions)
     const [reposRes, eventsRes] = await Promise.all([
-      fetch(
+      fetchWithTimeout(
         `${GITHUB_API_BASE}/users/${encodeURIComponent(username)}/repos?per_page=100&sort=pushed&type=owner`,
         { headers, next: { revalidate: 3600 } }
-      ),
-      fetch(
+      ).catch(() => null),
+      fetchWithTimeout(
         `${GITHUB_API_BASE}/users/${encodeURIComponent(username)}/events/public?per_page=100`,
         { headers, next: { revalidate: 1800 } }
-      ),
+      ).catch(() => null),
     ]);
 
+    // Calculate total stargazers across public repositories
     let totalStars = 0;
-    if (reposRes.ok) {
+    if (reposRes && reposRes.ok) {
       const repos: GitHubRepoRaw[] = await reposRes.json();
       if (Array.isArray(repos)) {
         totalStars = repos.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0);
       }
     }
 
+    // Estimate active contributions from recent public events
     let activeContributions = 0;
-    if (eventsRes.ok) {
+    if (eventsRes && eventsRes.ok) {
       const events: GitHubEventRaw[] = await eventsRes.json();
       if (Array.isArray(events)) {
         activeContributions = events.reduce((count, event) => {
@@ -183,10 +223,23 @@ export async function GET(request: NextRequest): Promise<NextResponse<StatsRespo
       },
     });
   } catch (err: unknown) {
+    if (err instanceof Error && (err.name === "AbortError" || err.name === "TimeoutError")) {
+      return NextResponse.json(
+        {
+          error: "GitHub API request timed out",
+          code: "TIMEOUT",
+          details: "GitHub took too long to respond (exceeded 8s timeout). GitHub API may be experiencing high latency.",
+          status: 504,
+        },
+        { status: 504 }
+      );
+    }
+
     const message = err instanceof Error ? err.message : "Unknown error occurred";
     return NextResponse.json(
       {
         error: "Internal Server Error",
+        code: "SERVER_ERROR",
         details: message,
         status: 500,
       },

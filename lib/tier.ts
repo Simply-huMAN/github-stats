@@ -35,7 +35,7 @@ export function getTierDetails(score: number): TierDetails {
         badgeBorder: "border-indigo-400/50 shadow-[0_0_15px_rgba(99,102,241,0.5)]",
         gradient: "from-indigo-950/90 via-purple-950/60 to-black",
         glow: "shadow-glow-mythic border-indigo-500/60 ring-1 ring-cyan-500/30",
-        textAccent: "text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-fuchsia-400",
+        textAccent: "text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]",
         cardBorder: "border-indigo-500/50",
       },
     };
@@ -54,7 +54,7 @@ export function getTierDetails(score: number): TierDetails {
         badgeBorder: "border-amber-400/60 shadow-[0_0_12px_rgba(245,158,11,0.4)]",
         gradient: "from-amber-950/60 via-stone-900 to-neutral-950",
         glow: "shadow-glow-gold border-amber-500/50 ring-1 ring-amber-400/20",
-        textAccent: "text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400",
+        textAccent: "text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.35)]",
         cardBorder: "border-amber-500/40",
       },
     };
@@ -72,7 +72,7 @@ export function getTierDetails(score: number): TierDetails {
       badgeBorder: "border-zinc-500/40 shadow-[0_0_8px_rgba(161,161,170,0.2)]",
       gradient: "from-zinc-900 via-neutral-900 to-stone-950",
       glow: "shadow-glow-bronze border-zinc-700/60 ring-1 ring-zinc-600/20",
-      textAccent: "text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-stone-300 to-zinc-400",
+      textAccent: "text-zinc-200",
       cardBorder: "border-zinc-700/50",
     },
   };

@@ -1,15 +1,19 @@
 "use client";
 
-import React, { useState, useRef, useEffect, FormEvent } from "react";
+import React, { useState, useRef, useEffect, useMemo, FormEvent } from "react";
 import { StatsResponse } from "@/types/stats";
 import { CustomizerOptions } from "@/types/builder";
 import { StatsCard } from "@/components/StatsCard";
 import { DownloadButton } from "@/components/DownloadButton";
 import { CustomizerToolbar } from "@/components/builder/CustomizerToolbar";
 import {
+  NotificationAlert,
+  NotificationErrorType,
+} from "@/components/NotificationAlert";
+import { CITY_THEMES } from "@/lib/themes/cityThemes";
+import {
   Search,
   Github,
-  AlertCircle,
   RefreshCw,
   Share2,
   Check,
@@ -46,7 +50,7 @@ const INITIAL_DEMO_DATA: StatsResponse = {
       badgeBorder: "border-indigo-400/50 shadow-[0_0_15px_rgba(99,102,241,0.5)]",
       gradient: "from-indigo-950/90 via-purple-950/60 to-black",
       glow: "shadow-glow-mythic border-indigo-500/60 ring-1 ring-cyan-500/30",
-      textAccent: "text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-fuchsia-400",
+      textAccent: "text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]",
       cardBorder: "border-indigo-500/50",
     },
   },
@@ -60,11 +64,21 @@ const DEFAULT_OPTIONS: CustomizerOptions = {
   cardBackground: "ambient-glow",
 };
 
+interface ErrorState {
+  type: NotificationErrorType;
+  title: string;
+  message: string;
+  details?: string;
+  suggestions?: string[];
+  username?: string;
+  resetTime?: string;
+}
+
 export default function HomePage() {
   const [usernameInput, setUsernameInput] = useState("leerob");
   const [statsData, setStatsData] = useState<StatsResponse>(INITIAL_DEMO_DATA);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorState, setErrorState] = useState<ErrorState | null>(null);
   const [customizerOptions, setCustomizerOptions] = useState<CustomizerOptions>(DEFAULT_OPTIONS);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -95,15 +109,172 @@ export default function HomePage() {
     }
   }, []);
 
+  // Compute solid base background color to pass to DownloadButton for browser-agnostic export
+  const currentBaseBgColor = useMemo(() => {
+    if (customizerOptions.themeMode !== "auto" && customizerOptions.themeMode in CITY_THEMES) {
+      return CITY_THEMES[customizerOptions.themeMode as keyof typeof CITY_THEMES].baseBgColor;
+    }
+    const tier = statsData.tier?.tier || "Mythic";
+    if (tier === "Gold") return "#140e05";
+    if (tier === "Bronze") return "#121214";
+    return "#08051a";
+  }, [customizerOptions.themeMode, statsData.tier]);
+
   async function fetchStats(userToFetch: string) {
-    if (!userToFetch.trim()) return;
+    let trimmed = userToFetch.trim().replace(/^@+/, "");
+    if (trimmed.includes("github.com/")) {
+      trimmed = trimmed.split("github.com/")[1]?.split("/")[0]?.replace(/^@+/, "") || trimmed;
+    }
+    if (!trimmed) return;
+
     setIsLoading(true);
-    setErrorMessage(null);
+    setErrorState(null);
+
+    const controller = new AbortController();
+    const timeoutTimer = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      // Use /api/developer to prevent ad-blockers / Brave Shields from blocking the request as tracking telemetry
+      const res = await fetch(`/api/developer?username=${encodeURIComponent(trimmed)}`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutTimer);
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        if (res.status === 404) {
+          setErrorState({
+            type: "not_found",
+            title: "Developer Not Found",
+            message: `The GitHub user '@${trimmed}' does not exist or has been renamed.`,
+            details: data.details,
+            username: trimmed,
+            suggestions: [
+              "Verify the username spelling or check for accidental spaces.",
+              "GitHub usernames only contain letters, numbers, and single hyphens.",
+              "Confirm the user has not deleted their GitHub account.",
+            ],
+          });
+          return;
+        }
+
+        if (res.status === 403 || data.code === "RATE_LIMITED") {
+          setErrorState({
+            type: "rate_limited",
+            title: "GitHub API Rate Limit Reached",
+            message: "The unauthenticated GitHub API rate limit (60 requests/hr) has been reached.",
+            details: data.details,
+            resetTime: data.resetTime,
+            username: trimmed,
+            suggestions: [
+              `Rate limit will reset at ${data.resetTime || "shortly"}.`,
+              "Wait a few moments or consider configuring GITHUB_TOKEN on the server for 5,000 req/hr.",
+            ],
+          });
+          return;
+        }
+
+        if (res.status === 504 || data.code === "TIMEOUT") {
+          setErrorState({
+            type: "timeout",
+            title: "Request Timed Out",
+            message: "GitHub API took longer than 8 seconds to respond.",
+            details: data.details,
+            username: trimmed,
+            suggestions: [
+              "GitHub API may be experiencing temporary latency.",
+              "Click the 'Retry' button below to try fetching again.",
+            ],
+          });
+          return;
+        }
+
+        if (res.status === 400 || data.code === "INVALID_USERNAME") {
+          setErrorState({
+            type: "invalid_username",
+            title: "Invalid GitHub Handle",
+            message: data.error || "Please enter a valid GitHub username.",
+            details: data.details,
+            username: trimmed,
+            suggestions: [
+              "GitHub usernames can be up to 39 characters.",
+              "Only alphanumeric characters or hyphens are allowed (no consecutive hyphens).",
+            ],
+          });
+          return;
+        }
+
+        setErrorState({
+          type: "server",
+          title: data.error || "Unable to Fetch Profile",
+          message: data.details || "An error occurred while communicating with GitHub.",
+          details: data.details,
+          username: trimmed,
+          suggestions: [
+            "Check that your network connection is stable.",
+            "Retry the request in a few moments.",
+          ],
+        });
+        return;
+      }
+
+      setStatsData(data);
+      setErrorState(null);
+    } catch (err: unknown) {
+      clearTimeout(timeoutTimer);
+
+      if (err instanceof Error && err.name === "AbortError") {
+        setErrorState({
+          type: "timeout",
+          title: "Request Timed Out",
+          message: "The request exceeded 10 seconds without a response.",
+          username: trimmed,
+          suggestions: [
+            "Network connectivity to GitHub or the server may be slow.",
+            "Click 'Retry' below to attempt fetching again.",
+          ],
+        });
+        return;
+      }
+
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        setErrorState({
+          type: "network",
+          title: "You are Offline",
+          message: "No internet connection detected. Please verify your Wi-Fi or data connection.",
+          username: trimmed,
+          suggestions: [
+            "Ensure Wi-Fi or cellular network is enabled.",
+            "Disable any ad-blockers or firewall software interfering with requests.",
+          ],
+        });
+        return;
+      }
+
+      setErrorState({
+        type: "server",
+        title: "Connection Error",
+        message: err instanceof Error ? err.message : "Failed to connect to the stats service.",
+        username: trimmed,
+        suggestions: [
+          "Check your network connection.",
+          "Click 'Retry' below to try again.",
+        ],
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function handleSearch(e: FormEvent) {
     e.preventDefault();
-    fetchStats(usernameInput);
+    let trimmed = usernameInput.trim().replace(/^@+/, "");
+    if (trimmed.includes("github.com/")) {
+      trimmed = trimmed.split("github.com/")[1]?.split("/")[0]?.replace(/^@+/, "") || trimmed;
+    }
+    setUsernameInput(trimmed);
+    fetchStats(trimmed);
   }
 
   function handleCopyShareLink() {
@@ -186,14 +357,31 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Error Display */}
-        {errorMessage && (
-          <div className="w-full max-w-md mb-6 p-4 rounded-xl bg-red-950/40 border border-red-800/60 text-red-300 text-xs flex items-start gap-3">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-400" />
-            <div className="leading-relaxed">
-              <span className="font-semibold block">Failed to fetch stats</span>
-              {errorMessage}
-            </div>
+        {/* Polished Error & Notification Banner */}
+        {errorState && (
+          <div className="w-full flex justify-center mb-6">
+            <NotificationAlert
+              type={errorState.type}
+              title={errorState.title}
+              message={errorState.message}
+              details={errorState.details}
+              suggestions={errorState.suggestions}
+              username={errorState.username}
+              resetTime={errorState.resetTime}
+              isRetrying={isLoading}
+              onRetry={() => {
+                if (errorState.username) {
+                  fetchStats(errorState.username);
+                } else {
+                  fetchStats(usernameInput);
+                }
+              }}
+              onDismiss={() => setErrorState(null)}
+              onSelectSample={(sampleHandle) => {
+                setUsernameInput(sampleHandle);
+                fetchStats(sampleHandle);
+              }}
+            />
           </div>
         )}
 
@@ -212,6 +400,7 @@ export default function HomePage() {
             cardRef={cardRef}
             username={statsData.user.username}
             tier={customizerOptions.themeMode === "auto" ? statsData.tier.tier : customizerOptions.themeMode}
+            baseBgColor={currentBaseBgColor}
             className="w-full sm:w-auto"
           />
 
