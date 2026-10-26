@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.1] - 2026-10-26
+
+### Added
+- **Microsoft Clarity Analytics Integration**:
+  - Integrated Microsoft Clarity tracking script into the root HTML `<head>` ([`app/layout.tsx`](app/layout.tsx)) using Next.js `next/script` with `strategy="afterInteractive"`.
+  - Enables user session recordings, visual click and scroll heatmaps, and user experience analytics without impacting core Web Vitals or page load performance.
+
+---
+
 ## [0.3.0] - 2026-10-26
 
 ### Fixed
