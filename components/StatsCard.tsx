@@ -42,12 +42,15 @@ function formatNumber(num: number): string {
 const TIER_THEME_CONFIG: Record<
   TierType,
   {
+    baseBgColor: string;
+    linearGradient: string;
     outerContainer: string;
     ambientBg: string;
     borderGlow: string;
     topStripe: string;
     badgeStyle: string;
     icon: React.ComponentType<{ className?: string }>;
+    accentColor: string;
     accentGradient: string;
     metricCardBg: string;
     metricIconColor: string;
@@ -57,6 +60,8 @@ const TIER_THEME_CONFIG: Record<
   }
 > = {
   Bronze: {
+    baseBgColor: "#121214",
+    linearGradient: "linear-gradient(135deg, #18181b 0%, #121214 50%, #0a0a0c 100%)",
     outerContainer:
       "bg-gradient-to-br from-zinc-900 via-[#18181b] to-neutral-950 text-zinc-100 border border-zinc-700/60 shadow-xl shadow-zinc-950/80",
     ambientBg: "radial-gradient(circle at 85% 15%, rgba(161, 161, 170, 0.08), transparent 60%)",
@@ -64,14 +69,17 @@ const TIER_THEME_CONFIG: Record<
     topStripe: "bg-gradient-to-r from-zinc-500 via-zinc-400 to-stone-600",
     badgeStyle: "bg-zinc-800/90 text-zinc-300 border border-zinc-600/50 shadow-sm",
     icon: ShieldCheck,
-    accentGradient: "text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 via-stone-300 to-zinc-400",
+    accentColor: "text-zinc-200",
+    accentGradient: "text-zinc-200",
     metricCardBg: "bg-zinc-900/70 border border-zinc-800/80 hover:border-zinc-700/60",
     metricIconColor: "text-zinc-400",
-    watermarkColor: "text-zinc-500/80",
+    watermarkColor: "text-zinc-400",
     avatarBorder: "border-zinc-500/70",
     glowDot: "bg-zinc-400",
   },
   Gold: {
+    baseBgColor: "#140e05",
+    linearGradient: "linear-gradient(135deg, #1b1307 0%, #130e06 50%, #0a0703 100%)",
     outerContainer:
       "bg-gradient-to-br from-[#1b1307] via-[#130e06] to-neutral-950 text-amber-50 border border-amber-500/50 shadow-2xl shadow-amber-950/50 ring-1 ring-amber-400/20",
     ambientBg:
@@ -82,15 +90,17 @@ const TIER_THEME_CONFIG: Record<
     badgeStyle:
       "bg-gradient-to-r from-amber-500/25 to-yellow-600/25 text-amber-300 border border-amber-400/60 shadow-[0_0_15px_rgba(245,158,11,0.35)]",
     icon: Award,
-    accentGradient:
-      "text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400",
+    accentColor: "text-amber-300",
+    accentGradient: "text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.35)]",
     metricCardBg: "bg-amber-950/30 border border-amber-800/40 hover:border-amber-500/50",
     metricIconColor: "text-amber-400",
-    watermarkColor: "text-amber-500/70",
+    watermarkColor: "text-amber-400/90",
     avatarBorder: "border-amber-400/80 shadow-[0_0_12px_rgba(245,158,11,0.35)]",
     glowDot: "bg-amber-400 shadow-[0_0_6px_#fbbf24]",
   },
   Mythic: {
+    baseBgColor: "#08051a",
+    linearGradient: "linear-gradient(135deg, #0d0926 0%, #090618 50%, #04020b 100%)",
     outerContainer:
       "bg-gradient-to-br from-[#0d0926] via-[#090618] to-[#04020b] text-indigo-50 border border-indigo-500/60 shadow-2xl shadow-indigo-950/60 ring-1 ring-cyan-500/40",
     ambientBg:
@@ -101,11 +111,11 @@ const TIER_THEME_CONFIG: Record<
     badgeStyle:
       "bg-gradient-to-r from-indigo-500/30 via-purple-500/30 to-pink-500/30 text-cyan-200 border border-cyan-400/60 shadow-[0_0_20px_rgba(99,102,241,0.6)] animate-pulse-slow",
     icon: Sparkles,
-    accentGradient:
-      "text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-indigo-200 to-fuchsia-300",
+    accentColor: "text-cyan-300",
+    accentGradient: "text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]",
     metricCardBg: "bg-indigo-950/30 border border-indigo-700/40 hover:border-cyan-400/50",
     metricIconColor: "text-cyan-400",
-    watermarkColor: "text-indigo-400/80",
+    watermarkColor: "text-indigo-300/90",
     avatarBorder: "border-cyan-400/80 shadow-[0_0_12px_rgba(6,182,212,0.4)]",
     glowDot: "bg-cyan-400 shadow-[0_0_6px_#22d3ee]",
   },
@@ -135,12 +145,15 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
     if (selectedMode !== "auto" && selectedMode in CITY_THEMES) {
       const city = CITY_THEMES[selectedMode as keyof typeof CITY_THEMES];
       return {
+        baseBgColor: city.baseBgColor,
+        linearGradient: city.linearGradient,
         outerContainer: city.outerContainer,
         ambientBg: city.ambientBg,
         borderGlow: city.borderGlow,
         topStripe: city.topStripe,
         badgeStyle: city.badgeStyle,
         badgeLabel: tierDetails.badgeLabel || `${activeTier} Tier`,
+        accentColor: city.accentColor,
         accentGradient: city.accentGradient,
         metricCardBg: city.metricCardBg,
         metricIconColor: city.metricIconColor,
@@ -156,12 +169,15 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
         : TIER_THEME_CONFIG[activeTier];
 
     return {
+      baseBgColor: tierTheme.baseBgColor,
+      linearGradient: tierTheme.linearGradient,
       outerContainer: tierTheme.outerContainer,
       ambientBg: tierTheme.ambientBg,
       borderGlow: tierTheme.borderGlow,
       topStripe: tierTheme.topStripe,
       badgeStyle: tierTheme.badgeStyle,
       badgeLabel: tierDetails.badgeLabel || `${activeTier} Tier`,
+      accentColor: tierTheme.accentColor,
       accentGradient: tierTheme.accentGradient,
       metricCardBg: tierTheme.metricCardBg,
       metricIconColor: tierTheme.metricIconColor,
@@ -184,10 +200,22 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
     }
   }, [user.createdAt]);
 
-  return (
-    <div
+  // Use same-origin avatar proxy with unique username path to avoid CORS/Shields canvas issues
+  // and prevent html-to-image from caching and reusing previous users' avatars
+  const avatarSrc = useMemo(() => {
+    if (user.avatarUrl && user.avatarUrl.startsWith("http")) {
+      return `/api/avatar/${encodeURIComponent(user.username)}?url=${encodeURIComponent(user.avatarUrl)}`;
+    }
+    return user.avatarUrl;
+  }, [user.avatarUrl, user.username]);
+
+  return (\n    <div
       ref={ref}
-      style={{ backgroundImage: resolvedTheme.ambientBg }}
+      style={{
+        backgroundColor: resolvedTheme.baseBgColor,
+        backgroundImage: `${resolvedTheme.ambientBg}, ${resolvedTheme.linearGradient}`,
+        colorScheme: "dark",
+      }}
       className={cn(
         "relative w-full max-w-[540px] rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 overflow-hidden select-none transition-all duration-300",
         resolvedTheme.outerContainer,
@@ -215,9 +243,16 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
             <div className={cn("overflow-hidden transition-all", frameConfig.wrapperClassName)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={user.avatarUrl}
+                key={user.username}
+                src={avatarSrc}
                 alt={user.name || user.username}
                 crossOrigin="anonymous"
+                onError={(e) => {
+                  // Fallback to direct avatarUrl if proxy fails
+                  if (e.currentTarget.src !== user.avatarUrl) {
+                    e.currentTarget.src = user.avatarUrl;
+                  }
+                }}
                 className={cn(
                   "w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 object-cover border-2 shadow-md transition-all",
                   frameConfig.imgClassName,
@@ -242,7 +277,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
               {user.name || user.username}
             </h2>
             <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-zinc-400 flex-wrap">
-              <span className="font-mono text-zinc-400">@{user.username}</span>
+              <span className="font-mono text-zinc-300">@{user.username}</span>
               {joinYear && (
                 <>
                   <span className="opacity-40">•</span>
@@ -276,7 +311,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
       )}
 
       {/* Rank Classification Box */}
-      <div className="relative z-10 mt-3.5 sm:mt-5 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-black/35 backdrop-blur-md border border-white/10">
+      <div className="relative z-10 mt-3.5 sm:mt-5 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-black/40 backdrop-blur-md border border-white/10">
         <div className="flex items-center justify-between gap-1">
           <span className="text-[10px] sm:text-xs uppercase font-mono tracking-wider text-zinc-400">
             Rank Classification
@@ -304,7 +339,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           <div className="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white font-mono">
             {formatNumber(stats.totalStars)}
           </div>
-          <span className="text-[9px] sm:text-[10px] text-zinc-500 font-mono truncate block">earned across repos</span>
+          <span className="text-[9px] sm:text-[10px] text-zinc-400 font-mono truncate block">earned across repos</span>
         </div>
 
         {/* Followers */}
@@ -316,7 +351,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           <div className="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white font-mono">
             {formatNumber(stats.followers)}
           </div>
-          <span className="text-[9px] sm:text-[10px] text-zinc-500 font-mono truncate block">developer reach</span>
+          <span className="text-[9px] sm:text-[10px] text-zinc-400 font-mono truncate block">developer reach</span>
         </div>
 
         {/* Repositories */}
@@ -328,7 +363,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           <div className="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white font-mono">
             {formatNumber(stats.publicRepos)}
           </div>
-          <span className="text-[9px] sm:text-[10px] text-zinc-500 font-mono truncate block">public projects</span>
+          <span className="text-[9px] sm:text-[10px] text-zinc-400 font-mono truncate block">public projects</span>
         </div>
 
         {/* Active Contributions */}
@@ -340,7 +375,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           <div className="text-lg sm:text-xl md:text-2xl font-black tracking-tight text-white font-mono">
             {formatNumber(stats.activeContributions)}
           </div>
-          <span className="text-[9px] sm:text-[10px] text-zinc-500 font-mono truncate block">recent contributions</span>
+          <span className="text-[9px] sm:text-[10px] text-zinc-400 font-mono truncate block">recent contributions</span>
         </div>
       </div>
 
