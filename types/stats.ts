@@ -44,9 +44,19 @@ export interface StatsResponse {
   fetchedAt: string;
 }
 
+export type ApiErrorCode =
+  | "NOT_FOUND"
+  | "RATE_LIMITED"
+  | "TIMEOUT"
+  | "INVALID_USERNAME"
+  | "NETWORK_ERROR"
+  | "SERVER_ERROR";
+
 export interface ApiError {
   error: string;
+  code?: ApiErrorCode | string;
   details?: string;
+  resetTime?: string;
   status: number;
 }
 
