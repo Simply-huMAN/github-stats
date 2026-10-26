@@ -6,11 +6,33 @@ import { toPng } from "html-to-image";
 import { cn } from "@/lib/utils";
 
 export interface DownloadButtonProps {
+  /**
+   * React ref referencing the card container DOM node
+   */
   cardRef: React.RefObject<HTMLDivElement>;
+  /**
+   * GitHub handle for naming the downloaded PNG
+   */
   username: string;
+  /**
+   * Assigned tier for the badge/filename
+   */
   tier?: string;
+  /**
+   * Opaque base background color for browser-agnostic canvas rendering (prevents Brave washed-out transparency)
+   */
+  baseBgColor?: string;
+  /**
+   * Additional Tailwind classes for the button
+   */
   className?: string;
+  /**
+   * Callback fired on successful export
+   */
   onSuccess?: () => void;
+  /**
+   * Callback fired on error
+   */
   onError?: (err: Error) => void;
 }
 
@@ -18,6 +40,7 @@ export function DownloadButton({
   cardRef,
   username,
   tier = "tier",
+  baseBgColor = "#080614",
   className,
   onSuccess,
   onError,
@@ -33,19 +56,29 @@ export function DownloadButton({
 
     try {
       setIsExporting(true);
-      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Microtask to let browser finish any pending layout or theme changes
+      await new Promise((resolve) => setTimeout(resolve, 120));
 
       const sanitizedUsername = username.replace(/[^a-zA-Z0-9_-]/g, "");
       const outputFilename = `${sanitizedUsername}-github-${tier.toLowerCase()}-card.png`;
 
+      // Export high-resolution PNG using html-to-image
+      // Setting skipFonts to true prevents Brave Shields / ad blockers from stalling or blocking font requests
+      // Setting explicit solid backgroundColor guarantees the PNG is 100% opaque across all browsers and image viewers
+      // Setting includeQueryParams to true ensures html-to-image does NOT strip avatar query params and cross-contaminate users' avatars
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
-        pixelRatio: 3,
+        includeQueryParams: true,
+        pixelRatio: 3, // 3x crisp export for retina/print quality
         quality: 1,
-        skipFonts: false,
-        backgroundColor: "transparent",
+        skipFonts: true,
+        backgroundColor: baseBgColor,
+        imagePlaceholder:
+          "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2318181b'/%3E%3C/svg%3E",
       });
 
+      // Trigger automatic browser download
       const downloadLink = document.createElement("a");
       downloadLink.download = outputFilename;
       downloadLink.href = dataUrl;
@@ -63,7 +96,7 @@ export function DownloadButton({
     } finally {
       setIsExporting(false);
     }
-  }, [cardRef, username, tier, onSuccess, onError]);
+  }, [cardRef, username, tier, baseBgColor, onSuccess, onError]);
 
   return (
     <button
