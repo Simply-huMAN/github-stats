@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.0] - 2026-10-26
+
+### Fixed
+- **Browser-Agnostic Image Export (Brave Washed-Out Fix)**:
+  - Configured solid foundation background colors (`baseBgColor`) and linear gradients (`linearGradient`) across all city themes and tier configurations.
+  - Multi-layered card backgrounds with `backgroundColor`, `backgroundImage: ${ambientBg}, ${linearGradient}`, and explicit `colorScheme: 'dark'`, eliminating transparency alpha leakage that caused cards to appear washed out in Brave browser.
+  - Enabled `skipFonts: true` and solid canvas background in `components/DownloadButton.tsx` so Brave Shields doesn't stall or wash out exports.
+- **Avatar Cache Isolation in Export Engine**:
+  - Resolved `html-to-image` memory caching bug where exporting a new user reused the previous user's cached avatar due to query parameter stripping in cache keys.
+  - Enabled `includeQueryParams: true` in `DownloadButton.tsx`.
+  - Added unique user path segments to avatar proxy (`/api/avatar/[username]`) and React `key={user.username}` on image nodes to enforce 100% avatar freshness on consecutive searches and downloads.
+- **Theme Text Visibility in ForeignObject Canvas**:
+  - Replaced `-webkit-background-clip: text` with vibrant, solid, high-contrast text colors and glow drop-shadows across all 8 city themes and 3 performance tiers.
+  - Guarantees Rank Classification score and tier titles are crisp and visible across all browsers (Brave, Chrome, Safari, Firefox) and SVG canvas exports.
+- **Brave Shields / Ad-Blocker Request Blocking Fix**:
+  - Added `/api/developer` route alias so ad-blockers and privacy shields (which filter out URL patterns matching `*stats*` as telemetry/analytics) do not silently block developer fetch calls.
+  - Sanitized search inputs to automatically strip leading `@` symbols (e.g. `@torvalds` -> `torvalds`) and extract handles from full profile URLs.
+
+### Added
+- **Rich Error & Notification System (`components/NotificationAlert.tsx`)**:
+  - Specialized alert treatments for 404 (Developer Not Found with typo guidance and quick sample handles), 403 (GitHub Rate Limit with reset timers and token instructions), 504 (Request Timeout with retry button), and offline network errors.
+  - Built-in 10-second client-side `AbortController` timeout and 8-second upstream API timeout so requests never hang indefinitely.
+
+### Changed
+- Streamlined GitHub Actions release notes generation to strictly publish only the changes for the current release version from `CHANGELOG.md` (`generate_release_notes: false`).
+
+---
+
 ## [0.2.0] - 2026-10-26
 
 ### Added

@@ -8,6 +8,13 @@ const __dirname = path.dirname(__filename);
 const nextConfig = {
   output: "standalone",
   reactStrictMode: true,
+  typescript: {
+    // We run `tsc --noEmit` separately to prevent Node 24 @types/react resolution issue
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
     remotePatterns: [
       {

@@ -6,16 +6,16 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. 0.2.0 or 1.0.0)'
+        description: 'Release version (e.g. 0.3.0 or 1.0.0)'
         required: true
-        default: '0.2.0'
+        default: '0.3.0'
 
 permissions:
   contents: write
 
 env:
   NODE_VERSION: '22'
-  RELEASE_VERSION: ${{ github.event.inputs.version || '0.2.0' }}
+  RELEASE_VERSION: ${{ github.event.inputs.version || '0.3.0' }}
 
 jobs:
   setup:
@@ -129,23 +129,16 @@ jobs:
           name: nextjs-standalone-build
           path: build-artifacts
 
+      - name: Extract Release Notes from CHANGELOG
+        run: node scripts/extract-changelog.mjs "${{ env.RELEASE_VERSION }}"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.RELEASE_VERSION }}
-          name: Release v${{ env.RELEASE_VERSION }} - MVP
-          generate_release_notes: true
-          body: |
-            ## 🚀 GitHub Stats & Performance Tier Card - MVP Release v${{ env.RELEASE_VERSION }}
-
-            ### Highlights
-            - **GitHub Stats API Route** (`/api/stats`): Ingests followers, public repos, stargazers count, and active 90-day contributions.
-            - **Performance Tiers**: Algorithmic scoring evaluating Bronze, Gold, and Mythic developer ranks.
-            - **Custom Card Builder & 8 City Themes**: Handcrafted palettes for Tokyo, Berlin, Bangalore, Hyderabad, SF, Paris, Frankfurt, and Shanghai.
-            - **Modular Aesthetics**: Configurable avatar frames, badges, background textures, and persistent URL sharing.
-            - **Mobile-First Design**: Optimized layout, touch targets, and typography for mobile and desktop screens.
-            - **Retina PNG Export**: One-click 3x retina card export via `html-to-image` with CORS handling.
-            - **Docker & Render Ready**: Multi-stage standalone Node 22 Alpine container and Render Blueprint `render.yaml`.
+          name: Release v${{ env.RELEASE_VERSION }}
+          body_path: release_notes.md
+          generate_release_notes: false
           draft: false
           prerelease: false
 
