@@ -21,6 +21,7 @@
   - Added comprehensive `metadataBase`, favicon links, Open Graph, and Twitter metadata to `app/layout.tsx`.
   - Removed dead duplicate `lib/themes/frameStyles.ts`.
   - Validated clean production build (`npm run build` succeeds).
+  - Created Pull Request [#3](https://github.com/Simply-huMAN/github-stats/pull/3) for release v0.3.2.
 
 ### What's next
 1. App routing architecture: create navigation and setup routes (`/` landing hero, `/card` stats studio, `/wrapped` year in review).
