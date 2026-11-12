@@ -394,7 +394,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           )}
         >
           <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", resolvedTheme.glowDot)} />
-          <span className="font-semibold tracking-normal lowercase">github-stats-s3gs.onrender.com</span>
+          <span className="font-semibold tracking-normal lowercase">mygitstats.dev</span>
           <span className="opacity-40">•</span>
           <span className="opacity-80 tracking-wider uppercase">verified tier</span>
         </div>

@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.2] - 2026-11-13
+
+### Added
+- **Domain Branding & Metadata**:
+  - Configured `metadataBase` to point to production domain `https://mygitstats.dev`.
+  - Added comprehensive OpenGraph, Twitter card metadata, and SVG favicon links in [`app/layout.tsx`](app/layout.tsx).
+- **Multi-Page Repository Pagination**:
+  - Enhanced GitHub repository star calculation in [`app/api/stats/route.ts`](app/api/stats/route.ts) to paginate up to 300 repositories (3 pages) concurrently, resolving star truncation for developers with >100 public repositories.
+
+### Changed
+- **Card Watermark Domain**:
+  - Updated card export watermark from Render hosting URL to `mygitstats.dev` across live canvas previews and generated PNGs ([`components/StatsCard.tsx`](components/StatsCard.tsx)).
+- **Project Documentation**:
+  - Added repository audit, review notes, decision log, and session tracker to `docs/`.
+
+### Removed
+- **Redundant Theme Styles**:
+  - Removed duplicate `lib/themes/frameStyles.ts` in favor of `lib/themes/frameStyles.tsx`.
+
+---
+
 ## [0.3.1] - 2026-10-26
 
 ### Added
