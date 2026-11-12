@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { Navbar } from "@/components/navigation/Navbar";
+import { Footer } from "@/components/navigation/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -71,8 +73,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="bg-zinc-950 text-zinc-100 antialiased selection:bg-indigo-500 selection:text-white">
-        {children}
+      <body className="bg-zinc-950 text-zinc-100 antialiased selection:bg-indigo-500 selection:text-white flex flex-col min-h-screen">
+        <Navbar />
+        <div className="flex-1">{children}</div>
+        <Footer />
       </body>
     </html>
   );

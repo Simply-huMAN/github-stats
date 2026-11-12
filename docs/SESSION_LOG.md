@@ -4,7 +4,27 @@
 
 ---
 
-## Session 1 — November 13, 2026 (00:00 - 00:50 IST)
+## Session 2 — November 13, 2026 (01:15 - 01:25 IST)
+
+### What was done
+- **Checked out feature branch `feat/routing-and-landing`** from `release/v0.3.2`.
+- **Created Multi-Route Architecture**:
+  - `components/navigation/Navbar.tsx`: Sticky responsive header with brand logo, links to `/wrapped` (with "Flagship" badge), `/card`, and external GitHub repo link.
+  - `components/navigation/Footer.tsx`: Brand summary, city theme directory, "No OAuth token required" privacy badge, and open source attribution.
+  - `app/card/page.tsx`: Migrated full Card Studio customizer from root page, complete with 8 city themes, avatar geometry selectors, live card preview, and 3x PNG download engine.
+  - `app/wrapped/page.tsx`: Created GitHub Wrapped portal with 2026/2025/2024 year selector, handle search, and preview of the 6-chapter Wrapped story (Identity, Activity, Tech Stack, Highlights, Personality, Finale).
+  - `app/page.tsx`: High-converting dual-hero platform landing page highlighting GitHub Wrapped 2026 (hero) & Card Studio (utility), with automatic query parameter backwards-compatibility for legacy `/?user=...` links.
+  - `app/layout.tsx`: Integrated global `Navbar` and `Footer` with sticky layout.
+- **Production Build Validation**:
+  - Successfully built all routes (`/`, `/card`, `/wrapped`, and all `/api/*` endpoints) via `npm run build` with 0 errors.
+
+### What's next
+1. Commit and push `feat/routing-and-landing`.
+2. Phase 3: Build GitHub Wrapped data aggregation engine (GraphQL contributions query for full-year commits, streak calculations, and top languages).
+
+---
+
+## Session 1 — November 13, 2026 (00:00 - 01:05 IST)
 
 ### What was done
 - **Phase 0 audit completed** — full repository inspection of all 17 source files, API routes, CI/CD, types, themes, and configuration
@@ -22,32 +42,3 @@
   - Removed dead duplicate `lib/themes/frameStyles.ts`.
   - Validated clean production build (`npm run build` succeeds).
   - Created Pull Request [#3](https://github.com/Simply-huMAN/github-stats/pull/3) for release v0.3.2.
-
-### What's next
-1. App routing architecture: create navigation and setup routes (`/` landing hero, `/card` stats studio, `/wrapped` year in review).
-2. DNS configuration and SSL verification for `mygitstats.dev`.
-3. Design and develop the GitHub Wrapped data service (GraphQL query for annual contributions).
-
-### Files modified
-- `components/StatsCard.tsx`
-- `app/api/stats/route.ts`
-- `app/layout.tsx`
-- `docs/SESSION_LOG.md`
-
-### Files deleted
-- `lib/themes/frameStyles.ts`
-
-### Pending decisions
-- D3: Confirm Wrapped as hero product
-- D5: Persistence strategy
-- D6: Image generation architecture
-- D7: Hosting platform
-
-### Files modified
-None — audit only, no code changes made.
-
-### Files created
-- `docs/PLAN_REVIEW.md`
-- `docs/PHASE0_AUDIT.md`
-- `docs/DECISIONS.md`
-- `docs/SESSION_LOG.md`
