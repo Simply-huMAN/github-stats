@@ -85,3 +85,4 @@ jobs:
             .next/static
             public
           retention-days: 3
+

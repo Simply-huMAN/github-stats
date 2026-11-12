@@ -141,24 +141,34 @@ export async function GET(request: NextRequest): Promise<NextResponse<StatsRespo
 
     const userData: GitHubUserRaw = await userRes.json();
 
-    // 2. Concurrently fetch Repositories (for stars) and Public Events (for active contributions)
-    const [reposRes, eventsRes] = await Promise.all([
+    // 2. Concurrently fetch Repositories (paginating up to 300 repos for stars) and Public Events (for active contributions)
+    const publicRepoCount = userData.public_repos || 0;
+    // Determine how many pages to fetch (max 3 pages = 300 repos to prevent rate-limit exhaustion)
+    const repoPagesToFetch = Math.min(Math.max(1, Math.ceil(publicRepoCount / 100)), 3);
+
+    const repoRequests = Array.from({ length: repoPagesToFetch }, (_, idx) =>
       fetchWithTimeout(
-        `${GITHUB_API_BASE}/users/${encodeURIComponent(username)}/repos?per_page=100&sort=pushed&type=owner`,
+        `${GITHUB_API_BASE}/users/${encodeURIComponent(username)}/repos?per_page=100&sort=pushed&type=owner&page=${idx + 1}`,
         { headers, next: { revalidate: 3600 } }
-      ).catch(() => null),
+      ).catch(() => null)
+    );
+
+    const [eventsRes, ...reposResponses] = await Promise.all([
       fetchWithTimeout(
         `${GITHUB_API_BASE}/users/${encodeURIComponent(username)}/events/public?per_page=100`,
         { headers, next: { revalidate: 1800 } }
       ).catch(() => null),
+      ...repoRequests,
     ]);
 
     // Calculate total stargazers across public repositories
     let totalStars = 0;
-    if (reposRes && reposRes.ok) {
-      const repos: GitHubRepoRaw[] = await reposRes.json();
-      if (Array.isArray(repos)) {
-        totalStars = repos.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0);
+    for (const reposRes of reposResponses) {
+      if (reposRes && reposRes.ok) {
+        const repos: GitHubRepoRaw[] = await reposRes.json().catch(() => []);
+        if (Array.isArray(repos)) {
+          totalStars += repos.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0);
+        }
       }
     }
 
