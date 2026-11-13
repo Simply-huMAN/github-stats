@@ -8,14 +8,14 @@ on:
       version:
         description: 'Release version (e.g. 0.3.0 or 1.0.0)'
         required: true
-        default: '0.3.2'
+        default: '0.3.3'
 
 permissions:
   contents: write
 
 env:
   NODE_VERSION: '22'
-  RELEASE_VERSION: ${{ github.event.inputs.version || '0.3.2' }}
+  RELEASE_VERSION: ${{ github.event.inputs.version || '0.3.3' }}
 
 jobs:
   setup:
