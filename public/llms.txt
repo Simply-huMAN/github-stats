@@ -1,0 +1,36 @@
+# MyGitStats — Developer Stats Cards & Performance Tier Generator
+
+> A modern, zero-authentication web tool that computes developer performance tiers (Bronze, Gold, Mythic) and renders customizable, city-themed stats cards exportable as high-resolution 3x retina PNGs.
+
+## Live Application
+- Website: https://mygitstats.dev
+- Card Builder: https://mygitstats.dev/card
+- Annual Wrapped: https://mygitstats.dev/wrapped
+- Repository: https://github.com/Simply-huMAN/github-stats
+
+## Performance Tier Scoring Formula
+The developer classification score is deterministically calculated from public GitHub metrics:
+- Total Stars earned across public repositories: 3.0 points per star
+- Total Followers: 1.5 points per follower
+- Public Repositories (capped at 50 to prevent repo-spam skew): 1.0 point per repo
+- Recent Active Contributions (last 90 days via Public Events): 0.5 points per contribution
+
+Formula:
+Score = (TotalStars * 3.0) + (Followers * 1.5) + (min(PublicRepos, 50) * 1.0) + (ActiveContributions * 0.5)
+
+### Tier Classifications:
+- Bronze Tier (< 100 points): Rising Developer / Emerging Builder
+- Gold Tier (100 - 499 points): Senior Contributor / Prolific Builder
+- Mythic Tier (>= 500 points): Legendary Architect / Ecosystem Leader
+
+## Visual Themes & Customization
+- 8 City-Inspired Palettes: Tokyo (Neon Cyberpunk), Berlin (Monochrome Techno), Bangalore (Tech Hub Emerald/Saffron), Hyderabad (Regal Gold/Cyan), San Francisco (Ocean Teal), Paris (Champagne Lavender), Frankfurt (Financial Slate), Shanghai (Imperial Red/Gold).
+- Avatar Frames: Squircle, Circle, Cyber Hexagon, Neon Ring, Brushed Metal.
+- Avatar Badges: Performance Tier Rank, Minimal Shield, Star Contributor, Neon Sparkle.
+- Card Backgrounds: Ambient Glow, Cyber Grid, Dot Matrix, Glassmorphism.
+- Export Quality: 3x Retina PNG resolution, browser-agnostic rendering.
+
+## Endpoints & Deep Linking
+- Public developer profile link: https://mygitstats.dev/card?user={username}
+- Theme deep link: https://mygitstats.dev/card?user={username}&theme=tokyo&frame=hexagon
+
