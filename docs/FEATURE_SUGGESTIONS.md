@@ -61,3 +61,4 @@ A specialized export format allowing developers to generate panoramic landscape 
 | **Phase B** | Heatmap React Component | Build an accessible, scalable SVG/HTML calendar dot grid with city theme color mapping. |
 | **Phase C** | Banner Canvas Mode | Add a layout toggle in `/card` (or new `/banner` studio route): **Card View** (vertical/square) vs **Banner View** (1500×500 / 1584×396). |
 | **Phase D** | High-Res Export & Preview | Wire up landscape DOM node to `DownloadButton` with instant 1500×500 PNG download. |
+
