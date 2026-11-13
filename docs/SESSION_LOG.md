@@ -4,6 +4,27 @@
 
 ---
 
+## Session 3 — November 13, 2026 (22:40 - 23:55 IST)
+
+### What was done
+- **Created and verified SEO & AI Search (GEO) Suite**:
+  - Implemented `app/robots.ts` with explicit allow rules for Googlebot, Bingbot, and AI crawlers (GPTBot, PerplexityBot, ClaudeBot, Google-Extended), blocking `/api/avatar/`.
+  - Implemented dynamic XML sitemap generation via `app/sitemap.ts` (`/`, `/card`, `/wrapped`).
+  - Added open web standard `public/llms.txt` for AI search engines.
+  - Implemented edge-rendered dynamic Open Graph preview banner via `app/opengraph-image.tsx` (1200×630px).
+  - Integrated canonical tags (`https://mygitstats.dev`), GoogleBot indexing directives, and Schema.org `WebApplication` + `FAQPage` JSON-LD structured data into `app/layout.tsx`.
+  - Added dedicated route layout metadata in `app/card/layout.tsx` and `app/wrapped/layout.tsx`.
+- **Prepared & Merged Release v0.3.3**:
+  - Updated `package.json`, `CHANGELOG.md`, `release_notes.md`, and `.github/workflows/release.yml` to `0.3.3`.
+  - Fast-forward merged `feat/seo-and-indexing` into `main`, rebased cleanly onto `origin/main`, and pushed live.
+- **Documented New Feature Suggestions**:
+  - Created [`docs/FEATURE_SUGGESTIONS.md`](FEATURE_SUGGESTIONS.md) detailing the GitHub-style 52-week commit activity heatmap with city themes and social landscape banner generator (1500×500 for Twitter/X and 1584×396 for LinkedIn).
+
+### What's next
+1. Feature implementation from `docs/FEATURE_SUGGESTIONS.md` or resuming GitHub Wrapped engine.
+
+---
+
 ## Session 2 — November 13, 2026 (01:15 - 01:25 IST)
 
 ### What was done
