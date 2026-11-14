@@ -33,10 +33,19 @@ export const metadata: Metadata = {
     canonical: BASE_URL,
   },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
+  manifest: "/manifest.json",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -88,19 +97,27 @@ const jsonLd = [
     "@type": "WebApplication",
     name: "MyGitStats",
     url: BASE_URL,
+    sameAs: ["https://github.com/Simply-huMAN/github-stats"],
     description:
       "Turn your GitHub activity into beautiful developer performance tier cards, city-themed profiles, and shareable annual Wrapped stories.",
     applicationCategory: "DeveloperApplication",
     operatingSystem: "All",
+    featureList: [
+      "Developer Performance Tier Scoring (Mythic, Gold, Bronze)",
+      "52-Week GitHub-Style Commit Activity Heatmap with City Themes",
+      "8 Bespoke City Aesthetic Palettes & Avatar Customizers",
+      "Crisp 3x Retina PNG Direct Image Export",
+      "GitHub Wrapped Annual Year-in-Review Story",
+    ],
     offers: {
       "@type": "Offer",
       price: "0",
       priceCurrency: "USD",
     },
     author: {
-      "@type": "Organization",
-      name: "MyGitStats",
-      url: BASE_URL,
+      "@type": "Person",
+      name: "Maloth Aditya",
+      url: "https://github.com/Simply-huMAN",
     },
   },
   {
