@@ -9,6 +9,7 @@ import {
   UserStats,
 } from "@/types/stats";
 import { calculateTierScore, getTierDetails } from "@/lib/tier";
+import { fetchContributionCalendar } from "@/lib/contributions";
 
 export const dynamic = "force-dynamic";
 
@@ -219,10 +220,19 @@ export async function GET(request: NextRequest): Promise<NextResponse<StatsRespo
     const score = calculateTierScore(stats);
     const tier = getTierDetails(score);
 
+    // Concurrently or safely resolve 52-week contribution calendar
+    const calendar = await fetchContributionCalendar(
+      username,
+      process.env.GITHUB_TOKEN,
+      activeContributions,
+      stats.publicRepos
+    );
+
     const payload: StatsResponse = {
       user,
       stats,
       tier,
+      calendar,
       fetchedAt: new Date().toISOString(),
     };
 

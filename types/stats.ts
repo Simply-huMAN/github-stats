@@ -37,10 +37,26 @@ export interface UserProfile {
   htmlUrl: string;
 }
 
+export interface ContributionDay {
+  date: string;
+  count: number;
+  level: 0 | 1 | 2 | 3 | 4;
+}
+
+export interface ContributionWeek {
+  contributionDays: ContributionDay[];
+}
+
+export interface ContributionCalendar {
+  totalContributions: number;
+  weeks: ContributionWeek[];
+}
+
 export interface StatsResponse {
   user: UserProfile;
   stats: UserStats;
   tier: TierDetails;
+  calendar?: ContributionCalendar;
   fetchedAt: string;
 }
 

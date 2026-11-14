@@ -38,6 +38,7 @@ export interface CustomizerOptions {
   avatarFrame: AvatarFrameStyle;
   avatarBadge: AvatarBadgeStyle;
   cardBackground: CardBackgroundStyle;
+  showHeatmap?: boolean;
 }
 
 export interface CityThemeConfig {

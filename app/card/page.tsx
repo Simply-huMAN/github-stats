@@ -12,6 +12,7 @@ import {
   NotificationErrorType,
 } from "@/components/NotificationAlert";
 import { CITY_THEMES } from "@/lib/themes/cityThemes";
+import { generateSyntheticCalendar } from "@/lib/contributions";
 import {
   Search,
   Github,
@@ -57,6 +58,7 @@ const INITIAL_DEMO_DATA: StatsResponse = {
       cardBorder: "border-indigo-500/50",
     },
   },
+  calendar: generateSyntheticCalendar("leerob", 320, 128),
   fetchedAt: new Date().toISOString(),
 };
 
@@ -65,6 +67,7 @@ const DEFAULT_OPTIONS: CustomizerOptions = {
   avatarFrame: "squircle",
   avatarBadge: "tier-icon",
   cardBackground: "ambient-glow",
+  showHeatmap: true,
 };
 
 interface ErrorState {
@@ -96,18 +99,21 @@ export default function CardStudioPage() {
     const frameParam = params.get("frame") as CustomizerOptions["avatarFrame"];
     const badgeParam = params.get("badge") as CustomizerOptions["avatarBadge"];
     const bgParam = params.get("bg") as CustomizerOptions["cardBackground"];
+    const heatmapParam = params.get("heatmap");
+    const showHeatmap = heatmapParam !== null ? heatmapParam !== "false" && heatmapParam !== "0" : undefined;
 
     if (userParam && userParam !== usernameInput) {
       setUsernameInput(userParam);
       fetchStats(userParam);
     }
 
-    if (themeParam || frameParam || badgeParam || bgParam) {
+    if (themeParam || frameParam || badgeParam || bgParam || showHeatmap !== undefined) {
       setCustomizerOptions((prev) => ({
         themeMode: themeParam || prev.themeMode,
         avatarFrame: frameParam || prev.avatarFrame,
         avatarBadge: badgeParam || prev.avatarBadge,
         cardBackground: bgParam || prev.cardBackground,
+        showHeatmap: showHeatmap !== undefined ? showHeatmap : prev.showHeatmap,
       }));
     }
   }, []);
@@ -278,6 +284,11 @@ export default function CardStudioPage() {
     url.searchParams.set("frame", customizerOptions.avatarFrame);
     url.searchParams.set("badge", customizerOptions.avatarBadge);
     url.searchParams.set("bg", customizerOptions.cardBackground);
+    if (customizerOptions.showHeatmap === false) {
+      url.searchParams.set("heatmap", "false");
+    } else {
+      url.searchParams.delete("heatmap");
+    }
 
     navigator.clipboard.writeText(url.toString());
     setCopiedLink(true);

@@ -20,6 +20,8 @@ import {
   AVATAR_BADGE_CONFIG,
   CARD_BACKGROUND_CONFIG,
 } from "@/lib/themes/frameStyles";
+import { ContributionHeatmap } from "@/components/ContributionHeatmap";
+import { generateSyntheticCalendar } from "@/lib/contributions";
 import { cn } from "@/lib/utils";
 
 export interface StatsCardProps {
@@ -209,6 +211,11 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
     return user.avatarUrl;
   }, [user.avatarUrl, user.username]);
 
+  const calendarData = useMemo(() => {
+    if (data.calendar) return data.calendar;
+    return generateSyntheticCalendar(user.username, stats.activeContributions, stats.publicRepos);
+  }, [data.calendar, user.username, stats.activeContributions, stats.publicRepos]);
+
   return (
     <div
       ref={ref}
@@ -379,6 +386,15 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           <span className="text-[9px] sm:text-[10px] text-zinc-400 font-mono truncate block">recent contributions</span>
         </div>
       </div>
+
+      {/* 52-Week GitHub-Style Commit Activity Heatmap */}
+      {customizerOptions?.showHeatmap !== false && (
+        <ContributionHeatmap
+          calendar={calendarData}
+          themeMode={customizerOptions?.themeMode || "auto"}
+          tier={activeTier}
+        />
+      )}
 
       {/* Footer: Verified & Watermark */}
       <div className="relative z-10 mt-3.5 sm:mt-5 pt-2.5 sm:pt-3 border-t border-white/10 flex flex-wrap sm:flex-nowrap items-center justify-between gap-1.5 sm:gap-2 text-xs">
