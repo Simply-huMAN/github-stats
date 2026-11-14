@@ -1,21 +1,29 @@
-# GitHub Stats & Performance Tier Card Generator
+# MyGitStats — Developer Stats Cards & GitHub Wrapped
 
-A modern Next.js 14/15 application built with TypeScript and Tailwind CSS. It calculates developer performance tiers (Bronze, Gold, and Mythic) based on public GitHub statistics, displays a beautifully styled tier card with bespoke glow aesthetics, and exports high-resolution PNG cards with an elegant watermark using `html-to-image`.
+A modern Next.js application built with TypeScript and Tailwind CSS. It calculates developer performance tiers (Bronze, Gold, and Mythic) based on public GitHub statistics, displays a beautifully styled tier card with bespoke glow aesthetics, renders a 52-week commit activity heatmap, and exports high-resolution PNG cards with an elegant watermark.
 
+[![Live App](https://img.shields.io/badge/Live_App-mygitstats.dev-6366f1?style=flat&logo=googlechrome&logoColor=white)](https://mygitstats.dev)
+[![Card Studio](https://img.shields.io/badge/Studio-mygitstats.dev%2Fcard-4f46e5?style=flat)](https://mygitstats.dev/card)
+[![GitHub Wrapped](https://img.shields.io/badge/Wrapped-mygitstats.dev%2Fwrapped-ec4899?style=flat)](https://mygitstats.dev/wrapped)
 ![Next.js](https://img.shields.io/badge/Next.js-14%2F15-black?style=flat&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?style=flat&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.4-38bdf8?style=flat&logo=tailwind-css)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ed?style=flat&logo=docker)
-![Render](https://img.shields.io/badge/Render-Deployable-46e3b7?style=flat&logo=render)
+
+> 🌐 **Live Website**: [https://mygitstats.dev](https://mygitstats.dev)  
+> 🎨 **Card Studio**: [https://mygitstats.dev/card](https://mygitstats.dev/card)  
+> 🎆 **GitHub Wrapped**: [https://mygitstats.dev/wrapped](https://mygitstats.dev/wrapped)
 
 ---
 
 ## Features
 
-- **GitHub Stats Ingestion (`/api/stats`)**:
+- **GitHub Stats Ingestion (`/api/stats` & `/api/developer`)**:
   - Automatically fetches followers, public repositories, and aggregates total stars across public repos.
   - Estimates active 90-day contributions from the GitHub Public Events API.
   - Zero-config public API access with rate-limit handling, plus optional `GITHUB_TOKEN` support (5,000 req/hr).
+- **52-Week Commit Activity Heatmap**:
+  - Live interactive commit frequency grid across the calendar year with city-themed color palettes (Tokyo, Bangalore, Hyderabad, Berlin, Classic Green).
+  - Configurable customizer toggle to show or hide the heatmap on the card preview and PNG exports.
 - **Weighted Tier Calculation**:
   $$\text{Score} = (\text{Total Stars} \times 3.0) + (\text{Followers} \times 1.5) + (\min(\text{Public Repos}, 50) \times 1.0) + (\text{Active Contributions} \times 0.5)$$
   - **Bronze Tier** (`< 100` pts): Brushed metallic zinc/slate gradient.
@@ -24,7 +32,17 @@ A modern Next.js 14/15 application built with TypeScript and Tailwind CSS. It ca
 - **High-Quality PNG Export**:
   - Exports crisp 3x retina PNG images directly from the card DOM node.
   - Built-in CORS safeguards for GitHub avatars to prevent tainted canvas errors.
-  - Elegant, discreet watermark badge (`github-stats-s3gs.onrender.com • verified tier`).
+  - Elegant, discreet watermark badge (`mygitstats.dev • verified tier`).
+
+---
+
+## 🚀 Embed in Your GitHub Profile README
+
+Add your custom stats card to your GitHub profile README by linking back to your live card:
+
+```markdown
+[![MyGitStats Card](https://mygitstats.dev/og-image.png)](https://mygitstats.dev/card?user=YOUR_USERNAME)
+```
 
 ---
 
