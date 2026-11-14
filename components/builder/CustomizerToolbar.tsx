@@ -9,6 +9,7 @@ import {
   Layers,
   RotateCcw,
   Check,
+  GitCommit,
 } from "lucide-react";
 import {
   CustomizerOptions,
@@ -114,15 +115,46 @@ export function CustomizerToolbar({
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={onReset}
-          className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-mono text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors flex-shrink-0"
-          title="Reset customization to default"
-        >
-          <RotateCcw className="w-3 h-3" />
-          <span>Reset</span>
-        </button>
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          {/* Heatmap Toggle */}
+          <button
+            type="button"
+            onClick={() =>
+              onChange({
+                ...options,
+                showHeatmap: options.showHeatmap === false ? true : false,
+              })
+            }
+            className={cn(
+              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all border",
+              options.showHeatmap !== false
+                ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-300 shadow-sm shadow-emerald-950/40"
+                : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400 hover:text-zinc-200"
+            )}
+            title="Toggle Commit Activity Heatmap on Card"
+          >
+            <GitCommit className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Heatmap</span>
+            <span className={cn(
+              "font-mono text-[10px] px-1 py-0.2 rounded font-bold uppercase",
+              options.showHeatmap !== false
+                ? "bg-emerald-500/20 text-emerald-300"
+                : "bg-zinc-700 text-zinc-400"
+            )}>
+              {options.showHeatmap !== false ? "ON" : "OFF"}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onReset}
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-mono text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors flex-shrink-0"
+            title="Reset customization to default"
+          >
+            <RotateCcw className="w-3 h-3" />
+            <span className="hidden sm:inline">Reset</span>
+          </button>
+        </div>
       </div>
 
       {/* Tab Panels */}
