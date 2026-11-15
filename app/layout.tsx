@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   creator: "MyGitStats",
   publisher: "MyGitStats",
   alternates: {
-    canonical: BASE_URL,
+    canonical: "/",
   },
   icons: {
     icon: [

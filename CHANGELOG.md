@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.5] - 2026-11-14
 
 ### Fixed
+- **Bing Redirect Loop & Trailing Slash Canonicalization**:
+  - Configured `trailingSlash: true` in [`next.config.mjs`](next.config.mjs) to eliminate 301/308 redirect loops reported by Bing Webmaster Tools when crawling `https://mygitstats.dev/`.
+  - Harmonized root and subpage canonical URLs (`/`, `/card/`, `/wrapped/`) in [`app/layout.tsx`](app/layout.tsx) and [`app/sitemap.ts`](app/sitemap.ts) ensuring clean 200 OK responses for Bingbot and Googlebot.
 - **Google Search Favicon & Web App Manifest**:
   - Implemented multi-format favicon system meeting Google's strict `Googlebot-Image` search result requirements:
     - Root `public/favicon.ico` with multi-resolution embeds (16x16, 32x32, 48x48).

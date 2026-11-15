@@ -6,19 +6,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     {
-      url: baseUrl,
+      url: `${baseUrl}/`,
       lastModified: currentDate,
       changeFrequency: "weekly",
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/card`,
+      url: `${baseUrl}/card/`,
       lastModified: currentDate,
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/wrapped`,
+      url: `${baseUrl}/wrapped/`,
       lastModified: currentDate,
       changeFrequency: "monthly",
       priority: 0.8,
