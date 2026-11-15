@@ -25,7 +25,7 @@ export default function PlatformLandingPage() {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("user") || params.get("theme") || params.get("frame")) {
-      router.replace(`/card/?${params.toString()}`);
+      router.replace(`/card?${params.toString()}`);
     }
   }, [router]);
 

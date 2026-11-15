@@ -1,9 +1,9 @@
 ## What's Changed in v0.3.5
 
 ### Fixed
-- **Bing Redirect Loop & Trailing Slash Canonicalization**:
-  - Configured `trailingSlash: true` in `next.config.mjs` to eliminate 301/308 redirect loops reported by Bing Webmaster Tools when crawling `https://mygitstats.dev/`.
-  - Harmonized root and subpage canonical URLs (`/`, `/card/`, `/wrapped/`) in `app/layout.tsx` and `app/sitemap.ts` ensuring clean 200 OK responses for Bingbot and Googlebot.
+- **Strictly Drop Trailing Slashes & Eliminate Bing Redirect Loops**:
+  - Configured `trailingSlash: false` in `next.config.mjs` to enforce trailing slash removal across all routes, preventing 301/308 redirect loops reported by Bing Webmaster Tools.
+  - Harmonized root and subpage canonical URLs (`/`, `/card`, `/wrapped`) in `app/layout.tsx` and `app/sitemap.ts` ensuring clean 200 OK responses without trailing slashes.
 - **Google Search Favicon & Web App Manifest**:
   - Implemented multi-format favicon system meeting Google's strict `Googlebot-Image` search result requirements:
     - Root `public/favicon.ico` with multi-resolution embeds (16x16, 32x32, 48x48).

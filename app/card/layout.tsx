@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     "Generate and customize your GitHub developer stats card with city themes, avatar frames, performance tiers, and export high-res PNGs.",
   alternates: {
-    canonical: "/card/",
+    canonical: "/card",
   },
   openGraph: {
     title: "Custom Developer Stats Card Builder | MyGitStats",

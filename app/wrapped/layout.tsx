@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     "Explore your annual GitHub contributions, streak milestones, pull requests, and coding achievements.",
   alternates: {
-    canonical: "/wrapped/",
+    canonical: "/wrapped",
   },
   openGraph: {
     title: "GitHub Wrapped — Developer Year in Review | MyGitStats",
