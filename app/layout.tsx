@@ -8,6 +8,7 @@ const BASE_URL = "https://mygitstats.dev";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
+  applicationName: "MyGitStats",
   title: {
     default: "MyGitStats — Developer Stats Cards & GitHub Wrapped",
     template: "%s | MyGitStats",
@@ -92,6 +93,16 @@ export const viewport: Viewport = {
 };
 
 const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "MyGitStats",
+    alternateName: ["mygitstats.dev", "MyGitStats App", "MyGitStats Developer Cards"],
+    url: BASE_URL,
+    description:
+      "Turn your GitHub activity into beautiful developer performance tier cards, city-themed profiles, and shareable annual Wrapped stories.",
+    sameAs: ["https://github.com/Simply-huMAN/github-stats"],
+  },
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",

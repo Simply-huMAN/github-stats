@@ -10,6 +10,12 @@
     - Added static `public/manifest.json` configured in `app/layout.tsx`.
 
 ### Added
+- **Google Search Brand Identity (`WebSite` Schema & `applicationName`)**:
+  - Injected Schema.org `WebSite` JSON-LD structured data with `"name": "MyGitStats"` and `"alternateName": ["mygitstats.dev", "MyGitStats App"]` inside `app/layout.tsx` to establish the authoritative site name in Google SERPs.
+  - Added `applicationName: "MyGitStats"` to root Next.js metadata.
+- **Repository Branding & Inbound Anchor Strategy**:
+  - Updated `README.md` to explicitly reinforce "MyGitStats" as a single combined brand word across all titles, badges, and code snippets.
+  - Added `docs/LAUNCH_POSTS.md` with copy-paste launch post templates for Dev.to, Hashnode, Reddit, and Hacker News using the exact anchor text `[MyGitStats](https://mygitstats.dev)`.
 - **AI Search Engine (GEO) Knowledge Graph & Context**:
   - Added `public/llms-full.txt` containing full architectural details, deterministic scoring formulas, city theme specifications, and endpoint documentation for Perplexity, ChatGPT Search, and Claude.
   - Linked GitHub repository (`https://github.com/Simply-huMAN/github-stats`) and author identity in Schema.org `WebApplication` structured data (`sameAs` & `author`) to unify search engine entity knowledge graphs.
