@@ -1,21 +1,24 @@
-## What's Changed in v0.3.4
-
-### Added
-- **52-Week Commit Activity Heatmap**:
-  - Implemented an inline vector SVG heatmap component ([`components/ContributionHeatmap.tsx`](components/ContributionHeatmap.tsx)) rendering the full calendar year of commit activity across 52 columns and 7 weekday rows.
-  - Added month indicators (Jan–Dec), weekday labels (Mon, Wed, Fri), commit summary badge, and an intensity level legend (Less $\to$ More).
-- **City-Themed Heatmap Palettes**:
-  - Integrated dynamic color mapping to harmonize dot intensities across all city palettes (Tokyo, Bangalore, Hyderabad, Berlin, San Francisco, Paris, Frankfurt, Shanghai) as well as tier fallbacks and classic GitHub green.
-- **Interactive Heatmap Customizer Toggle**:
-  - Added a dedicated 1-click `[Heatmap: ON / OFF]` button to the builder toolbar ([`components/builder/CustomizerToolbar.tsx`](components/builder/CustomizerToolbar.tsx)).
-  - Dynamically renders or completely removes the heatmap from card canvas previews and 3x retina PNG exports ([`components/StatsCard.tsx`](components/StatsCard.tsx)).
-  - Preserves toggle preference across deep-link sharing URLs (`?heatmap=false`).
-- **Resilient 3-Tier Contribution Data Ingestion**:
-  - Built multi-tier data resolution in [`lib/contributions.ts`](lib/contributions.ts): queries the official GitHub GraphQL `contributionsCollection` when `GITHUB_TOKEN` is present, falls back to a public mirror API, and defaults to a deterministic synthetic 52-week activity generator seeded from user activity metrics.
-- **SEO & Backlink Flywheel in README**:
-  - Added live domain badges (`mygitstats.dev`), direct studio navigation links, and a copy-paste GitHub profile README embed code snippet in [`README.md`](README.md).
+## What's Changed in v0.3.5
 
 ### Fixed
-- **WhatsApp & Social Link Previews**:
-  - Resolved missing preview image on WhatsApp, iMessage, and Telegram by adding an optimized static banner at [`public/og-image.png`](public/og-image.png) (85.7 KB, well under WhatsApp's 300 KB limit).
-  - Added explicit `type: "image/png"` to Open Graph image metadata in [`app/layout.tsx`](app/layout.tsx).
+- **Strictly Drop Trailing Slashes & Eliminate Bing Redirect Loops**:
+  - Configured `trailingSlash: false` in `next.config.mjs` to enforce trailing slash removal across all routes, preventing 301/308 redirect loops reported by Bing Webmaster Tools.
+  - Harmonized root and subpage canonical URLs (`/`, `/card`, `/wrapped`) in `app/layout.tsx` and `app/sitemap.ts` ensuring clean 200 OK responses without trailing slashes.
+- **Google Search Favicon & Web App Manifest**:
+  - Implemented multi-format favicon system meeting Google's strict `Googlebot-Image` search result requirements:
+    - Root `public/favicon.ico` with multi-resolution embeds (16x16, 32x32, 48x48).
+    - Explicit `public/icon-48.png` conforming to Google's preferred multiple-of-48px square requirement.
+    - `public/apple-touch-icon.png` (180x180) for iOS and Google mobile results.
+    - `public/icon-192.png` and `public/icon-512.png` for Progressive Web App (PWA) splash screens.
+    - Added static `public/manifest.json` configured in `app/layout.tsx`.
+
+### Added
+- **Google Search Brand Identity (`WebSite` Schema & `applicationName`)**:
+  - Injected Schema.org `WebSite` JSON-LD structured data with `"name": "MyGitStats"` and `"alternateName": ["mygitstats.dev", "MyGitStats App"]` inside `app/layout.tsx` to establish the authoritative site name in Google SERPs.
+  - Added `applicationName: "MyGitStats"` to root Next.js metadata.
+- **Repository Branding & Inbound Anchor Strategy**:
+  - Updated `README.md` to explicitly reinforce "MyGitStats" as a single combined brand word across all titles, badges, and code snippets.
+  - Added `docs/LAUNCH_POSTS.md` with copy-paste launch post templates for Dev.to, Hashnode, Reddit, and Hacker News using the exact anchor text `[MyGitStats](https://mygitstats.dev)`.
+- **AI Search Engine (GEO) Knowledge Graph & Context**:
+  - Added `public/llms-full.txt` containing full architectural details, deterministic scoring formulas, city theme specifications, and endpoint documentation for Perplexity, ChatGPT Search, and Claude.
+  - Linked GitHub repository (`https://github.com/Simply-huMAN/github-stats`) and author identity in Schema.org `WebApplication` structured data (`sameAs` & `author`) to unify search engine entity knowledge graphs.

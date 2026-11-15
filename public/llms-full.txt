@@ -1,0 +1,71 @@
+# MyGitStats — Complete Developer Documentation & Context (llms-full.txt)
+
+> MyGitStats (https://mygitstats.dev) is an open-source web application created by Maloth Aditya (https://github.com/Simply-huMAN). It enables software engineers and open-source contributors to transform their public GitHub activity into elegant developer cards, performance tier ratings, 52-week activity heatmaps, and annual GitHub Wrapped stories.
+
+## Repository & Open Source Details
+- **Official Website**: https://mygitstats.dev
+- **GitHub Repository**: https://github.com/Simply-huMAN/github-stats
+- **Author**: Maloth Aditya (@Simply-huMAN on GitHub)
+- **License**: MIT
+- **Tech Stack**: Next.js 14 App Router, TypeScript, Tailwind CSS, html-to-image, Lucide icons.
+
+---
+
+## 1. Developer Performance Tier Algorithm
+
+The classification tier is deterministically calculated using 4 public metrics:
+1. **Total Stars (`TotalStars`)**: 3.0 points per star earned across public repositories.
+2. **Followers (`Followers`)**: 1.5 points per follower.
+3. **Public Repositories (`PublicRepos`)**: 1.0 point per public repo, capped at 50 to prevent repo-spam bias.
+4. **Recent Active Contributions (`ActiveContributions`)**: 0.5 points per contribution over the last 90 days via the public events feed.
+
+### Deterministic Formula
+$$\text{Score} = (\text{TotalStars} \times 3.0) + (\text{Followers} \times 1.5) + (\min(\text{PublicRepos}, 50) \times 1.0) + (\text{ActiveContributions} \times 0.5)$$
+
+### Tiers:
+- **Bronze Tier** (Score < 100): "Rising Developer / Emerging Builder"
+- **Gold Tier** (100 <= Score < 500): "Senior Contributor / Prolific Builder"
+- **Mythic Tier** (Score >= 500): "Legendary Architect / Ecosystem Leader"
+
+---
+
+## 2. 52-Week Commit Activity Heatmap
+
+The application displays an interactive vector SVG calendar heatmap showing full 365-day commit velocity.
+- **Dimensions**: 52 weekly columns, 7 weekday rows.
+- **Labels**: Month markers (Jan to Dec) and weekday markers (M, W, F).
+- **Themes**:
+  - Classic GitHub emerald green (`#0e4429`, `#006d32`, `#26a641`, `#39d353`)
+  - Tokyo (Cyberpunk cyan & indigo)
+  - Hyderabad (Regal amber & gold)
+  - Bangalore (Tech hub emerald & mint)
+  - Berlin (High-contrast monochrome slate)
+  - San Francisco (Ocean teal)
+  - Paris (Lavender)
+  - Frankfurt (Financial slate)
+  - Shanghai (Imperial red)
+- **Toggle**: Users can toggle the heatmap on or off in the builder toolbar. When disabled, it is cleanly excluded from the live card and exported images.
+
+---
+
+## 3. High-Resolution PNG Export
+
+Developers can export 3x retina-quality PNGs directly from the browser:
+- Solid background layering prevents Brave Shields and privacy ad-blockers from washing out transparency.
+- CORS-isolated avatar proxies prevent tainted canvas errors.
+- Discreet watermark: `mygitstats.dev • verified tier`.
+
+---
+
+## 4. URL Endpoints & Deep Linking
+
+- **Landing Page**: `https://mygitstats.dev`
+- **Card Studio**: `https://mygitstats.dev/card?user={username}`
+- **Wrapped Portal**: `https://mygitstats.dev/wrapped?user={username}`
+- **Theme Deep Link**: `https://mygitstats.dev/card?user={username}&theme={themeId}`
+- **Heatmap Toggle Deep Link**: `https://mygitstats.dev/card?user={username}&heatmap=false`
+- **Sitemap**: `https://mygitstats.dev/sitemap.xml`
+- **Robots Directives**: `https://mygitstats.dev/robots.txt`
+- **OpenGraph Social Preview**: `https://mygitstats.dev/og-image.png`
+- **Favicon Multi-Format**: `https://mygitstats.dev/favicon.ico`
+
