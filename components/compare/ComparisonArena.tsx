@@ -146,7 +146,7 @@ export function ComparisonArena({
             value={user1Input}
             onChange={(e) => setUser1Input(e.target.value)}
             placeholder="Contender 1 (e.g. torvalds)"
-            className="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/60 text-white placeholder-zinc-500 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+            className="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/60 text-white placeholder-zinc-500 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500"
             required
           />
         </div>
@@ -168,7 +168,7 @@ export function ComparisonArena({
             value={user2Input}
             onChange={(e) => setUser2Input(e.target.value)}
             placeholder="Contender 2 (e.g. shadcn)"
-            className="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/60 text-white placeholder-zinc-500 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+            className="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/60 text-white placeholder-zinc-500 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500"
             required
           />
         </div>
@@ -215,9 +215,36 @@ export function ComparisonArena({
       {!isLoading && comparison && (
         <div className="w-full max-w-4xl flex flex-col gap-6 animate-fade-in">
           {/* Winner Headline Banner */}
-          <div className="w-full p-4 sm:p-5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-950/40 via-zinc-950 to-orange-950/40 text-center flex flex-col items-center shadow-lg">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono font-semibold mb-2">
-              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+          <div
+            className={cn(
+              "w-full p-4 sm:p-5 rounded-2xl border text-center flex flex-col items-center shadow-lg transition-all",
+              comparison.summary.overallWinner === 1
+                ? "border-indigo-500/40 bg-gradient-to-r from-indigo-950/50 via-zinc-950 to-indigo-950/20 shadow-indigo-950/40"
+                : comparison.summary.overallWinner === 2
+                ? "border-purple-500/40 bg-gradient-to-r from-purple-950/50 via-zinc-950 to-purple-950/20 shadow-purple-950/40"
+                : "border-zinc-800 bg-zinc-950/80 shadow-black/40"
+            )}
+          >
+            <div
+              className={cn(
+                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold mb-2 border",
+                comparison.summary.overallWinner === 1
+                  ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-300"
+                  : comparison.summary.overallWinner === 2
+                  ? "bg-purple-500/15 border-purple-500/30 text-purple-300"
+                  : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400"
+              )}
+            >
+              <Trophy
+                className={cn(
+                  "w-3.5 h-3.5",
+                  comparison.summary.overallWinner === 1
+                    ? "text-indigo-400"
+                    : comparison.summary.overallWinner === 2
+                    ? "text-purple-400"
+                    : "text-zinc-400"
+                )}
+              />
               <span>{comparison.summary.winMargin}</span>
             </div>
             <h2 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
@@ -232,28 +259,30 @@ export function ComparisonArena({
           >
             {/* Contender Cards Face-Off Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 relative">
-              {/* User 1 Card */}
+              {/* User 1 Card (Indigo Theme) */}
               <ComparisonCard
                 data={comparison.user1}
                 isOverallWinner={comparison.summary.overallWinner === 1}
                 winsCount={comparison.summary.user1Wins}
                 contenderLabel="Contender 1"
+                colorTheme="indigo"
               />
 
               {/* Central VS Badge (Floating on desktop) */}
               <div
                 data-export-ignore="false"
-                className="hidden md:flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 items-center justify-center w-12 h-12 rounded-full bg-zinc-950 border-2 border-amber-500/60 shadow-xl shadow-amber-500/20 text-amber-400 font-extrabold font-mono text-sm"
+                className="hidden md:flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 items-center justify-center w-12 h-12 rounded-full bg-zinc-950 border-2 border-indigo-500/40 shadow-xl shadow-indigo-500/20 text-white font-extrabold font-mono text-sm"
               >
                 VS
               </div>
 
-              {/* User 2 Card */}
+              {/* User 2 Card (Purple Theme) */}
               <ComparisonCard
                 data={comparison.user2}
                 isOverallWinner={comparison.summary.overallWinner === 2}
                 winsCount={comparison.summary.user2Wins}
                 contenderLabel="Contender 2"
+                colorTheme="purple"
               />
             </div>
 
@@ -326,3 +355,4 @@ export function ComparisonArena({
     </div>
   );
 }
+

@@ -44,3 +44,4 @@ export interface ComparisonError {
   failedUser?: "user1" | "user2" | "both";
   status: number;
 }
+

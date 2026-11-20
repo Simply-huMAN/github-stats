@@ -1,9 +1,8 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { StatsResponse } from "@/types/stats";
-import { Crown, Trophy, ExternalLink, Calendar, MapPin, Building2, Flame } from "lucide-react";
+import { Crown, Trophy, ExternalLink, Calendar, MapPin, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ComparisonCardProps {
@@ -11,6 +10,7 @@ interface ComparisonCardProps {
   isOverallWinner: boolean;
   winsCount: number;
   contenderLabel: string;
+  colorTheme?: "indigo" | "purple";
 }
 
 export function ComparisonCard({
@@ -18,10 +18,11 @@ export function ComparisonCard({
   isOverallWinner,
   winsCount,
   contenderLabel,
+  colorTheme = "indigo",
 }: ComparisonCardProps) {
   const { user, stats, tier } = data;
-
   const joinYear = new Date(user.createdAt).getFullYear();
+  const isIndigo = colorTheme === "indigo";
 
   return (
     <div
@@ -29,18 +30,34 @@ export function ComparisonCard({
         "relative flex flex-col rounded-2xl border p-5 sm:p-6 backdrop-blur-xl transition-all duration-300",
         "bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 shadow-xl",
         isOverallWinner
-          ? "border-amber-500/60 shadow-amber-500/10 ring-1 ring-amber-500/30"
+          ? isIndigo
+            ? "border-indigo-500/60 shadow-indigo-500/10 ring-1 ring-indigo-500/30"
+            : "border-purple-500/60 shadow-purple-500/10 ring-1 ring-purple-500/30"
           : "border-zinc-800/80 shadow-black/40"
       )}
     >
       {/* Contender Header Pill */}
       <div className="flex items-center justify-between gap-2 mb-4">
-        <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-semibold px-2 py-0.5 rounded-md bg-zinc-800/60 border border-zinc-700/50">
+        <span
+          className={cn(
+            "text-[11px] font-mono uppercase tracking-wider font-semibold px-2.5 py-0.5 rounded-md border",
+            isIndigo
+              ? "text-indigo-300 bg-indigo-500/10 border-indigo-500/30"
+              : "text-purple-300 bg-purple-500/10 border-purple-500/30"
+          )}
+        >
           {contenderLabel}
         </span>
 
         {isOverallWinner && (
-          <span className="flex items-center gap-1 text-xs font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2.5 py-0.5 rounded-full shadow-sm animate-pulse">
+          <span
+            className={cn(
+              "flex items-center gap-1.5 text-xs font-bold px-2.5 py-0.5 rounded-full border shadow-sm animate-pulse",
+              isIndigo
+                ? "text-indigo-300 bg-indigo-500/20 border-indigo-500/40"
+                : "text-purple-300 bg-purple-500/20 border-purple-500/40"
+            )}
+          >
             <Crown className="w-3.5 h-3.5" />
             Showdown Winner ({winsCount} Wins)
           </span>
@@ -53,7 +70,11 @@ export function ComparisonCard({
           <div
             className={cn(
               "relative h-18 w-18 sm:h-20 sm:w-20 rounded-2xl overflow-hidden border-2 shadow-md",
-              isOverallWinner ? "border-amber-400 shadow-amber-500/20" : "border-zinc-700"
+              isOverallWinner
+                ? isIndigo
+                  ? "border-indigo-400 shadow-indigo-500/20"
+                  : "border-purple-400 shadow-purple-500/20"
+                : "border-zinc-700"
             )}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -65,7 +86,14 @@ export function ComparisonCard({
             />
           </div>
           {isOverallWinner && (
-            <div className="absolute -top-2 -right-2 bg-gradient-to-tr from-amber-500 to-yellow-300 text-zinc-950 p-1 rounded-full shadow-lg">
+            <div
+              className={cn(
+                "absolute -top-2 -right-2 text-white p-1 rounded-full shadow-lg",
+                isIndigo
+                  ? "bg-gradient-to-tr from-indigo-600 to-cyan-400"
+                  : "bg-gradient-to-tr from-purple-600 to-pink-400"
+              )}
+            >
               <Trophy className="w-3.5 h-3.5" />
             </div>
           )}
@@ -87,7 +115,14 @@ export function ComparisonCard({
             </a>
           </div>
 
-          <p className="text-xs sm:text-sm font-mono text-zinc-400 truncate">@{user.username}</p>
+          <p
+            className={cn(
+              "text-xs sm:text-sm font-mono truncate font-medium",
+              isIndigo ? "text-indigo-400/90" : "text-purple-400/90"
+            )}
+          >
+            @{user.username}
+          </p>
 
           {/* Tier Badge */}
           <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border backdrop-blur-md shadow-sm">

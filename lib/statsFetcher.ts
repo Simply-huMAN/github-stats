@@ -214,3 +214,4 @@ export async function fetchUserStats(username: string): Promise<StatsResponse> {
     fetchedAt: new Date().toISOString(),
   };
 }
+

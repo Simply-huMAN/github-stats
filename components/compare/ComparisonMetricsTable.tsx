@@ -2,7 +2,7 @@
 
 import React from "react";
 import { MetricComparison } from "@/types/compare";
-import { Trophy, CheckCircle2, Minus, ArrowUp, ArrowDown } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ComparisonMetricsTableProps {
@@ -19,10 +19,16 @@ export function ComparisonMetricsTable({
   return (
     <div className="w-full rounded-2xl border border-zinc-800 bg-zinc-950/80 backdrop-blur-xl overflow-hidden shadow-2xl">
       {/* Table Header */}
-      <div className="grid grid-cols-12 gap-2 p-4 sm:p-5 border-b border-zinc-800/80 bg-zinc-900/50 text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
-        <div className="col-span-5 sm:col-span-4 text-left truncate">{user1Name}</div>
-        <div className="col-span-2 sm:col-span-4 text-center">Metric Showdown</div>
-        <div className="col-span-5 sm:col-span-4 text-right truncate">{user2Name}</div>
+      <div className="grid grid-cols-12 gap-2 p-4 sm:p-5 border-b border-zinc-800/80 bg-zinc-900/50 text-xs font-mono font-bold uppercase tracking-wider">
+        <div className="col-span-5 sm:col-span-4 text-left truncate text-indigo-400">
+          {user1Name}
+        </div>
+        <div className="col-span-2 sm:col-span-4 text-center text-zinc-400">
+          Metric Showdown
+        </div>
+        <div className="col-span-5 sm:col-span-4 text-right truncate text-purple-400">
+          {user2Name}
+        </div>
       </div>
 
       {/* Metric Rows */}
@@ -39,20 +45,20 @@ export function ComparisonMetricsTable({
             >
               {/* Top Row: Values and Metric Name */}
               <div className="grid grid-cols-12 items-center gap-2">
-                {/* User 1 Value */}
+                {/* User 1 Value (Indigo) */}
                 <div className="col-span-4 flex items-center gap-2">
                   <span
                     className={cn(
                       "text-base sm:text-xl font-bold font-mono tracking-tight",
-                      m.winner === 1 ? "text-amber-400" : "text-zinc-300"
+                      m.winner === 1 ? "text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]" : "text-zinc-300"
                     )}
                   >
                     {m.user1Value.toLocaleString()}
                     {m.unit && m.key !== "tierScore" && ` ${m.unit}`}
                   </span>
                   {m.winner === 1 && (
-                    <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
-                      <Trophy className="w-3 h-3 text-amber-400" />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 px-2 py-0.5 text-[10px] font-semibold text-indigo-300 shadow-sm">
+                      <Trophy className="w-3 h-3 text-indigo-400" />
                       Win
                     </span>
                   )}
@@ -68,18 +74,18 @@ export function ComparisonMetricsTable({
                   </span>
                 </div>
 
-                {/* User 2 Value */}
+                {/* User 2 Value (Purple) */}
                 <div className="col-span-4 flex items-center justify-end gap-2 text-right">
                   {m.winner === 2 && (
-                    <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
-                      <Trophy className="w-3 h-3 text-amber-400" />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/10 border border-purple-500/30 px-2 py-0.5 text-[10px] font-semibold text-purple-300 shadow-sm">
+                      <Trophy className="w-3 h-3 text-purple-400" />
                       Win
                     </span>
                   )}
                   <span
                     className={cn(
                       "text-base sm:text-xl font-bold font-mono tracking-tight",
-                      m.winner === 2 ? "text-amber-400" : "text-zinc-300"
+                      m.winner === 2 ? "text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.4)]" : "text-zinc-300"
                     )}
                   >
                     {m.user2Value.toLocaleString()}
@@ -90,30 +96,42 @@ export function ComparisonMetricsTable({
 
               {/* Bottom Visual Comparison Progress Bar */}
               <div className="flex items-center gap-3">
-                <span className="text-[10px] font-mono text-zinc-500 w-8 text-left">
+                <span
+                  className={cn(
+                    "text-[10px] font-mono w-8 text-left",
+                    m.winner === 1 ? "text-indigo-400 font-bold" : "text-zinc-500"
+                  )}
+                >
                   {u1Percent}%
                 </span>
                 <div className="flex-1 h-2 rounded-full overflow-hidden bg-zinc-800 flex">
+                  {/* User 1 Segment (Indigo) */}
                   <div
                     className={cn(
                       "h-full transition-all duration-500",
                       m.winner === 1
-                        ? "bg-gradient-to-r from-amber-500 to-amber-300"
-                        : "bg-indigo-500/70"
+                        ? "bg-gradient-to-r from-indigo-600 to-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.6)]"
+                        : "bg-indigo-500/40"
                     )}
                     style={{ width: `${u1Percent}%` }}
                   />
+                  {/* User 2 Segment (Purple) */}
                   <div
                     className={cn(
                       "h-full transition-all duration-500",
                       m.winner === 2
-                        ? "bg-gradient-to-l from-amber-500 to-amber-300"
-                        : "bg-purple-500/70"
+                        ? "bg-gradient-to-l from-purple-600 to-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.6)]"
+                        : "bg-purple-500/40"
                     )}
                     style={{ width: `${u2Percent}%` }}
                   />
                 </div>
-                <span className="text-[10px] font-mono text-zinc-500 w-8 text-right">
+                <span
+                  className={cn(
+                    "text-[10px] font-mono w-8 text-right",
+                    m.winner === 2 ? "text-purple-400 font-bold" : "text-zinc-500"
+                  )}
+                >
                   {u2Percent}%
                 </span>
               </div>
