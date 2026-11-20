@@ -20,26 +20,49 @@ export async function generateMetadata({ params }: BattlePageProps): Promise<Met
   const u1Name = val.user1 || user1;
   const u2Name = val.user2 || user2;
 
-  const title = `${u1Name} vs ${u2Name} — GitHub Developer Comparison & Battle | MyGitStats`;
-  const description = `Compare ${u1Name} and ${u2Name} side-by-side on GitHub. Analyze performance tiers, total stars, active contributions, followers, and repositories with MyGitStats.`;
+  const title = `${u1Name} vs ${u2Name} — Who Wins the GitHub Developer Showdown? | MyGitStats`;
+  const description = `Head-to-head GitHub battle: ${u1Name} vs ${u2Name}. Compare performance tier ranks (Mythic, Gold, Bronze), total stars, followers, and active contribution velocity side-by-side.`;
   const canonicalUrl = `/compare/${val.canonical1 || user1.toLowerCase()}/vs/${val.canonical2 || user2.toLowerCase()}`;
+  const showdownUrl = `https://mygitstats.dev/compare/${u1Name}/vs/${u2Name}`;
+  const ogImageUrl = `https://mygitstats.dev/compare/${encodeURIComponent(u1Name)}/vs/${encodeURIComponent(u2Name)}/opengraph-image`;
 
   return {
     title,
     description,
+    keywords: [
+      `${u1Name} vs ${u2Name}`,
+      `${u1Name} github stats`,
+      `${u2Name} github stats`,
+      "github developer comparison",
+      "developer showdown",
+      "head-to-head git stats",
+      "github performance tier battle",
+      "compare developers",
+    ],
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
       title,
       description,
-      url: `https://mygitstats.dev/compare/${u1Name}/vs/${u2Name}`,
+      url: showdownUrl,
+      siteName: "MyGitStats",
       type: "website",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${u1Name} vs ${u2Name} — GitHub Developer Showdown Battle Card`,
+          type: "image/png",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [ogImageUrl],
     },
   };
 }
