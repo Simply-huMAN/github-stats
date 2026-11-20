@@ -49,6 +49,17 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/compare"
+                  className="hover:text-white transition-colors flex items-center gap-1.5"
+                >
+                  <span>Developer Comparison</span>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">
+                    New
+                  </span>
+                </Link>
+              </li>
+              <li>
                 <a
                   href="https://github.com/Simply-huMAN/github-stats"
                   target="_blank"
