@@ -4,6 +4,8 @@ import { ComparisonArena } from "@/components/compare/ComparisonArena";
 import { validateComparisonPair } from "@/lib/validation";
 import { Swords } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 interface BattlePageProps {
   params: {
     user1: string;
