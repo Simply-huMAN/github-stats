@@ -1,3 +1,21 @@
+## What's Changed in v0.4.0
+
+### Added
+- **Developer Showdown — Head-to-Head 2-User Comparison**:
+  - New comparison arena at `/compare` and dynamic showdown routes at `/compare/[user1]/vs/[user2]`.
+  - Side-by-side metric battle across 6 dimensions: Performance Tier Score, Star Power, Followers, 90-Day Contribution Velocity, Public Repos, and GitHub Seniority.
+  - Contender color system: Electric Indigo (`#6366f1`) for Contender 1 vs Yellow-Orange / Amber (`#f59e0b`) for Contender 2 with matching winner trophies.
+  - High-res battle card PNG export for social sharing.
+- **Pre-Validation & Edge CDN Caching**:
+  - Strict pre-validation (`/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i`) drops invalid queries before making upstream API calls.
+  - Cloudflare Edge CDN cache headers (`s-maxage=86400`) ensure repeated comparisons are served from the edge.
+- **Dynamic OpenGraph Battle Cards**:
+  - Edge-rendered dynamic 1200×630 social share cards (`/compare/[user1]/vs/[user2]/opengraph-image`) with rich previews for Twitter / X, LinkedIn, Discord, and Slack.
+- **Mobile-Responsive UI**:
+  - Stacked mobile metrics view with dedicated trophy indicators and percentage comparison bars.
+
+---
+
 ## What's Changed in v0.3.5
 
 ### Fixed
