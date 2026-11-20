@@ -10,14 +10,13 @@ import { BattleCardDownload } from "./BattleCardDownload";
 import {
   Swords,
   ArrowLeftRight,
+  ArrowUpDown,
   Share2,
   Check,
-  Sparkles,
   AlertCircle,
   Loader2,
   Trophy,
   Flame,
-  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -98,7 +97,6 @@ export function ComparisonArena({
       setError(val.error || "Please provide two valid GitHub usernames.");
       return;
     }
-    // Navigate to canonical SEO dynamic route
     router.push(`/compare/${val.user1}/vs/${val.user2}`);
     executeComparison(val.user1, val.user2);
   }
@@ -137,7 +135,7 @@ export function ComparisonArena({
       {/* Search & Matchmaking Controls */}
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-3xl mb-8 p-3 sm:p-4 rounded-2xl border border-zinc-800 bg-zinc-950/80 backdrop-blur-xl shadow-2xl flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3"
+        className="w-full max-w-3xl mb-6 sm:mb-8 p-3 sm:p-4 rounded-2xl border border-zinc-800 bg-zinc-950/80 backdrop-blur-xl shadow-2xl flex flex-col sm:flex-row items-center gap-2 sm:gap-3"
       >
         {/* User 1 Input */}
         <div className="relative w-full sm:flex-1">
@@ -146,19 +144,20 @@ export function ComparisonArena({
             value={user1Input}
             onChange={(e) => setUser1Input(e.target.value)}
             placeholder="Contender 1 (e.g. torvalds)"
-            className="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/60 text-white placeholder-zinc-500 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500"
+            className="w-full px-3.5 sm:px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/60 text-white placeholder-zinc-500 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500"
             required
           />
         </div>
 
-        {/* Swap Button */}
+        {/* Swap Button (Vertical arrow on mobile, horizontal on desktop) */}
         <button
           type="button"
           onClick={handleSwap}
-          className="p-2.5 rounded-xl border border-zinc-700/60 bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all active:scale-95 shrink-0"
+          className="p-2 sm:p-2.5 rounded-xl border border-zinc-700/60 bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all active:scale-95 shrink-0"
           title="Swap contenders"
         >
-          <ArrowLeftRight className="w-4 h-4" />
+          <ArrowUpDown className="w-4 h-4 sm:hidden" />
+          <ArrowLeftRight className="w-4 h-4 hidden sm:block" />
         </button>
 
         {/* User 2 Input */}
@@ -168,7 +167,7 @@ export function ComparisonArena({
             value={user2Input}
             onChange={(e) => setUser2Input(e.target.value)}
             placeholder="Contender 2 (e.g. shadcn)"
-            className="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/60 text-white placeholder-zinc-500 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
+            className="w-full px-3.5 sm:px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/60 text-white placeholder-zinc-500 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
             required
           />
         </div>
@@ -190,7 +189,7 @@ export function ComparisonArena({
 
       {/* Error Alert */}
       {error && (
-        <div className="w-full max-w-2xl mb-8 p-4 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 flex items-start gap-3 backdrop-blur-md">
+        <div className="w-full max-w-2xl mb-6 sm:mb-8 p-3.5 sm:p-4 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 flex items-start gap-3 backdrop-blur-md">
           <AlertCircle className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
           <div className="flex-1 text-sm">
             <p className="font-semibold text-rose-200">Comparison Check</p>
@@ -201,11 +200,11 @@ export function ComparisonArena({
 
       {/* Loading Skeleton */}
       {isLoading && (
-        <div className="w-full max-w-4xl py-16 flex flex-col items-center justify-center gap-4">
-          <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 animate-pulse shadow-glow-gold">
-            <Swords className="w-8 h-8 text-amber-400 animate-bounce" />
+        <div className="w-full max-w-4xl py-12 sm:py-16 flex flex-col items-center justify-center gap-3 sm:gap-4">
+          <div className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 animate-pulse shadow-glow-gold">
+            <Swords className="w-7 h-7 sm:w-8 sm:h-8 text-amber-400 animate-bounce" />
           </div>
-          <p className="text-sm font-mono text-zinc-400">
+          <p className="text-xs sm:text-sm font-mono text-zinc-400 text-center px-4">
             Analyzing GitHub profiles & computing showdown metrics...
           </p>
         </div>
@@ -213,7 +212,7 @@ export function ComparisonArena({
 
       {/* Showdown Result Arena */}
       {!isLoading && comparison && (
-        <div className="w-full max-w-4xl flex flex-col gap-6 animate-fade-in">
+        <div className="w-full max-w-4xl flex flex-col gap-4 sm:gap-6 animate-fade-in">
           {/* Winner Headline Banner */}
           <div
             className={cn(
@@ -227,7 +226,7 @@ export function ComparisonArena({
           >
             <div
               className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold mb-2 border",
+                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold mb-1.5 sm:mb-2 border",
                 comparison.summary.overallWinner === 1
                   ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-300"
                   : comparison.summary.overallWinner === 2
@@ -247,7 +246,7 @@ export function ComparisonArena({
               />
               <span>{comparison.summary.winMargin}</span>
             </div>
-            <h2 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
+            <h2 className="text-base sm:text-2xl font-extrabold text-white tracking-tight px-2">
               {comparison.summary.headline}
             </h2>
           </div>
@@ -255,10 +254,10 @@ export function ComparisonArena({
           {/* Exportable Battle Arena Ref Target */}
           <div
             ref={arenaRef}
-            className="w-full p-4 sm:p-6 rounded-3xl border border-zinc-800 bg-[#070709] shadow-2xl flex flex-col gap-6"
+            className="w-full p-3 sm:p-6 rounded-2xl sm:rounded-3xl border border-zinc-800 bg-[#070709] shadow-2xl flex flex-col gap-4 sm:gap-6"
           >
             {/* Contender Cards Face-Off Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 relative">
               {/* User 1 Card (Indigo Theme) */}
               <ComparisonCard
                 data={comparison.user1}
@@ -268,12 +267,19 @@ export function ComparisonArena({
                 colorTheme="indigo"
               />
 
-              {/* Central VS Badge (Floating on desktop) */}
+              {/* Desktop Central Floating VS Badge */}
               <div
                 data-export-ignore="false"
                 className="hidden md:flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 items-center justify-center w-12 h-12 rounded-full bg-zinc-950 border-2 border-indigo-500/40 shadow-xl shadow-indigo-500/20 text-white font-extrabold font-mono text-sm"
               >
                 VS
+              </div>
+
+              {/* Mobile Centered VS Divider */}
+              <div className="flex md:hidden items-center justify-center -my-1 z-10">
+                <span className="px-3 py-0.5 rounded-full bg-zinc-900 border border-zinc-700 text-[11px] font-mono font-bold text-zinc-300 shadow-md">
+                  VS
+                </span>
               </div>
 
               {/* User 2 Card (Amber / Yellow-Orange Theme) */}
@@ -294,27 +300,27 @@ export function ComparisonArena({
             />
 
             {/* Watermark in Exported PNG */}
-            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500 pt-2 border-t border-zinc-900">
-              <span>mygitstats.dev • verified developer showdown</span>
-              <span>{new Date(comparison.comparedAt).toLocaleDateString()}</span>
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-zinc-500 pt-2 border-t border-zinc-900">
+              <span className="truncate">mygitstats.dev • verified showdown</span>
+              <span className="shrink-0">{new Date(comparison.comparedAt).toLocaleDateString()}</span>
             </div>
           </div>
 
-          {/* Social Actions & Export Toolbar */}
-          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 pt-2">
+          {/* Social Actions & Export Toolbar (Full width on mobile) */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center sm:justify-end gap-2.5 sm:gap-3 pt-1">
             <button
               onClick={handleCopyShareLink}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-zinc-700/60 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-semibold text-xs sm:text-sm transition-all active:scale-95 shadow-sm"
+              className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-zinc-700/60 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-semibold text-xs sm:text-sm transition-all active:scale-95 shadow-sm"
             >
               {copiedLink ? (
                 <>
                   <Check className="w-4 h-4 text-emerald-400" />
-                  <span className="text-emerald-400">Copied Battle Link!</span>
+                  <span className="text-emerald-400 font-bold">Copied Battle Link!</span>
                 </>
               ) : (
                 <>
                   <Share2 className="w-4 h-4 text-zinc-400" />
-                  <span>Share Battle</span>
+                  <span>Share Battle Link</span>
                 </>
               )}
             </button>
@@ -323,31 +329,32 @@ export function ComparisonArena({
               arenaRef={arenaRef}
               user1={comparison.user1.user.username}
               user2={comparison.user2.user.username}
+              className="w-full sm:w-auto justify-center"
             />
           </div>
         </div>
       )}
 
       {/* Trending Showdowns Section */}
-      <div className="w-full max-w-4xl mt-16 pt-10 border-t border-zinc-800/80">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="w-full max-w-4xl mt-12 sm:mt-16 pt-8 sm:pt-10 border-t border-zinc-800/80">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4">
           <Flame className="w-4 h-4 text-amber-400" />
-          <h3 className="text-sm font-mono uppercase tracking-wider font-bold text-zinc-300">
+          <h3 className="text-xs sm:text-sm font-mono uppercase tracking-wider font-bold text-zinc-300">
             Popular Open-Source Showdowns
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
           {TRENDING_MATCHUPS.map((match) => (
             <button
               key={`${match.u1}-${match.u2}`}
               onClick={() => handleSelectMatchup(match.u1, match.u2)}
-              className="p-3 rounded-xl border border-zinc-800/80 bg-zinc-950 hover:bg-zinc-900/60 hover:border-amber-500/40 text-left transition-all group flex flex-col gap-1"
+              className="p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 bg-zinc-950 hover:bg-zinc-900/60 hover:border-amber-500/40 text-left transition-all group flex flex-col gap-0.5 sm:gap-1"
             >
-              <span className="text-xs font-bold text-zinc-200 group-hover:text-amber-300 transition-colors">
+              <span className="text-xs font-bold text-zinc-200 group-hover:text-amber-300 transition-colors truncate">
                 {match.u1} <span className="text-zinc-500 font-normal">vs</span> {match.u2}
               </span>
-              <span className="text-[11px] text-zinc-500 line-clamp-1">{match.label}</span>
+              <span className="text-[10px] sm:text-[11px] text-zinc-500 line-clamp-1">{match.label}</span>
             </button>
           ))}
         </div>
@@ -355,4 +362,3 @@ export function ComparisonArena({
     </div>
   );
 }
-
