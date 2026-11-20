@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Github, Sparkles, CreditCard, Menu, X, ArrowUpRight } from "lucide-react";
+import { Github, Sparkles, CreditCard, Menu, X, ArrowUpRight, Swords } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
@@ -22,6 +22,12 @@ export function Navbar() {
       href: "/card",
       label: "Card Studio",
       icon: CreditCard,
+    },
+    {
+      href: "/compare",
+      label: "Compare",
+      badge: "New",
+      icon: Swords,
     },
   ];
 

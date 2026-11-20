@@ -4,10 +4,12 @@
 
 [![MyGitStats Live](https://img.shields.io/badge/MyGitStats-mygitstats.dev-6366f1?style=for-the-badge&logo=googlechrome&logoColor=white)](https://mygitstats.dev)
 [![MyGitStats Card Studio](https://img.shields.io/badge/MyGitStats-Card_Studio-4f46e5?style=for-the-badge&logo=sparkles)](https://mygitstats.dev/card)
+[![MyGitStats Compare](https://img.shields.io/badge/MyGitStats-Developer_Showdown-f59e0b?style=for-the-badge&logo=swords)](https://mygitstats.dev/compare)
 [![MyGitStats Wrapped](https://img.shields.io/badge/MyGitStats-GitHub_Wrapped_2026-ec4899?style=for-the-badge&logo=github)](https://mygitstats.dev/wrapped)
 
 > 🌐 **Official Website**: [https://mygitstats.dev](https://mygitstats.dev)  
 > 🎨 **MyGitStats Studio**: [https://mygitstats.dev/card](https://mygitstats.dev/card)  
+> ⚔️ **Developer Showdown**: [https://mygitstats.dev/compare](https://mygitstats.dev/compare)  
 > 🎆 **MyGitStats Wrapped**: [https://mygitstats.dev/wrapped](https://mygitstats.dev/wrapped)  
 > 📦 **GitHub Repository**: [https://github.com/Simply-huMAN/github-stats](https://github.com/Simply-huMAN/github-stats)
 

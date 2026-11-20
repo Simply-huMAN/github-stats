@@ -239,7 +239,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<StatsRespo
     return NextResponse.json(payload, {
       status: 200,
       headers: {
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=1800",
+        "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=43200",
+        "CDN-Cache-Control": "max-age=86400",
+        "Cloudflare-CDN-Cache-Control": "max-age=86400",
       },
     });
   } catch (err: unknown) {
