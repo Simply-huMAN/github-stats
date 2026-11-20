@@ -10,7 +10,7 @@ interface ComparisonCardProps {
   isOverallWinner: boolean;
   winsCount: number;
   contenderLabel: string;
-  colorTheme?: "indigo" | "purple";
+  colorTheme?: "indigo" | "amber";
 }
 
 export function ComparisonCard({
@@ -32,7 +32,7 @@ export function ComparisonCard({
         isOverallWinner
           ? isIndigo
             ? "border-indigo-500/60 shadow-indigo-500/10 ring-1 ring-indigo-500/30"
-            : "border-purple-500/60 shadow-purple-500/10 ring-1 ring-purple-500/30"
+            : "border-amber-500/60 shadow-amber-500/10 ring-1 ring-amber-500/30"
           : "border-zinc-800/80 shadow-black/40"
       )}
     >
@@ -43,7 +43,7 @@ export function ComparisonCard({
             "text-[11px] font-mono uppercase tracking-wider font-semibold px-2.5 py-0.5 rounded-md border",
             isIndigo
               ? "text-indigo-300 bg-indigo-500/10 border-indigo-500/30"
-              : "text-purple-300 bg-purple-500/10 border-purple-500/30"
+              : "text-amber-300 bg-amber-500/10 border-amber-500/30"
           )}
         >
           {contenderLabel}
@@ -55,7 +55,7 @@ export function ComparisonCard({
               "flex items-center gap-1.5 text-xs font-bold px-2.5 py-0.5 rounded-full border shadow-sm animate-pulse",
               isIndigo
                 ? "text-indigo-300 bg-indigo-500/20 border-indigo-500/40"
-                : "text-purple-300 bg-purple-500/20 border-purple-500/40"
+                : "text-amber-300 bg-amber-500/20 border-amber-500/40"
             )}
           >
             <Crown className="w-3.5 h-3.5" />
@@ -73,7 +73,7 @@ export function ComparisonCard({
               isOverallWinner
                 ? isIndigo
                   ? "border-indigo-400 shadow-indigo-500/20"
-                  : "border-purple-400 shadow-purple-500/20"
+                  : "border-amber-400 shadow-amber-500/20"
                 : "border-zinc-700"
             )}
           >
@@ -88,10 +88,10 @@ export function ComparisonCard({
           {isOverallWinner && (
             <div
               className={cn(
-                "absolute -top-2 -right-2 text-white p-1 rounded-full shadow-lg",
+                "absolute -top-2 -right-2 text-zinc-950 p-1 rounded-full shadow-lg",
                 isIndigo
-                  ? "bg-gradient-to-tr from-indigo-600 to-cyan-400"
-                  : "bg-gradient-to-tr from-purple-600 to-pink-400"
+                  ? "bg-gradient-to-tr from-indigo-500 to-cyan-300 text-white"
+                  : "bg-gradient-to-tr from-amber-500 to-yellow-300 text-zinc-950"
               )}
             >
               <Trophy className="w-3.5 h-3.5" />
@@ -118,7 +118,7 @@ export function ComparisonCard({
           <p
             className={cn(
               "text-xs sm:text-sm font-mono truncate font-medium",
-              isIndigo ? "text-indigo-400/90" : "text-purple-400/90"
+              isIndigo ? "text-indigo-400/90" : "text-amber-400/90"
             )}
           >
             @{user.username}

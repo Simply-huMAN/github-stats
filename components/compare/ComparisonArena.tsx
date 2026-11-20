@@ -168,7 +168,7 @@ export function ComparisonArena({
             value={user2Input}
             onChange={(e) => setUser2Input(e.target.value)}
             placeholder="Contender 2 (e.g. shadcn)"
-            className="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/60 text-white placeholder-zinc-500 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500"
+            className="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/60 text-white placeholder-zinc-500 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
             required
           />
         </div>
@@ -221,7 +221,7 @@ export function ComparisonArena({
               comparison.summary.overallWinner === 1
                 ? "border-indigo-500/40 bg-gradient-to-r from-indigo-950/50 via-zinc-950 to-indigo-950/20 shadow-indigo-950/40"
                 : comparison.summary.overallWinner === 2
-                ? "border-purple-500/40 bg-gradient-to-r from-purple-950/50 via-zinc-950 to-purple-950/20 shadow-purple-950/40"
+                ? "border-amber-500/40 bg-gradient-to-r from-amber-950/50 via-zinc-950 to-orange-950/20 shadow-amber-950/40"
                 : "border-zinc-800 bg-zinc-950/80 shadow-black/40"
             )}
           >
@@ -231,7 +231,7 @@ export function ComparisonArena({
                 comparison.summary.overallWinner === 1
                   ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-300"
                   : comparison.summary.overallWinner === 2
-                  ? "bg-purple-500/15 border-purple-500/30 text-purple-300"
+                  ? "bg-amber-500/15 border-amber-500/30 text-amber-300"
                   : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400"
               )}
             >
@@ -241,7 +241,7 @@ export function ComparisonArena({
                   comparison.summary.overallWinner === 1
                     ? "text-indigo-400"
                     : comparison.summary.overallWinner === 2
-                    ? "text-purple-400"
+                    ? "text-amber-400"
                     : "text-zinc-400"
                 )}
               />
@@ -276,13 +276,13 @@ export function ComparisonArena({
                 VS
               </div>
 
-              {/* User 2 Card (Purple Theme) */}
+              {/* User 2 Card (Amber / Yellow-Orange Theme) */}
               <ComparisonCard
                 data={comparison.user2}
                 isOverallWinner={comparison.summary.overallWinner === 2}
                 winsCount={comparison.summary.user2Wins}
                 contenderLabel="Contender 2"
-                colorTheme="purple"
+                colorTheme="amber"
               />
             </div>
 

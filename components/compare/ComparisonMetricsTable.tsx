@@ -26,7 +26,7 @@ export function ComparisonMetricsTable({
         <div className="col-span-2 sm:col-span-4 text-center text-zinc-400">
           Metric Showdown
         </div>
-        <div className="col-span-5 sm:col-span-4 text-right truncate text-purple-400">
+        <div className="col-span-5 sm:col-span-4 text-right truncate text-amber-400">
           {user2Name}
         </div>
       </div>
@@ -74,18 +74,18 @@ export function ComparisonMetricsTable({
                   </span>
                 </div>
 
-                {/* User 2 Value (Purple) */}
+                {/* User 2 Value (Amber / Yellow-Orange) */}
                 <div className="col-span-4 flex items-center justify-end gap-2 text-right">
                   {m.winner === 2 && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/10 border border-purple-500/30 px-2 py-0.5 text-[10px] font-semibold text-purple-300 shadow-sm">
-                      <Trophy className="w-3 h-3 text-purple-400" />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-[10px] font-semibold text-amber-300 shadow-sm">
+                      <Trophy className="w-3 h-3 text-amber-400" />
                       Win
                     </span>
                   )}
                   <span
                     className={cn(
                       "text-base sm:text-xl font-bold font-mono tracking-tight",
-                      m.winner === 2 ? "text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.4)]" : "text-zinc-300"
+                      m.winner === 2 ? "text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]" : "text-zinc-300"
                     )}
                   >
                     {m.user2Value.toLocaleString()}
@@ -115,13 +115,13 @@ export function ComparisonMetricsTable({
                     )}
                     style={{ width: `${u1Percent}%` }}
                   />
-                  {/* User 2 Segment (Purple) */}
+                  {/* User 2 Segment (Amber / Yellow-Orange) */}
                   <div
                     className={cn(
                       "h-full transition-all duration-500",
                       m.winner === 2
-                        ? "bg-gradient-to-l from-purple-600 to-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.6)]"
-                        : "bg-purple-500/40"
+                        ? "bg-gradient-to-l from-amber-500 to-yellow-400 shadow-[0_0_10px_rgba(245,158,11,0.6)]"
+                        : "bg-amber-500/40"
                     )}
                     style={{ width: `${u2Percent}%` }}
                   />
@@ -129,7 +129,7 @@ export function ComparisonMetricsTable({
                 <span
                   className={cn(
                     "text-[10px] font-mono w-8 text-right",
-                    m.winner === 2 ? "text-purple-400 font-bold" : "text-zinc-500"
+                    m.winner === 2 ? "text-amber-400 font-bold" : "text-zinc-500"
                   )}
                 >
                   {u2Percent}%

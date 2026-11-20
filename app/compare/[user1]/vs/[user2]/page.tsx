@@ -63,7 +63,7 @@ export default function BattlePage({ params }: BattlePageProps) {
         <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight text-center max-w-3xl leading-tight">
           <span className="text-indigo-400">{val.user1 || user1}</span>{" "}
           <span className="text-zinc-500 font-mono text-2xl sm:text-4xl">vs</span>{" "}
-          <span className="text-purple-400">{val.user2 || user2}</span>
+          <span className="text-amber-400">{val.user2 || user2}</span>
         </h1>
 
         <p className="mt-4 text-sm sm:text-base text-zinc-400 text-center max-w-xl leading-relaxed mb-8">
