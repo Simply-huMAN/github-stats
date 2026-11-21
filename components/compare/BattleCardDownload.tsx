@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback } from "react";
 import { Download, Loader2, Check } from "lucide-react";
-import { toPng } from "html-to-image";
 import { cn } from "@/lib/utils";
 
 interface BattleCardDownloadProps {
@@ -27,6 +26,9 @@ export function BattleCardDownload({
     try {
       setIsExporting(true);
       await new Promise((resolve) => setTimeout(resolve, 80));
+
+      // Dynamically load html-to-image only when the user requests a download
+      const { toPng } = await import("html-to-image");
 
       const dataUrl = await toPng(arenaRef.current, {
         cacheBust: true,
@@ -60,7 +62,7 @@ export function BattleCardDownload({
       onClick={handleDownload}
       disabled={isExporting}
       className={cn(
-        "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 shadow-md",
+        "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 shadow-md min-h-[44px]",
         downloaded
           ? "bg-emerald-600 text-white"
           : "bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-zinc-950 font-bold active:scale-95 shadow-amber-500/20",
@@ -87,4 +89,3 @@ export function BattleCardDownload({
     </button>
   );
 }
-

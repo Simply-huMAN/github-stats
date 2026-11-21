@@ -21,6 +21,7 @@ import {
   Check,
   Sparkles,
   ArrowRight,
+  Swords,
 } from "lucide-react";
 
 const INITIAL_DEMO_DATA: StatsResponse = {
@@ -398,7 +399,7 @@ export default function CardStudioPage() {
           />
         </div>
 
-        {/* Action Controls: Download & Share */}
+        {/* Action Controls: Download, Share & Compare */}
         <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 w-full max-w-sm sm:max-w-none">
           <DownloadButton
             cardRef={cardRef}
@@ -407,6 +408,14 @@ export default function CardStudioPage() {
             baseBgColor={currentBaseBgColor}
             className="w-full sm:w-auto"
           />
+
+          <Link
+            href={`/compare?user1=${encodeURIComponent(statsData.user.username)}`}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm active:scale-95"
+          >
+            <Swords className="w-4 h-4 text-amber-400" />
+            <span>Compare this profile</span>
+          </Link>
 
           <button
             type="button"

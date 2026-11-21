@@ -114,6 +114,82 @@ const p3 = validateComparisonPair("Simply-huMAN", "simply-human");
 assert(!p3.isValid, "Simply-huMAN vs simply-human should fail validation");
 assert(p3.isSelfComparison, "Case-insensitive self comparison should be detected");
 
+console.log("\n=== 3. Testing Tiebreaker & Incomplete Metric Logic ===");
+function simulateShowdown({ u1Wins, u2Wins, u1Score, u2Score, u1Name, u2Name, undetermined = 0 }) {
+  let overallWinner = "tie";
+  let isTiebreaker = false;
+  let winnerWithheld = false;
+
+  const winGap = Math.abs(u1Wins - u2Wins);
+  if (undetermined > 0 && winGap <= undetermined) {
+    overallWinner = "undetermined";
+    winnerWithheld = true;
+    return {
+      overallWinner,
+      winnerWithheld,
+      headline: "Incomplete GitHub Data · Winner Withheld",
+      winMargin: "Winner withheld due to missing metrics",
+    };
+  }
+
+  if (u1Wins > u2Wins) {
+    overallWinner = 1;
+    return {
+      overallWinner,
+      winnerWithheld: false,
+      headline: `${u1Name} leads with ${u1Wins} category wins.`,
+      winMargin: `${u1Wins} to ${u2Wins} categories`,
+    };
+  } else if (u2Wins > u1Wins) {
+    overallWinner = 2;
+    return {
+      overallWinner,
+      winnerWithheld: false,
+      headline: `${u2Name} leads with ${u2Wins} category wins.`,
+      winMargin: `${u2Wins} to ${u1Wins} categories`,
+    };
+  } else {
+    // Tied on category wins: Tiebreaker by tier score
+    if (u1Score > u2Score) {
+      overallWinner = 1;
+      isTiebreaker = true;
+      return {
+        overallWinner,
+        winnerWithheld: false,
+        headline: `${u1Wins} categories each · ${u1Name} wins on tier score.`,
+        winMargin: `${u1Wins} categories each · ${u1Name} wins on tier score`,
+      };
+    } else if (u2Score > u1Score) {
+      overallWinner = 2;
+      isTiebreaker = true;
+      return {
+        overallWinner,
+        winnerWithheld: false,
+        headline: `${u1Wins} categories each · ${u2Name} wins on tier score.`,
+        winMargin: `${u1Wins} categories each · ${u2Name} wins on tier score`,
+      };
+    } else {
+      return {
+        overallWinner: "tie",
+        winnerWithheld: false,
+        headline: `Dead Heat! ${u1Name} and ${u2Name} are evenly matched.`,
+        winMargin: `Tied at ${u1Wins} categories each`,
+      };
+    }
+  }
+}
+
+// 3 to 3 tiebreaker test
+const tieRes = simulateShowdown({ u1Wins: 3, u2Wins: 3, u1Score: 450, u2Score: 320, u1Name: "Linus", u2Name: "Contender" });
+assert(tieRes.overallWinner === 1, "Linus should win 3-3 tie on tier score");
+assert(tieRes.headline === "3 categories each · Linus wins on tier score.", "Headline should clearly explain tie and tiebreaker");
+assert(tieRes.winMargin === "3 categories each · Linus wins on tier score", "Win margin should match tiebreaker format");
+
+// Incomplete data withholding test
+const withheldRes = simulateShowdown({ u1Wins: 3, u2Wins: 2, u1Score: 400, u2Score: 300, u1Name: "User1", u2Name: "User2", undetermined: 1 });
+assert(withheldRes.overallWinner === "undetermined", "Winner should be withheld when missing 1 metric could tie or flip the result");
+assert(withheldRes.winnerWithheld === true, "winnerWithheld flag should be true");
+
 console.log(`\n========================================`);
 console.log(`Test Summary: ${passedTests} / ${totalTests} assertions passed.`);
 if (passedTests === totalTests) {

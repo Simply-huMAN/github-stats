@@ -14,7 +14,9 @@ export interface MetricComparison {
   description: string;
   user1Value: number;
   user2Value: number;
-  winner: 1 | 2 | "tie";
+  user1Missing?: boolean;
+  user2Missing?: boolean;
+  winner: 1 | 2 | "tie" | "undetermined";
   diff: number; // user1Value - user2Value
   percentDiff: number; // percentage difference relative to lower value or 0
   unit?: string;
@@ -24,9 +26,14 @@ export interface ComparisonSummary {
   user1Wins: number;
   user2Wins: number;
   ties: number;
-  overallWinner: 1 | 2 | "tie";
+  overallWinner: 1 | 2 | "tie" | "undetermined";
+  isTiebreaker: boolean;
+  tiebreakerMetric?: string;
   headline: string;
   winMargin: string;
+  isComplete: boolean;
+  winnerWithheld?: boolean;
+  withheldReason?: string;
 }
 
 export interface ComparisonResult {
@@ -44,4 +51,3 @@ export interface ComparisonError {
   failedUser?: "user1" | "user2" | "both";
   status: number;
 }
-

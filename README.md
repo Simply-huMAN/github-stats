@@ -13,6 +13,12 @@
 > 🎆 **MyGitStats Wrapped**: [https://mygitstats.dev/wrapped](https://mygitstats.dev/wrapped)  
 > 📦 **GitHub Repository**: [https://github.com/Simply-huMAN/github-stats](https://github.com/Simply-huMAN/github-stats)
 
+### ⚔️ Popular Developer Showdowns
+Compare open-source builders side-by-side:
+- **[Linus Torvalds vs shadcn](https://mygitstats.dev/compare/torvalds/vs/shadcn)** — Linux Kernel Legend vs Modern UI
+- **[Dan Abramov vs Evan You](https://mygitstats.dev/compare/gaearon/vs/yyx990803)** — React vs Vue Ecosystem Creators
+- **[Lee Robinson vs Addy Osmani](https://mygitstats.dev/compare/leerob/vs/addyosmani)** — Next.js vs Chrome Web Platform
+
 ---
 
 ## 🌟 MyGitStats Key Features

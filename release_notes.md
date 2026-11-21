@@ -13,6 +13,13 @@
   - Edge-rendered dynamic 1200×630 social share cards (`/compare/[user1]/vs/[user2]/opengraph-image`) with rich previews for Twitter / X, LinkedIn, Discord, and Slack.
 - **Mobile-Responsive UI**:
   - Stacked mobile metrics view with dedicated trophy indicators and percentage comparison bars.
+  - Native Web Share API integration (iOS Safari & Android Chrome share sheets) with clipboard and selectable link fallbacks.
+  - 1-tap "Compare your profile" referral prompt for shared matchup recipients.
+
+### Curated Example Showdowns
+- [Linus Torvalds vs shadcn](https://mygitstats.dev/compare/torvalds/vs/shadcn)
+- [Dan Abramov vs Evan You](https://mygitstats.dev/compare/gaearon/vs/yyx990803)
+- [Lee Robinson vs Addy Osmani](https://mygitstats.dev/compare/leerob/vs/addyosmani)
 
 ---
 

@@ -29,10 +29,10 @@ export async function GET(
   const { user1, user2 } = validation;
 
   try {
-    // Concurrently fetch both GitHub profiles in parallel
+    // Concurrently fetch both GitHub profiles in parallel, skipping unused 52-week calendar calculation
     const [res1, res2] = await Promise.allSettled([
-      fetchUserStats(user1),
-      fetchUserStats(user2),
+      fetchUserStats(user1, { skipCalendar: true }),
+      fetchUserStats(user2, { skipCalendar: true }),
     ]);
 
     // Check for individual errors
@@ -68,14 +68,23 @@ export async function GET(
 
     const comparisonData = buildUserComparison(res1.value, res2.value);
 
-    // Return with Cloudflare Edge CDN Caching Headers (24 hours edge cache)
+    // Cache complete results ONLY. Incomplete results or withheld outcomes must NOT be cached on CDN.
+    const isComplete = comparisonData.summary.isComplete;
+    const cacheHeaders: Record<string, string> = isComplete
+      ? {
+          "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=43200",
+          "CDN-Cache-Control": "max-age=86400",
+          "Cloudflare-CDN-Cache-Control": "max-age=86400",
+        }
+      : {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        };
+
     return NextResponse.json(comparisonData, {
       status: 200,
-      headers: {
-        "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=43200",
-        "CDN-Cache-Control": "max-age=86400",
-        "Cloudflare-CDN-Cache-Control": "max-age=86400",
-      },
+      headers: cacheHeaders,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error occurred";

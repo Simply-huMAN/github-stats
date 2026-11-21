@@ -22,6 +22,22 @@ export interface PairValidationResult {
 }
 
 /**
+ * Sanitizes an input string or pasted GitHub URL into a clean username.
+ */
+export function sanitizeGitHubUsername(input: string | null | undefined): string {
+  if (!input || typeof input !== "string") return "";
+  let cleaned = input.trim().replace(/^@+/, "");
+  if (cleaned.includes("github.com/")) {
+    const afterDomain = cleaned.split("github.com/")[1];
+    const firstSegment = afterDomain?.split("/")[0]?.split(/[?#]/)[0];
+    if (firstSegment) {
+      cleaned = firstSegment.replace(/^@+/, "");
+    }
+  }
+  return cleaned;
+}
+
+/**
  * Sanitizes and validates a single GitHub username.
  */
 export function validateGitHubUsername(input: string | null | undefined): ValidationResult {
@@ -33,19 +49,7 @@ export function validateGitHubUsername(input: string | null | undefined): Valida
     };
   }
 
-  let cleaned = input.trim();
-
-  // Strip leading @ signs
-  cleaned = cleaned.replace(/^@+/, "");
-
-  // Handle accidental full GitHub URLs: e.g. https://github.com/torvalds?tab=repositories -> torvalds
-  if (cleaned.includes("github.com/")) {
-    const afterDomain = cleaned.split("github.com/")[1];
-    const firstSegment = afterDomain?.split("/")[0]?.split(/[?#]/)[0];
-    if (firstSegment) {
-      cleaned = firstSegment.replace(/^@+/, "");
-    }
-  }
+  const cleaned = sanitizeGitHubUsername(input);
 
   if (!cleaned) {
     return {

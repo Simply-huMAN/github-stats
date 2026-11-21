@@ -62,8 +62,12 @@ export class GitHubFetchError extends Error {
 /**
  * Fetches verified public GitHub stats and computes performance tier for a username.
  * Supports Next.js edge caching and optional server-side GITHUB_TOKEN.
+ * Options allow skipping unused 52-week contribution calendar calculation to optimize performance.
  */
-export async function fetchUserStats(username: string): Promise<StatsResponse> {
+export async function fetchUserStats(
+  username: string,
+  options?: { skipCalendar?: boolean }
+): Promise<StatsResponse> {
   const headers = getGitHubHeaders();
 
   let userRes: Response;
@@ -143,14 +147,23 @@ export async function fetchUserStats(username: string): Promise<StatsResponse> {
     ...repoRequests,
   ]);
 
+  const missingFields: string[] = [];
+
   let totalStars = 0;
+  let hasRepoErrors = false;
   for (const rRes of reposResponses) {
     if (rRes && rRes.ok) {
       const repos: GitHubRepoRaw[] = await rRes.json().catch(() => []);
       if (Array.isArray(repos)) {
         totalStars += repos.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0);
       }
+    } else if (rRes !== null) {
+      hasRepoErrors = true;
     }
+  }
+
+  if (hasRepoErrors && publicRepoCount > 0) {
+    missingFields.push("totalStars");
   }
 
   let activeContributions = 0;
@@ -174,7 +187,11 @@ export async function fetchUserStats(username: string): Promise<StatsResponse> {
         return count;
       }, 0);
     }
+  } else {
+    missingFields.push("activeContributions");
   }
+
+  const isPartial = missingFields.length > 0;
 
   const stats: UserStats = {
     followers: userData.followers || 0,
@@ -199,12 +216,15 @@ export async function fetchUserStats(username: string): Promise<StatsResponse> {
   const score = calculateTierScore(stats);
   const tier = getTierDetails(score);
 
-  const calendar = await fetchContributionCalendar(
-    username,
-    process.env.GITHUB_TOKEN,
-    activeContributions,
-    stats.publicRepos
-  );
+  // Skip the unused contribution calendar if requested (e.g. for comparison showdown)
+  const calendar = options?.skipCalendar
+    ? { totalContributions: activeContributions, weeks: [] }
+    : await fetchContributionCalendar(
+        username,
+        process.env.GITHUB_TOKEN,
+        activeContributions,
+        stats.publicRepos
+      );
 
   return {
     user,
@@ -212,6 +232,8 @@ export async function fetchUserStats(username: string): Promise<StatsResponse> {
     tier,
     calendar,
     fetchedAt: new Date().toISOString(),
+    isPartial,
+    missingFields: isPartial ? missingFields : undefined,
   };
 }
 

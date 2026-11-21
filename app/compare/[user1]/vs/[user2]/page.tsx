@@ -2,6 +2,9 @@ import React from "react";
 import type { Metadata } from "next";
 import { ComparisonArena } from "@/components/compare/ComparisonArena";
 import { validateComparisonPair } from "@/lib/validation";
+import { fetchUserStats } from "@/lib/statsFetcher";
+import { buildUserComparison } from "@/lib/comparisonEngine";
+import { ComparisonResult } from "@/types/compare";
 import { Swords } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -15,15 +18,17 @@ interface BattlePageProps {
 
 export async function generateMetadata({ params }: BattlePageProps): Promise<Metadata> {
   const { user1, user2 } = params;
-  const val = validateComparisonPair(user1, user2);
+  const decoded1 = decodeURIComponent(user1 || "");
+  const decoded2 = decodeURIComponent(user2 || "");
+  const val = validateComparisonPair(decoded1, decoded2);
 
-  const u1Name = val.user1 || user1;
-  const u2Name = val.user2 || user2;
+  const u1Name = val.user1 || decoded1;
+  const u2Name = val.user2 || decoded2;
 
   const title = `${u1Name} vs ${u2Name} — Who Wins the GitHub Developer Showdown? | MyGitStats`;
   const description = `Head-to-head GitHub battle: ${u1Name} vs ${u2Name}. Compare performance tier ranks (Mythic, Gold, Bronze), total stars, followers, and active contribution velocity side-by-side.`;
-  const canonicalUrl = `/compare/${val.canonical1 || user1.toLowerCase()}/vs/${val.canonical2 || user2.toLowerCase()}`;
-  const showdownUrl = `https://mygitstats.dev/compare/${u1Name}/vs/${u2Name}`;
+  const canonicalUrl = `/compare/${val.canonical1 || decoded1.toLowerCase()}/vs/${val.canonical2 || decoded2.toLowerCase()}`;
+  const showdownUrl = `https://mygitstats.dev/compare/${encodeURIComponent(u1Name)}/vs/${encodeURIComponent(u2Name)}`;
   const ogImageUrl = `https://mygitstats.dev/compare/${encodeURIComponent(u1Name)}/vs/${encodeURIComponent(u2Name)}/opengraph-image`;
 
   return {
@@ -67,12 +72,38 @@ export async function generateMetadata({ params }: BattlePageProps): Promise<Met
   };
 }
 
-export default function BattlePage({ params }: BattlePageProps) {
+export default async function BattlePage({ params }: BattlePageProps) {
   const { user1, user2 } = params;
-  const val = validateComparisonPair(user1, user2);
+  const decoded1 = decodeURIComponent(user1 || "");
+  const decoded2 = decodeURIComponent(user2 || "");
+  const val = validateComparisonPair(decoded1, decoded2);
+
+  let initialData: ComparisonResult | null = null;
+  let initialError: string | null = val.error || null;
+
+  // Single server-side fetch per matchup: avoids client-side duplicate requests
+  if (val.isValid) {
+    try {
+      const [res1, res2] = await Promise.allSettled([
+        fetchUserStats(val.user1, { skipCalendar: true }),
+        fetchUserStats(val.user2, { skipCalendar: true }),
+      ]);
+
+      if (res1.status === "fulfilled" && res2.status === "fulfilled") {
+        initialData = buildUserComparison(res1.value, res2.value);
+      } else {
+        const err1 = res1.status === "rejected" ? res1.reason : null;
+        const err2 = res2.status === "rejected" ? res2.reason : null;
+        const primaryErr = err1 || err2;
+        initialError = primaryErr?.message || "Failed to fetch stats for one or both GitHub users.";
+      }
+    } catch (e: unknown) {
+      initialError = e instanceof Error ? e.message : "Error loading comparison.";
+    }
+  }
 
   return (
-    <main className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col items-center px-3 py-8 sm:px-4 sm:py-10 md:py-16 selection:bg-amber-500/30">
+    <main className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col items-center px-3 py-6 sm:px-4 sm:py-10 md:py-14 selection:bg-amber-500/30">
       {/* Background ambient lighting */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-12 left-1/2 -translate-x-1/2 w-[600px] h-[350px] rounded-full bg-gradient-to-tr from-amber-600/10 via-orange-600/10 to-yellow-500/10 blur-[130px]" />
@@ -86,23 +117,23 @@ export default function BattlePage({ params }: BattlePageProps) {
         </div>
 
         <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight text-center max-w-3xl leading-tight px-2 break-words">
-          <span className="text-indigo-400">{val.user1 || user1}</span>{" "}
+          <span className="text-indigo-400 break-all">{val.user1 || decoded1}</span>{" "}
           <span className="text-zinc-500 font-mono text-xl sm:text-3xl md:text-4xl">vs</span>{" "}
-          <span className="text-amber-400">{val.user2 || user2}</span>
+          <span className="text-amber-400 break-all">{val.user2 || decoded2}</span>
         </h1>
 
-        <p className="mt-3 sm:mt-4 text-xs sm:text-base text-zinc-400 text-center max-w-xl leading-relaxed mb-6 sm:mb-8 px-2">
-          Verified side-by-side comparison of GitHub statistics, performance tiers, and open-source impact.
+        <p className="mt-2.5 sm:mt-3 text-xs sm:text-base text-zinc-400 text-center max-w-xl leading-relaxed mb-6 sm:mb-8 px-2">
+          Head-to-head GitHub developer comparison of performance tier scores, stars, reach, and activity.
         </p>
 
-        {/* Comparison Arena Component */}
+        {/* Comparison Arena Component with Server-Rendered Initial Data */}
         <ComparisonArena
-          initialUser1={val.user1 || user1}
-          initialUser2={val.user2 || user2}
-          initialError={val.error || null}
+          initialData={initialData}
+          initialUser1={val.user1 || decoded1}
+          initialUser2={val.user2 || decoded2}
+          initialError={initialError}
         />
       </div>
     </main>
   );
 }
-

@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   ShieldCheck,
   Share2,
+  Swords,
 } from "lucide-react";
 
 const YEARS = [2026, 2025, 2024];
@@ -236,19 +237,28 @@ export default function WrappedPage() {
           </div>
         </div>
 
-        {/* Studio Cross-link */}
+        {/* Cross-product Discovery Links */}
         <div className="mt-14 p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 text-center max-w-lg">
-          <h3 className="text-base font-bold text-white">Also need a GitHub README Card?</h3>
+          <h3 className="text-base font-bold text-white">Explore More Developer Tools</h3>
           <p className="text-xs text-zinc-400 mt-1">
-            Build live SVG &amp; PNG cards customized with city themes (Tokyo, Berlin, Bangalore) for your profile repository.
+            Build live SVG &amp; PNG cards for your README, or match @{activeUser} head-to-head in Developer Showdown.
           </p>
-          <Link
-            href={`/card?user=${encodeURIComponent(activeUser)}`}
-            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700 transition-colors"
-          >
-            <span>Open Card Studio</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          <div className="mt-4 flex items-center justify-center gap-3 flex-wrap">
+            <Link
+              href={`/card?user=${encodeURIComponent(activeUser)}`}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700 transition-colors"
+            >
+              <span>Card Studio</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+            <Link
+              href={`/compare?user1=${encodeURIComponent(activeUser)}`}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-semibold border border-amber-500/30 transition-colors"
+            >
+              <Swords className="w-3.5 h-3.5 text-amber-400" />
+              <span>Compare @{activeUser}</span>
+            </Link>
+          </div>
         </div>
       </div>
     </main>

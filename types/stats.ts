@@ -58,6 +58,8 @@ export interface StatsResponse {
   tier: TierDetails;
   calendar?: ContributionCalendar;
   fetchedAt: string;
+  isPartial?: boolean;
+  missingFields?: string[];
 }
 
 export type ApiErrorCode =

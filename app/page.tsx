@@ -93,7 +93,7 @@ export default function PlatformLandingPage() {
           </button>
         </form>
 
-        {/* Sample profiles */}
+        {/* Sample profiles & Showdown Shortcut */}
         <div className="mt-3.5 flex items-center gap-2 text-xs text-zinc-500 flex-wrap justify-center font-mono">
           <span>Popular profiles:</span>
           {["shadcn", "torvalds", "kentcdodds", "leerob", "gaearon"].map((handle) => (
@@ -106,6 +106,18 @@ export default function PlatformLandingPage() {
               @{handle}
             </button>
           ))}
+        </div>
+
+        {/* Compare GitHub Profiles Hero CTA */}
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <Link
+            href="/compare"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-xs sm:text-sm font-semibold text-amber-300 transition-all shadow-sm active:scale-95 group"
+          >
+            <Swords className="w-4 h-4 text-amber-400 group-hover:rotate-12 transition-transform" />
+            <span>Compare GitHub profiles</span>
+            <ArrowRight className="w-3.5 h-3.5 opacity-70 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
         </div>
 
         {/* Triple Product Highlight Cards */}

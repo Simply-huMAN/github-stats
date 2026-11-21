@@ -17,11 +17,17 @@ interface Props {
 }
 
 export default async function ShowdownOpenGraphImage({ params }: Props) {
-  const { user1, user2 } = params;
-  const val = validateComparisonPair(user1, user2);
+  let u1Raw = params.user1 || "";
+  let u2Raw = params.user2 || "";
+  try {
+    u1Raw = decodeURIComponent(u1Raw);
+    u2Raw = decodeURIComponent(u2Raw);
+  } catch {}
 
-  const u1Name = val.user1 || user1 || "User 1";
-  const u2Name = val.user2 || user2 || "User 2";
+  const val = validateComparisonPair(u1Raw, u2Raw);
+
+  const u1Name = val.user1 || u1Raw || "User 1";
+  const u2Name = val.user2 || u2Raw || "User 2";
 
   const u1Initial = u1Name.charAt(0).toUpperCase();
   const u2Initial = u2Name.charAt(0).toUpperCase();
