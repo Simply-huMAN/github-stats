@@ -61,6 +61,14 @@ export function ComparisonArena({
   const arenaRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const user1InputRef = useRef<HTMLInputElement>(null);
+  const user2InputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus second field if field 1 was prefilled via shortcut (e.g. /compare?user1=leerob)
+  useEffect(() => {
+    if (initialUser1 && !initialUser2) {
+      user2InputRef.current?.focus();
+    }
+  }, [initialUser1, initialUser2]);
 
   // Clean pasted URLs into usernames (e.g. https://github.com/torvalds -> torvalds)
   function handleInput1Change(val: string) {
@@ -153,8 +161,10 @@ export function ComparisonArena({
       return;
     }
 
+    // Single fetch path: navigate to showdown route which performs server-side data fetching and rendering.
+    // We do NOT call executeComparison in parallel, avoiding duplicate network fetches.
+    setIsLoading(true);
     router.push(`/compare/${val.user1}/vs/${val.user2}`);
-    executeComparison(val.user1, val.user2);
   }
 
   function handleSwap() {
@@ -165,11 +175,11 @@ export function ComparisonArena({
     setUser2Error(null);
     setGeneralError(null);
 
-    if (comparison) {
+    if (comparison && user2Input && temp) {
       const val = validateComparisonPair(user2Input, temp);
       if (val.isValid) {
+        setIsLoading(true);
         router.push(`/compare/${val.user1}/vs/${val.user2}`);
-        executeComparison(val.user1, val.user2);
       }
     }
   }
@@ -180,8 +190,8 @@ export function ComparisonArena({
     setUser1Error(null);
     setUser2Error(null);
     setGeneralError(null);
+    setIsLoading(true);
     router.push(`/compare/${u1}/vs/${u2}`);
-    executeComparison(u1, u2);
   }
 
   function handleTryRandomExample() {
@@ -248,18 +258,24 @@ export function ComparisonArena({
           </button>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
-          {/* Contender 1 Input with persistent label */}
-          <div className="relative flex-1 flex flex-col">
-            <label className="text-[11px] font-mono font-bold text-indigo-400 mb-1">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full">
+          {/* Contender 1 Input with connected label and aria tags */}
+          <div className="relative flex-1 min-w-0 max-w-full w-full flex flex-col">
+            <label
+              htmlFor="contender1-input"
+              className="text-[11px] font-mono font-bold text-indigo-400 mb-1"
+            >
               Contender 1
             </label>
             <input
+              id="contender1-input"
               ref={user1InputRef}
               type="text"
               value={user1Input}
               onChange={(e) => handleInput1Change(e.target.value)}
               placeholder="Username or GitHub URL"
+              aria-describedby={user1Error ? "contender1-error" : undefined}
+              aria-invalid={Boolean(user1Error)}
               className={cn(
                 "w-full px-3.5 sm:px-4 py-2.5 rounded-xl bg-zinc-900 border text-white placeholder-zinc-500 font-mono text-base sm:text-sm min-h-[44px] focus:outline-none focus:ring-2",
                 user1Error
@@ -269,15 +285,19 @@ export function ComparisonArena({
               required
             />
             {user1Error && (
-              <span className="text-rose-400 text-xs mt-1 flex items-center gap-1 font-sans">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                {user1Error}
+              <span
+                id="contender1-error"
+                role="alert"
+                className="text-rose-400 text-xs mt-1 flex items-start gap-1 font-sans break-all max-w-full overflow-hidden"
+              >
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                <span className="break-all overflow-hidden">{user1Error}</span>
               </span>
             )}
           </div>
 
           {/* Swap Button (Min 44px tap target on mobile and desktop) */}
-          <div className="flex sm:flex-col items-center justify-center pt-0 sm:pt-4">
+          <div className="flex sm:flex-col items-center justify-center pt-0 sm:pt-4 shrink-0">
             <button
               type="button"
               onClick={handleSwap}
@@ -290,16 +310,23 @@ export function ComparisonArena({
             </button>
           </div>
 
-          {/* Contender 2 Input with persistent label */}
-          <div className="relative flex-1 flex flex-col">
-            <label className="text-[11px] font-mono font-bold text-amber-400 mb-1">
+          {/* Contender 2 Input with connected label and aria tags */}
+          <div className="relative flex-1 min-w-0 max-w-full w-full flex flex-col">
+            <label
+              htmlFor="contender2-input"
+              className="text-[11px] font-mono font-bold text-amber-400 mb-1"
+            >
               Contender 2
             </label>
             <input
+              id="contender2-input"
+              ref={user2InputRef}
               type="text"
               value={user2Input}
               onChange={(e) => handleInput2Change(e.target.value)}
               placeholder="Username or GitHub URL"
+              aria-describedby={user2Error ? "contender2-error" : undefined}
+              aria-invalid={Boolean(user2Error)}
               className={cn(
                 "w-full px-3.5 sm:px-4 py-2.5 rounded-xl bg-zinc-900 border text-white placeholder-zinc-500 font-mono text-base sm:text-sm min-h-[44px] focus:outline-none focus:ring-2",
                 user2Error
@@ -309,15 +336,19 @@ export function ComparisonArena({
               required
             />
             {user2Error && (
-              <span className="text-rose-400 text-xs mt-1 flex items-center gap-1 font-sans">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                {user2Error}
+              <span
+                id="contender2-error"
+                role="alert"
+                className="text-rose-400 text-xs mt-1 flex items-start gap-1 font-sans break-all max-w-full overflow-hidden"
+              >
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                <span className="break-all overflow-hidden">{user2Error}</span>
               </span>
             )}
           </div>
 
           {/* Compare Profiles Button */}
-          <div className="pt-0 sm:pt-4">
+          <div className="pt-0 sm:pt-4 shrink-0">
             <button
               type="submit"
               disabled={isLoading}
@@ -587,7 +618,7 @@ export function ComparisonArena({
                   </code>
                 </p>
                 <p className="text-[11px] text-zinc-500">
-                  * Note: Active contributions are estimated from public GitHub events (up to ~300 recent events). Missing data due to GitHub API rate limits or network issues will withhold the winner to prevent false results.
+                  * Note: Active contributions are estimated from public GitHub events (up to 100 recent events per user). Missing data due to GitHub API rate limits or network issues will withhold the winner to prevent false results.
                 </p>
               </div>
             )}

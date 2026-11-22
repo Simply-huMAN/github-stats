@@ -1,8 +1,33 @@
 import React from "react";
 import { ComparisonArena } from "@/components/compare/ComparisonArena";
-import { Swords, Sparkles, Shield, Trophy } from "lucide-react";
+import { sanitizeGitHubUsername } from "@/lib/validation";
+import { Swords } from "lucide-react";
 
-export default function CompareHubPage() {
+export const dynamic = "force-dynamic";
+
+interface CompareHubPageProps {
+  searchParams?: {
+    user1?: string;
+    u1?: string;
+    user2?: string;
+    u2?: string;
+    user?: string;
+  };
+}
+
+export default function CompareHubPage({ searchParams }: CompareHubPageProps) {
+  const rawU1 = searchParams?.user1 || searchParams?.u1 || searchParams?.user || "";
+  const rawU2 = searchParams?.user2 || searchParams?.u2 || "";
+
+  const initialUser1 = rawU1 ? sanitizeGitHubUsername(rawU1) : "";
+  const initialUser2 = rawU2 ? sanitizeGitHubUsername(rawU2) : "";
+
+  // If a profile shortcut provides user1 (e.g. from Card Studio or Wrapped: /compare?user1=leerob),
+  // prefill user1 and leave user2 empty and ready for input.
+  // Otherwise, default to the classic torvalds vs shadcn matchup.
+  const resolvedUser1 = initialUser1 || (initialUser2 ? "" : "torvalds");
+  const resolvedUser2 = initialUser2 || (initialUser1 ? "" : "shadcn");
+
   return (
     <main className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col items-center px-3 py-8 sm:px-4 sm:py-10 md:py-16 selection:bg-amber-500/30">
       {/* Background ambient lighting */}
@@ -26,13 +51,15 @@ export default function CompareHubPage() {
 
         <p className="mt-3 sm:mt-4 text-xs sm:text-base text-zinc-400 text-center max-w-xl leading-relaxed mb-6 sm:mb-8 px-2">
           Match any two GitHub profiles. Compare weighted performance tiers, repository stars,
-          follower impact, and contribution velocity in real time.
+          follower reach, and recent contribution activity.
         </p>
 
         {/* Comparison Arena Component */}
-        <ComparisonArena initialUser1="torvalds" initialUser2="shadcn" />
+        <ComparisonArena
+          initialUser1={resolvedUser1}
+          initialUser2={resolvedUser2}
+        />
       </div>
     </main>
   );
 }
-

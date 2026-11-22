@@ -1,5 +1,5 @@
-import { StatsResponse } from "@/types/stats";
-import { ComparisonResult, MetricComparison, ComparisonSummary } from "@/types/compare";
+import type { StatsResponse } from "@/types/stats";
+import type { ComparisonResult, MetricComparison, ComparisonSummary } from "@/types/compare";
 
 function getAccountAgeDays(createdAt: string): number {
   const createdDate = new Date(createdAt);

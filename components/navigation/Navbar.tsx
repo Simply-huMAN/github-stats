@@ -50,7 +50,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Nav Items */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-0.5 lg:gap-1">
           {navLinks.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -59,7 +59,7 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all",
+                  "relative flex items-center gap-1.5 lg:gap-2 px-2.5 py-1.5 lg:px-3.5 lg:py-2 rounded-xl text-xs lg:text-sm font-medium transition-all",
                   isActive
                     ? "text-white bg-zinc-900 border border-zinc-800 shadow-sm"
                     : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/60"
@@ -67,14 +67,14 @@ export function Navbar() {
               >
                 <Icon
                   className={cn(
-                    "w-4 h-4",
+                    "w-3.5 h-3.5 lg:w-4 lg:h-4",
                     item.highlight ? "text-amber-400" : "text-zinc-400",
                     isActive && "text-indigo-400"
                   )}
                 />
                 <span>{item.label}</span>
                 {item.badge && (
-                  <span className="rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 border border-amber-500/30">
+                  <span className="hidden sm:inline-block rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-1.5 py-0.5 text-[9px] lg:text-[10px] font-semibold text-amber-300 border border-amber-500/30">
                     {item.badge}
                   </span>
                 )}
@@ -84,21 +84,22 @@ export function Navbar() {
         </nav>
 
         {/* Desktop CTA / GitHub Link */}
-        <div className="hidden md:flex items-center gap-2.5">
+        <div className="hidden md:flex items-center gap-2">
           <a
             href="https://github.com/Simply-huMAN/github-stats"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border border-transparent hover:border-zinc-800 transition-all"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 lg:px-3 lg:py-2 rounded-xl text-xs font-mono text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border border-transparent hover:border-zinc-800 transition-all"
           >
-            <Github className="w-4 h-4" />
+            <Github className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
             <span>GitHub</span>
-            <ArrowUpRight className="w-3 h-3 opacity-60" />
+            <ArrowUpRight className="w-3 h-3 opacity-60 hidden lg:inline-block" />
           </a>
 
+          {/* Redundant Get Wrapped CTA hidden on md (since Wrapped 2026 is already in navlinks) to prevent spill at 768px */}
           <Link
             href="/wrapped"
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 active:scale-95 transition-all"
+            className="hidden lg:flex items-center gap-1.5 px-3.5 py-1.5 lg:px-4 lg:py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 active:scale-95 transition-all"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
             <span>Get Wrapped</span>

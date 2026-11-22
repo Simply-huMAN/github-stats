@@ -78,7 +78,7 @@ export default async function CompareHubOpenGraphImage() {
           }}
         >
           Match any two GitHub profiles. Compare weighted performance tiers, repository stars,
-          follower reach, and active contribution velocity in real time.
+          follower reach, and active contribution velocity.
         </div>
 
         {/* Showdown Badges */}

@@ -101,17 +101,18 @@ export function ComparisonCard({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <h3 className="text-base sm:text-xl font-bold text-white truncate">
+            <h3 className="text-base sm:text-xl font-bold text-white truncate max-w-[calc(100%-48px)]">
               {user.name || user.username}
             </h3>
             <a
               href={user.htmlUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-zinc-500 hover:text-zinc-300 transition-colors"
-              title="Open GitHub profile"
+              className="min-h-[44px] min-w-[44px] -m-2 p-2 flex items-center justify-center text-zinc-400 hover:text-white transition-colors rounded-lg hover:bg-zinc-800/60 active:scale-95 shrink-0"
+              title={`Open @${user.username}'s GitHub profile`}
+              aria-label={`Open @${user.username}'s GitHub profile`}
             >
-              <ExternalLink className="w-3.5 h-3.5" />
+              <ExternalLink className="w-4 h-4" />
             </a>
           </div>
 
