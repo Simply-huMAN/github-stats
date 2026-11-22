@@ -428,12 +428,10 @@ export function ComparisonArena({
                 : "border-zinc-800 bg-zinc-950/80 shadow-black/40"
             )}
           >
-            {/* Contender Handles & Score */}
+            {/* Contender Handles */}
             <div className="flex items-center justify-center gap-2 text-xs sm:text-sm font-mono font-bold mb-1.5 flex-wrap px-2">
               <span className="text-indigo-400 break-all">@{comparison.user1.user.username}</span>
-              <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-white font-mono text-xs">
-                {comparison.summary.user1Wins} vs {comparison.summary.user2Wins}
-              </span>
+              <span className="text-zinc-500 font-mono text-xs font-normal">vs</span>
               <span className="text-amber-400 break-all">@{comparison.user2.user.username}</span>
             </div>
 
@@ -597,10 +595,10 @@ export function ComparisonArena({
               className="w-full flex items-center justify-between text-left font-mono text-zinc-400 hover:text-zinc-200 transition-colors"
             >
               <span className="flex items-center gap-1.5 font-semibold">
-                <Info className="w-3.5 h-3.5 text-indigo-400" />
+                <Info className="hidden sm:inline-block w-3.5 h-3.5 text-indigo-400 shrink-0" />
                 How are showdown winners & tier scores calculated?
               </span>
-              {showFormulaInfo ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              {showFormulaInfo ? <ChevronUp className="w-4 h-4 shrink-0" /> : <ChevronDown className="w-4 h-4 shrink-0" />}
             </button>
 
             {showFormulaInfo && (
