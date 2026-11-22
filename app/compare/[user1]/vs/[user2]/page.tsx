@@ -2,7 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { ComparisonArena } from "@/components/compare/ComparisonArena";
 import { validateComparisonPair } from "@/lib/validation";
-import { fetchUserStats } from "@/lib/statsFetcher";
+import { fetchUserStats, GitHubFetchError } from "@/lib/statsFetcher";
 import { buildUserComparison } from "@/lib/comparisonEngine";
 import { ComparisonResult } from "@/types/compare";
 import { Swords } from "lucide-react";
@@ -18,16 +18,18 @@ interface BattlePageProps {
 
 export async function generateMetadata({ params }: BattlePageProps): Promise<Metadata> {
   const { user1, user2 } = params;
-  const decoded1 = decodeURIComponent(user1 || "");
-  const decoded2 = decodeURIComponent(user2 || "");
-  const val = validateComparisonPair(decoded1, decoded2);
+  const val = validateComparisonPair(user1, user2);
 
-  const u1Name = val.user1 || decoded1;
-  const u2Name = val.user2 || decoded2;
+  if (!val.isValid) {
+    return { title: "Compare GitHub profiles", robots: { index: false } };
+  }
+
+  const u1Name = val.user1;
+  const u2Name = val.user2;
 
   const title = `${u1Name} vs ${u2Name} — Who Wins the GitHub Developer Showdown? | MyGitStats`;
   const description = `Head-to-head GitHub battle: ${u1Name} vs ${u2Name}. Compare performance tier ranks (Mythic, Gold, Bronze), total stars, followers, and active contribution velocity side-by-side.`;
-  const canonicalUrl = `/compare/${val.canonical1 || decoded1.toLowerCase()}/vs/${val.canonical2 || decoded2.toLowerCase()}`;
+  const canonicalUrl = `/compare/${val.canonical1}/vs/${val.canonical2}`;
   const showdownUrl = `https://mygitstats.dev/compare/${encodeURIComponent(u1Name)}/vs/${encodeURIComponent(u2Name)}`;
   const ogImageUrl = `https://mygitstats.dev/compare/${encodeURIComponent(u1Name)}/vs/${encodeURIComponent(u2Name)}/opengraph-image`;
 
@@ -74,12 +76,11 @@ export async function generateMetadata({ params }: BattlePageProps): Promise<Met
 
 export default async function BattlePage({ params }: BattlePageProps) {
   const { user1, user2 } = params;
-  const decoded1 = decodeURIComponent(user1 || "");
-  const decoded2 = decodeURIComponent(user2 || "");
-  const val = validateComparisonPair(decoded1, decoded2);
+  const val = validateComparisonPair(user1, user2);
 
   let initialData: ComparisonResult | null = null;
   let initialError: string | null = val.error || null;
+  let initialFailedUser: "user1" | "user2" | undefined;
 
   // Single server-side fetch per matchup: avoids client-side duplicate requests
   if (val.isValid) {
@@ -95,7 +96,12 @@ export default async function BattlePage({ params }: BattlePageProps) {
         const err1 = res1.status === "rejected" ? res1.reason : null;
         const err2 = res2.status === "rejected" ? res2.reason : null;
         const primaryErr = err1 || err2;
-        initialError = primaryErr?.message || "Failed to fetch stats for one or both GitHub users.";
+        initialError = err1 && err2
+          ? "Couldn’t load either GitHub profile. Check both usernames and try again."
+          : primaryErr?.message || "Couldn’t load a GitHub profile. Please try again.";
+        if (!(err1 && err2) && primaryErr instanceof GitHubFetchError && primaryErr.code === "NOT_FOUND") {
+          initialFailedUser = err1 ? "user1" : "user2";
+        }
       }
     } catch (e: unknown) {
       initialError = e instanceof Error ? e.message : "Error loading comparison.";
@@ -117,9 +123,9 @@ export default async function BattlePage({ params }: BattlePageProps) {
         </div>
 
         <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight text-center max-w-3xl leading-tight px-2 break-words">
-          <span className="text-indigo-400 break-all">{val.user1 || decoded1}</span>{" "}
+          <span className="text-indigo-400 break-all">{val.user1 || user1}</span>{" "}
           <span className="text-zinc-500 font-mono text-xl sm:text-3xl md:text-4xl">vs</span>{" "}
-          <span className="text-amber-400 break-all">{val.user2 || decoded2}</span>
+          <span className="text-amber-400 break-all">{val.user2 || user2}</span>
         </h1>
 
         <p className="mt-2.5 sm:mt-3 text-xs sm:text-base text-zinc-400 text-center max-w-xl leading-relaxed mb-6 sm:mb-8 px-2">
@@ -128,10 +134,12 @@ export default async function BattlePage({ params }: BattlePageProps) {
 
         {/* Comparison Arena Component with Server-Rendered Initial Data */}
         <ComparisonArena
+          key={`${user1}/vs/${user2}`}
           initialData={initialData}
-          initialUser1={val.user1 || decoded1}
-          initialUser2={val.user2 || decoded2}
+          initialUser1={val.user1 || user1}
+          initialUser2={val.user2 || user2}
           initialError={initialError}
+          initialFailedUser={initialFailedUser}
         />
       </div>
     </main>

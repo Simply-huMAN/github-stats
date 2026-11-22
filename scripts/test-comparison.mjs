@@ -5,6 +5,10 @@ import {
   sanitizeGitHubUsername,
 } from "../lib/validation.ts";
 import { buildUserComparison } from "../lib/comparisonEngine.ts";
+import { formatComparisonDate, formatComparisonNumber } from "../lib/comparisonFormat.ts";
+import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
+import ts from "typescript";
 
 let totalTests = 0;
 let passedTests = 0;
@@ -229,6 +233,66 @@ assert(compWithheld.summary.isComplete === false, "isComplete should be false wh
 assert(compWithheld.summary.winnerWithheld === true, "winnerWithheld should be true when missing data could alter winner");
 assert(compWithheld.summary.overallWinner === "undetermined", "overallWinner should be 'undetermined' when winner is withheld");
 assert(compWithheld.summary.headline.includes("Winner Withheld"), "Headline should inform user that winner is withheld");
+
+console.log("\n=== 4. Testing the comparison API with controlled GitHub responses ===");
+// Compile Next.js source modules so the Node test can resolve the same @/ imports.
+const require = createRequire(import.meta.url);
+const modules = new Map();
+function loadSource(path) {
+  if (modules.has(path)) return modules.get(path).exports;
+  const module = { exports: {} };
+  modules.set(path, module);
+  const source = readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+  const { outputText } = ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  });
+  const loadDependency = (name) => name.startsWith("@/") ? loadSource(`${name.slice(2)}.ts`) : require(name);
+  new Function("require", "module", "exports", outputText)(loadDependency, module, module.exports);
+  return module.exports;
+}
+
+const { GET } = loadSource("app/api/compare/route.ts");
+const { NextRequest } = require("next/server");
+const realFetch = globalThis.fetch;
+try {
+  for (const scenario of ["healthy", "rejected repository", "repository 503", "invalid repository JSON", "invalid events JSON", "invalid event item"]) {
+    globalThis.fetch = async (url) => {
+      const request = new URL(url);
+      assert(request.hostname === "api.github.com", "The compare API only requests GitHub");
+      const [, , username, endpoint] = request.pathname.split("/");
+      const beta = username === "betadev";
+      if (!endpoint) {
+        return Response.json({
+          login: username, name: username, public_repos: 12, followers: 3, created_at: "2020-01-01T00:00:00Z",
+        });
+      }
+      if (endpoint === "repos") {
+        if (beta && scenario === "rejected repository") throw new TypeError("GitHub connection lost");
+        if (beta && scenario === "repository 503") return new Response(null, { status: 503 });
+        if (beta && scenario === "invalid repository JSON") return new Response("{invalid");
+        return Response.json([{ stargazers_count: beta ? 40 : 20 }]);
+      }
+      if (beta && scenario === "invalid events JSON") return new Response("{invalid");
+      if (beta && scenario === "invalid event item") return Response.json([null]);
+      return Response.json([{ type: "PushEvent", payload: { size: beta ? 10 : 2 } }]);
+    };
+
+    const response = await GET(new NextRequest("http://localhost/api/compare?u1=alphadev&u2=betadev"));
+    const data = await response.json();
+    const complete = scenario === "healthy";
+    const affectedMetric = scenario.includes("repository") ? "totalStars" : "activeContributions";
+    assert(response.status === 200, `${scenario} returns a usable comparison response`);
+    assert(data.summary.isComplete === complete, `${scenario} reports the right completeness`);
+    assert(data.summary.overallWinner === (complete ? 2 : "undetermined"), `${scenario} reports the right winner`);
+    assert(response.headers.get("cache-control").startsWith(complete ? "public" : "no-store"), `${scenario} uses the right cache policy`);
+    assert(complete || data.user2.missingFields.includes(affectedMetric), `${scenario} correctly surfaces missing data`);
+  }
+} finally {
+  globalThis.fetch = realFetch;
+}
+
+assert(formatComparisonNumber(1309345.5) === "1,309,345.5", "Comparison numbers use deterministic grouping");
+assert(formatComparisonDate("2026-11-22T17:32:00Z").includes("5:32 PM UTC"), "Comparison timestamps use UTC");
 
 console.log(`\n========================================`);
 console.log(`Test Summary: ${passedTests} / ${totalTests} assertions passed.`);

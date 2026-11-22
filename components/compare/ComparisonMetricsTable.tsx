@@ -4,6 +4,7 @@ import React from "react";
 import { MetricComparison } from "@/types/compare";
 import { Trophy, HelpCircle, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatComparisonNumber } from "@/lib/comparisonFormat";
 
 interface ComparisonMetricsTableProps {
   metrics: MetricComparison[];
@@ -78,7 +79,7 @@ export function ComparisonMetricsTable({
                         m.user1Missing ? "text-zinc-500 italic" : m.winner === 1 ? "text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]" : "text-zinc-300"
                       )}
                     >
-                      {m.user1Missing ? "—" : m.user1Value.toLocaleString()}
+                      {m.user1Missing ? "—" : formatComparisonNumber(m.user1Value)}
                       {!m.user1Missing && m.unit && m.key !== "tierScore" && ` ${m.unit}`}
                     </span>
                     {m.winner === 1 && !isUndetermined && (
@@ -98,7 +99,7 @@ export function ComparisonMetricsTable({
                       <span className="text-[10px] font-mono text-amber-500/80">Withheld</span>
                     ) : m.winner !== "tie" ? (
                       <span className="text-[10px] font-mono text-zinc-500">
-                        +{Math.abs(m.diff).toLocaleString()}
+                        +{formatComparisonNumber(Math.abs(m.diff))}
                       </span>
                     ) : (
                       <span className="text-[10px] font-mono text-zinc-500">Tie</span>
@@ -113,7 +114,7 @@ export function ComparisonMetricsTable({
                         m.user2Missing ? "text-zinc-500 italic" : m.winner === 2 ? "text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]" : "text-zinc-300"
                       )}
                     >
-                      {m.user2Missing ? "—" : m.user2Value.toLocaleString()}
+                      {m.user2Missing ? "—" : formatComparisonNumber(m.user2Value)}
                       {!m.user2Missing && m.unit && m.key !== "tierScore" && ` ${m.unit}`}
                     </span>
                     {m.winner === 2 && !isUndetermined && (
@@ -139,7 +140,7 @@ export function ComparisonMetricsTable({
                       m.user1Missing ? "text-zinc-500 italic" : m.winner === 1 ? "text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]" : "text-zinc-300"
                     )}
                   >
-                    {m.user1Missing ? "— (missing)" : m.user1Value.toLocaleString()}
+                    {m.user1Missing ? "— (missing)" : formatComparisonNumber(m.user1Value)}
                     {!m.user1Missing && m.unit && m.key !== "tierScore" && ` ${m.unit}`}
                   </span>
                   {m.winner === 1 && !isUndetermined && (
@@ -182,7 +183,7 @@ export function ComparisonMetricsTable({
                       m.user2Missing ? "text-zinc-500 italic" : m.winner === 2 ? "text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]" : "text-zinc-300"
                     )}
                   >
-                    {m.user2Missing ? "— (missing)" : m.user2Value.toLocaleString()}
+                    {m.user2Missing ? "— (missing)" : formatComparisonNumber(m.user2Value)}
                     {!m.user2Missing && m.unit && m.key !== "tierScore" && ` ${m.unit}`}
                   </span>
                 </div>

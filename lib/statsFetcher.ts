@@ -1,17 +1,41 @@
-import {
+import type {
   GitHubEventRaw,
   GitHubRepoRaw,
   GitHubUserRaw,
   StatsResponse,
   UserProfile,
   UserStats,
-  ApiError,
 } from "@/types/stats";
 import { calculateTierScore, getTierDetails } from "@/lib/tier";
 import { fetchContributionCalendar } from "@/lib/contributions";
 
 const GITHUB_API_BASE = "https://api.github.com";
 const UPSTREAM_TIMEOUT_MS = 8000;
+
+async function fetchGitHubList<T>(
+  url: string,
+  options: RequestInit,
+  isItem: (item: unknown) => item is T
+): Promise<T[] | null> {
+  try {
+    const response = await fetchWithTimeout(url, options);
+    if (!response.ok) return null;
+    const items: unknown = await response.json();
+    return Array.isArray(items) && items.every(isItem) ? items : null;
+  } catch {
+    return null;
+  }
+}
+
+function isRepository(item: unknown): item is GitHubRepoRaw {
+  return !!item && typeof item === "object" &&
+    "stargazers_count" in item && Number.isSafeInteger(item.stargazers_count) &&
+    Number(item.stargazers_count) >= 0;
+}
+
+function isEvent(item: unknown): item is GitHubEventRaw {
+  return !!item && typeof item === "object" && "type" in item && typeof item.type === "string";
+}
 
 function getGitHubHeaders(): HeadersInit {
   const headers: HeadersInit = {
@@ -130,63 +154,55 @@ export async function fetchUserStats(
 
   // Concurrently fetch Repositories (up to 300 repos) and Public Events
   const publicRepoCount = userData.public_repos || 0;
-  const repoPagesToFetch = Math.min(Math.max(1, Math.ceil(publicRepoCount / 100)), 3);
+  const repoPagesToFetch = Math.min(Math.ceil(publicRepoCount / 100), 3);
 
   const repoRequests = Array.from({ length: repoPagesToFetch }, (_, idx) =>
-    fetchWithTimeout(
+    fetchGitHubList(
       `${GITHUB_API_BASE}/users/${encodeURIComponent(username)}/repos?per_page=100&sort=pushed&type=owner&page=${idx + 1}`,
-      { headers, next: { revalidate: 3600 } }
-    ).catch(() => null)
+      { headers, next: { revalidate: 3600 } },
+      isRepository
+    )
   );
 
-  const [eventsRes, ...reposResponses] = await Promise.all([
-    fetchWithTimeout(
+  const [events, ...repoPages] = await Promise.all([
+    fetchGitHubList(
       `${GITHUB_API_BASE}/users/${encodeURIComponent(username)}/events/public?per_page=100`,
-      { headers, next: { revalidate: 1800 } }
-    ).catch(() => null),
+      { headers, next: { revalidate: 1800 } },
+      isEvent
+    ),
     ...repoRequests,
   ]);
 
   const missingFields: string[] = [];
 
   let totalStars = 0;
-  let hasRepoErrors = false;
-  for (const rRes of reposResponses) {
-    if (rRes && rRes.ok) {
-      const repos: GitHubRepoRaw[] = await rRes.json().catch(() => []);
-      if (Array.isArray(repos)) {
-        totalStars += repos.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0);
-      }
-    } else if (rRes !== null) {
-      hasRepoErrors = true;
-    }
-  }
-
-  if (hasRepoErrors && publicRepoCount > 0) {
+  if (repoPages.some((page) => page === null)) {
     missingFields.push("totalStars");
+  } else {
+    totalStars = repoPages.flat().reduce((sum, repo) => sum + (repo?.stargazers_count ?? 0), 0);
   }
 
   let activeContributions = 0;
-  if (eventsRes && eventsRes.ok) {
-    const events: GitHubEventRaw[] = await eventsRes.json().catch(() => []);
-    if (Array.isArray(events)) {
-      activeContributions = events.reduce((count, event) => {
-        if (event.type === "PushEvent") {
-          const commitCount = event.payload?.size || (event.payload?.commits ? event.payload.commits.length : 1);
-          return count + Math.max(commitCount, 1);
-        }
-        if (
-          event.type === "PullRequestEvent" ||
-          event.type === "IssuesEvent" ||
-          event.type === "CreateEvent" ||
-          event.type === "CommitCommentEvent" ||
-          event.type === "PullRequestReviewEvent"
-        ) {
-          return count + 1;
-        }
-        return count;
-      }, 0);
-    }
+  if (events) {
+    activeContributions = events.reduce((count, event) => {
+      if (event.type === "PushEvent") {
+        const { size, commits } = event.payload ?? {};
+        const commitCount = typeof size === "number" && Number.isSafeInteger(size)
+          ? size
+          : Array.isArray(commits) ? commits.length : 1;
+        return count + Math.max(commitCount, 1);
+      }
+      if (
+        event.type === "PullRequestEvent" ||
+        event.type === "IssuesEvent" ||
+        event.type === "CreateEvent" ||
+        event.type === "CommitCommentEvent" ||
+        event.type === "PullRequestReviewEvent"
+      ) {
+        return count + 1;
+      }
+      return count;
+    }, 0);
   } else {
     missingFields.push("activeContributions");
   }

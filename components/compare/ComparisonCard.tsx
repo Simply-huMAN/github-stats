@@ -4,6 +4,7 @@ import React from "react";
 import { StatsResponse } from "@/types/stats";
 import { Crown, Trophy, ExternalLink, Calendar, MapPin, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatComparisonNumber } from "@/lib/comparisonFormat";
 
 interface ComparisonCardProps {
   data: StatsResponse;
@@ -21,7 +22,7 @@ export function ComparisonCard({
   colorTheme = "indigo",
 }: ComparisonCardProps) {
   const { user, stats, tier } = data;
-  const joinYear = new Date(user.createdAt).getFullYear();
+  const joinYear = new Date(user.createdAt).getUTCFullYear();
   const isIndigo = colorTheme === "indigo";
 
   return (
@@ -136,7 +137,7 @@ export function ComparisonCard({
               )}
             />
             <span className={cn("text-[10px] sm:text-[11px]", tier.colors.badgeText)}>
-              {tier.badgeLabel} • {tier.score.toLocaleString()} pts
+              {data.isPartial ? "Tier score unavailable" : `${tier.badgeLabel} • ${formatComparisonNumber(tier.score)} pts`}
             </span>
           </div>
         </div>

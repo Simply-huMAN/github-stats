@@ -186,7 +186,7 @@ export default async function ShowdownOpenGraphImage({ params }: Props) {
                 marginBottom: "16px",
               }}
             >
-              github.com/{u1Name}
+              {`github.com/${u1Name}`}
             </div>
 
             {/* Micro Tags */}
@@ -226,7 +226,6 @@ export default async function ShowdownOpenGraphImage({ params }: Props) {
               alignItems: "center",
               justifyContent: "center",
               gap: "8px",
-              zIndex: 10,
             }}
           >
             <div
@@ -349,7 +348,7 @@ export default async function ShowdownOpenGraphImage({ params }: Props) {
                 marginBottom: "16px",
               }}
             >
-              github.com/{u2Name}
+              {`github.com/${u2Name}`}
             </div>
 
             {/* Micro Tags */}
