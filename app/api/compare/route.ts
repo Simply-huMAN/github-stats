@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateComparisonPair } from "@/lib/validation";
-import { fetchUserStats, GitHubFetchError } from "@/lib/statsFetcher";
+import { fetchUserStats, getComparisonFailure } from "@/lib/statsFetcher";
 import { buildUserComparison } from "@/lib/comparisonEngine";
 import { ComparisonResult, ComparisonError } from "@/types/compare";
 
@@ -40,30 +40,8 @@ export async function GET(
       const err1 = res1.status === "rejected" ? res1.reason : null;
       const err2 = res2.status === "rejected" ? res2.reason : null;
 
-      const failedUser =
-        err1 && err2 ? "both" : err1 ? "user1" : "user2";
-      const primaryErr = err1 || err2;
-
-      const statusCode =
-        primaryErr instanceof GitHubFetchError ? primaryErr.status : 500;
-      const code =
-        primaryErr instanceof GitHubFetchError ? primaryErr.code : "FETCH_ERROR";
-
-      return NextResponse.json(
-        {
-          error:
-            failedUser === "both"
-              ? `Failed to fetch stats for both '${user1}' and '${user2}'.`
-              : failedUser === "user1"
-              ? `Failed to fetch stats for Contender 1 ('${user1}'): ${primaryErr?.message}`
-              : `Failed to fetch stats for Contender 2 ('${user2}'): ${primaryErr?.message}`,
-          code,
-          details: primaryErr instanceof GitHubFetchError ? primaryErr.details : undefined,
-          failedUser,
-          status: statusCode,
-        },
-        { status: statusCode }
-      );
+      const failure = getComparisonFailure(err1, err2);
+      return NextResponse.json(failure, { status: failure.status });
     }
 
     const comparisonData = buildUserComparison(res1.value, res2.value);
@@ -87,12 +65,11 @@ export async function GET(
       headers: cacheHeaders,
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error occurred";
+    console.error("Comparison API failed", err);
     return NextResponse.json(
       {
         error: "Internal Server Error comparing developers",
         code: "SERVER_ERROR",
-        details: message,
         status: 500,
       },
       { status: 500 }

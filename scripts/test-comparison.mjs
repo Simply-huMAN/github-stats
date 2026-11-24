@@ -244,7 +244,7 @@ function loadSource(path) {
   modules.set(path, module);
   const source = readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
   const { outputText } = ts.transpileModule(source, {
-    compilerOptions: { module: ts.ModuleKind.CommonJS },
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   });
   const loadDependency = (name) => name.startsWith("@/") ? loadSource(`${name.slice(2)}.ts`) : require(name);
   new Function("require", "module", "exports", outputText)(loadDependency, module, module.exports);
@@ -293,6 +293,42 @@ try {
 
 assert(formatComparisonNumber(1309345.5) === "1,309,345.5", "Comparison numbers use deterministic grouping");
 assert(formatComparisonDate("2026-11-22T17:32:00Z").includes("5:32 PM UTC"), "Comparison timestamps use UTC");
+
+const { getComparisonFeedback, validateComparisonForm } = loadSource("lib/comparisonFeedback.ts");
+const emptyFeedback = validateComparisonForm("", "").feedback;
+assert(Boolean(emptyFeedback.user1 && emptyFeedback.user2 && !emptyFeedback.notice), "Both empty fields get inline feedback");
+const duplicateFeedback = validateComparisonForm("@torvalds", "https://github.com/TORVALDS").feedback;
+assert(duplicateFeedback.user2 === "Choose a different GitHub profile." && !duplicateFeedback.user1, "A duplicate profile flags only the second field");
+
+const retryAt = "2026-11-22T17:32:00.000Z";
+try {
+  for (const scenario of [
+    { statuses: [404, 200], status: 404, fields: ["user1"] },
+    { statuses: [404, 404], status: 404, fields: ["user1", "user2"] },
+    { statuses: [404, 429], status: 429, fields: [] },
+    { statuses: [503, 404], status: 503, fields: [] },
+  ]) {
+    globalThis.fetch = async (url) => {
+      const [, , username, endpoint] = new URL(url).pathname.split("/");
+      if (endpoint) return Response.json([]);
+      const status = scenario.statuses[username === "alphadev" ? 0 : 1];
+      return Response.json(
+        { login: username, name: username, public_repos: 0, followers: 0, created_at: "2020-01-01T00:00:00Z" },
+        { status, headers: { "x-ratelimit-reset": String(Date.parse(retryAt) / 1000) } }
+      );
+    };
+    const response = await GET(new NextRequest("http://localhost/api/compare?u1=alphadev&u2=betadev"));
+    const feedback = getComparisonFeedback(await response.json());
+    const fields = ["user1", "user2"].filter((field) => feedback[field]);
+    assert(response.status === scenario.status, `Profile responses ${scenario.statuses.join("/")} return the expected status`);
+    assert(fields.join() === scenario.fields.join() && Boolean(feedback.notice) === (fields.length === 0), "Feedback identifies missing fields or surfaces one recovery notice");
+    if (scenario.status === 429) {
+      assert(feedback.notice?.retryAt === retryAt, "Rate limiting preserves the GitHub retry time");
+    }
+  }
+} finally {
+  globalThis.fetch = realFetch;
+}
 
 console.log(`\n========================================`);
 console.log(`Test Summary: ${passedTests} / ${totalTests} assertions passed.`);

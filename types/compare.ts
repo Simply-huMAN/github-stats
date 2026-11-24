@@ -49,5 +49,6 @@ export interface ComparisonError {
   code: string;
   details?: string;
   failedUser?: "user1" | "user2" | "both";
+  retryAt?: string;
   status: number;
 }

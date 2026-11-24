@@ -6,6 +6,7 @@ import type {
   UserProfile,
   UserStats,
 } from "@/types/stats";
+import type { ComparisonError } from "@/types/compare";
 import { calculateTierScore, getTierDetails } from "@/lib/tier";
 import { fetchContributionCalendar } from "@/lib/contributions";
 
@@ -73,14 +74,34 @@ export class GitHubFetchError extends Error {
   code: string;
   status: number;
   details?: string;
+  retryAt?: string;
 
-  constructor(message: string, code: string, status: number, details?: string) {
+  constructor(message: string, code: string, status: number, details?: string, retryAt?: string) {
     super(message);
     this.name = "GitHubFetchError";
     this.code = code;
     this.status = status;
     this.details = details;
+    this.retryAt = retryAt;
   }
+}
+
+export function getComparisonFailure(first: unknown, second: unknown): ComparisonError {
+  const failures = [first, second].filter((error) => error != null);
+  const known = failures.filter((error): error is GitHubFetchError => error instanceof GitHubFetchError);
+  const rateLimited = known.find((error) => error.code === "RATE_LIMITED");
+  const allMissing = failures.length > 0 && failures.every(
+    (error) => error instanceof GitHubFetchError && error.code === "NOT_FOUND"
+  );
+  const primary = rateLimited ?? known.find((error) => error.code !== "NOT_FOUND") ?? (allMissing ? known[0] : undefined);
+
+  return {
+    error: allMissing ? "GitHub profile not found." : "Couldn’t load the comparison.",
+    code: primary?.code ?? "FETCH_ERROR",
+    status: primary?.status ?? 500,
+    failedUser: first != null && second != null ? "both" : first != null ? "user1" : second != null ? "user2" : undefined,
+    retryAt: rateLimited?.retryAt,
+  };
 }
 
 /**
@@ -129,15 +150,17 @@ export async function fetchUserStats(
     );
   }
 
-  if (userRes.status === 403) {
+  if (userRes.status === 403 || userRes.status === 429) {
     const remaining = userRes.headers.get("x-ratelimit-remaining");
     const resetTime = userRes.headers.get("x-ratelimit-reset");
     const resetDate = resetTime ? new Date(parseInt(resetTime, 10) * 1000).toLocaleTimeString() : "soon";
+    const resetAt = resetTime ? new Date(Number(resetTime) * 1000) : null;
     throw new GitHubFetchError(
       "GitHub API rate limit exceeded.",
       "RATE_LIMITED",
-      403,
-      `Remaining calls: ${remaining ?? 0}. Resets at ${resetDate}.`
+      userRes.status,
+      `Remaining calls: ${remaining ?? 0}. Resets at ${resetDate}.`,
+      resetAt && Number.isFinite(resetAt.getTime()) ? resetAt.toISOString() : undefined
     );
   }
 

@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from "react";
 import { Download, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ComparisonNotice } from "./ComparisonNotice";
 
 interface BattleCardDownloadProps {
   arenaRef: React.RefObject<HTMLDivElement>;
@@ -89,12 +90,14 @@ export function BattleCardDownload({
         ) : (
           <>
             <Download className="w-4 h-4 text-zinc-950" />
-            <span>Download Battle Card</span>
+            <span>{exportFailed ? "Try download again" : "Download Battle Card"}</span>
           </>
         )}
       </button>
       {exportFailed && (
-        <p role="alert" className="text-xs text-rose-300">Image export failed. Try again or share the matchup link.</p>
+        <ComparisonNotice title="Couldn’t create the image">
+          <p>Try the download again or share the matchup link.</p>
+        </ComparisonNotice>
       )}
     </div>
   );

@@ -2,7 +2,8 @@ import React from "react";
 import type { Metadata } from "next";
 import { ComparisonArena } from "@/components/compare/ComparisonArena";
 import { validateComparisonPair } from "@/lib/validation";
-import { fetchUserStats, GitHubFetchError } from "@/lib/statsFetcher";
+import { fetchUserStats, getComparisonFailure } from "@/lib/statsFetcher";
+import { getComparisonFeedback, validateComparisonForm } from "@/lib/comparisonFeedback";
 import { buildUserComparison } from "@/lib/comparisonEngine";
 import { ComparisonResult } from "@/types/compare";
 import { Swords } from "lucide-react";
@@ -76,11 +77,9 @@ export async function generateMetadata({ params }: BattlePageProps): Promise<Met
 
 export default async function BattlePage({ params }: BattlePageProps) {
   const { user1, user2 } = params;
-  const val = validateComparisonPair(user1, user2);
-
+  const { pair: val, feedback } = validateComparisonForm(user1, user2);
   let initialData: ComparisonResult | null = null;
-  let initialError: string | null = val.error || null;
-  let initialFailedUser: "user1" | "user2" | undefined;
+  let initialFeedback = val.isValid ? undefined : feedback;
 
   // Single server-side fetch per matchup: avoids client-side duplicate requests
   if (val.isValid) {
@@ -95,16 +94,11 @@ export default async function BattlePage({ params }: BattlePageProps) {
       } else {
         const err1 = res1.status === "rejected" ? res1.reason : null;
         const err2 = res2.status === "rejected" ? res2.reason : null;
-        const primaryErr = err1 || err2;
-        initialError = err1 && err2
-          ? "Couldn’t load either GitHub profile. Check both usernames and try again."
-          : primaryErr?.message || "Couldn’t load a GitHub profile. Please try again.";
-        if (!(err1 && err2) && primaryErr instanceof GitHubFetchError && primaryErr.code === "NOT_FOUND") {
-          initialFailedUser = err1 ? "user1" : "user2";
-        }
+        initialFeedback = getComparisonFeedback(getComparisonFailure(err1, err2));
       }
     } catch (e: unknown) {
-      initialError = e instanceof Error ? e.message : "Error loading comparison.";
+      console.error("Comparison page failed", e);
+      initialFeedback = getComparisonFeedback({ code: "FETCH_ERROR" });
     }
   }
 
@@ -138,8 +132,7 @@ export default async function BattlePage({ params }: BattlePageProps) {
           initialData={initialData}
           initialUser1={val.user1 || user1}
           initialUser2={val.user2 || user2}
-          initialError={initialError}
-          initialFailedUser={initialFailedUser}
+          initialFeedback={initialFeedback}
         />
       </div>
     </main>

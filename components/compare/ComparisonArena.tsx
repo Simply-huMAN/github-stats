@@ -3,10 +3,13 @@
 import React, { useState, useRef, FormEvent, useEffect, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ComparisonResult, ComparisonError } from "@/types/compare";
-import { validateComparisonPair, validateGitHubUsername } from "@/lib/validation";
+import { validateComparisonPair } from "@/lib/validation";
+import { getComparisonFeedback, validateComparisonForm } from "@/lib/comparisonFeedback";
+import type { ComparisonFeedback } from "@/lib/comparisonFeedback";
 import { ComparisonCard } from "./ComparisonCard";
 import { ComparisonMetricsTable } from "./ComparisonMetricsTable";
 import { BattleCardDownload } from "./BattleCardDownload";
+import { ComparisonNotice } from "./ComparisonNotice";
 import {
   Swords,
   ArrowLeftRight,
@@ -35,16 +38,14 @@ interface ComparisonArenaProps {
   initialData?: ComparisonResult | null;
   initialUser1?: string;
   initialUser2?: string;
-  initialError?: string | null;
-  initialFailedUser?: "user1" | "user2";
+  initialFeedback?: ComparisonFeedback;
 }
 
 export function ComparisonArena({
   initialData = null,
   initialUser1 = "torvalds",
   initialUser2 = "shadcn",
-  initialError = null,
-  initialFailedUser,
+  initialFeedback,
 }: ComparisonArenaProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -53,12 +54,11 @@ export function ComparisonArena({
   const [user1Input, setUser1Input] = useState(initialUser1);
   const [user2Input, setUser2Input] = useState(initialUser2);
 
-  const [user1Error, setUser1Error] = useState(initialFailedUser === "user1" ? initialError : null);
-  const [user2Error, setUser2Error] = useState(initialFailedUser === "user2" ? initialError : null);
-  const [generalError, setGeneralError] = useState(initialFailedUser ? null : initialError);
+  const [feedback, setFeedback] = useState<ComparisonFeedback>(initialFeedback ?? {});
+  const { user1: user1Error, user2: user2Error, notice } = feedback;
 
   const [comparison, setComparison] = useState<ComparisonResult | null>(initialData);
-  const [isFetching, setIsFetching] = useState(!initialData && !initialError && Boolean(initialUser1 && initialUser2));
+  const [isFetching, setIsFetching] = useState(!initialData && !initialFeedback && Boolean(initialUser1 && initialUser2));
   const isLoading = isFetching || isNavigating;
   const startedInitialFetch = useRef(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -69,6 +69,15 @@ export function ComparisonArena({
   const formRef = useRef<HTMLFormElement>(null);
   const user1InputRef = useRef<HTMLInputElement>(null);
   const user2InputRef = useRef<HTMLInputElement>(null);
+  const shareButtonRef = useRef<HTMLButtonElement>(null);
+  const shareInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (fallbackShareUrl) {
+      shareInputRef.current?.focus();
+      shareInputRef.current?.select();
+    }
+  }, [fallbackShareUrl]);
 
   // Auto-focus second field if field 1 was prefilled via shortcut (e.g. /compare?user1=leerob)
   useEffect(() => {
@@ -79,38 +88,25 @@ export function ComparisonArena({
 
   function handleInput1Change(val: string) {
     setUser1Input(val);
-    if (user1Error) setUser1Error(null);
-    if (generalError) setGeneralError(null);
+    setFeedback({ user2: validateComparisonPair(user1Input, user2Input).isSelfComparison ? undefined : user2Error });
   }
 
   function handleInput2Change(val: string) {
     setUser2Input(val);
-    if (user2Error) setUser2Error(null);
-    if (generalError) setGeneralError(null);
+    setFeedback({ user1: user1Error });
   }
 
   // Fetch comparison data when requested
   async function executeComparison(u1: string, u2: string) {
-    setUser1Error(null);
-    setUser2Error(null);
-    setGeneralError(null);
-
-    const val = validateComparisonPair(u1, u2);
+    const { pair: val, feedback: validationFeedback } = validateComparisonForm(u1, u2);
     if (!val.isValid) {
-      if (val.isSelfComparison) {
-        setGeneralError("Please enter two different GitHub usernames.");
-      } else if (!validateGitHubUsername(u1).isValid) {
-        setUser1Error("Enter a valid GitHub username or profile URL.");
-      } else if (!validateGitHubUsername(u2).isValid) {
-        setUser2Error("Enter a valid GitHub username or profile URL.");
-      } else {
-        setGeneralError(val.error || "Please provide two valid GitHub profiles.");
-      }
+      setFeedback(validationFeedback);
       setIsFetching(false);
       setComparison(null);
       return;
     }
 
+    setFeedback({});
     setIsFetching(true);
 
     try {
@@ -118,23 +114,13 @@ export function ComparisonArena({
       const data = await res.json();
 
       if (!res.ok) {
-        const errData = data as ComparisonError;
-        if (errData.code === "NOT_FOUND" && errData.failedUser === "user1") {
-          setUser1Error(errData.error || `User '${val.user1}' does not exist on GitHub.`);
-        } else if (errData.code === "NOT_FOUND" && errData.failedUser === "user2") {
-          setUser2Error(errData.error || `User '${val.user2}' does not exist on GitHub.`);
-        } else {
-          setGeneralError(errData.error || errData.details || "Failed to compare developers.");
-        }
+        setFeedback(getComparisonFeedback(data as ComparisonError));
         setComparison(null);
       } else {
         setComparison(data as ComparisonResult);
-        setUser1Error(null);
-        setUser2Error(null);
-        setGeneralError(null);
       }
     } catch {
-      setGeneralError("Network error while connecting to comparison engine. Please retry.");
+      setFeedback(getComparisonFeedback({ code: "NETWORK_ERROR" }));
       setComparison(null);
     } finally {
       setIsFetching(false);
@@ -143,16 +129,14 @@ export function ComparisonArena({
 
   // Load initial comparison only if not already provided by server
   useEffect(() => {
-    if (!startedInitialFetch.current && !initialData && !initialError && initialUser1 && initialUser2) {
+    if (!startedInitialFetch.current && !initialData && !initialFeedback && initialUser1 && initialUser2) {
       startedInitialFetch.current = true;
       executeComparison(initialUser1, initialUser2);
     }
-  }, [initialData, initialError, initialUser1, initialUser2]);
+  }, [initialData, initialFeedback, initialUser1, initialUser2]);
 
   function openMatchup(u1: string, u2: string) {
-    setUser1Error(null);
-    setUser2Error(null);
-    setGeneralError(null);
+    setFeedback({});
     setFallbackShareUrl(null);
     setCopiedLink(false);
 
@@ -167,17 +151,10 @@ export function ComparisonArena({
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (isLoading) return;
-    const val = validateComparisonPair(user1Input, user2Input);
+    const { pair: val, feedback: validationFeedback } = validateComparisonForm(user1Input, user2Input);
     if (!val.isValid) {
-      if (val.isSelfComparison) {
-        setGeneralError("Please enter two different GitHub usernames.");
-      } else if (!validateGitHubUsername(user1Input).isValid) {
-        setUser1Error("Enter a valid GitHub username or profile URL.");
-      } else if (!validateGitHubUsername(user2Input).isValid) {
-        setUser2Error("Enter a valid GitHub username or profile URL.");
-      } else {
-        setGeneralError(val.error || "Please provide two valid GitHub usernames.");
-      }
+      setFeedback(validationFeedback);
+      (validationFeedback.user1 ? user1InputRef : user2InputRef).current?.focus();
       setComparison(null);
       setFallbackShareUrl(null);
       return;
@@ -192,9 +169,7 @@ export function ComparisonArena({
     const temp = user1Input;
     setUser1Input(user2Input);
     setUser2Input(temp);
-    setUser1Error(null);
-    setUser2Error(null);
-    setGeneralError(null);
+    setFeedback({});
 
     if (comparison && user2Input && temp) {
       const val = validateComparisonPair(user2Input, temp);
@@ -258,6 +233,7 @@ export function ComparisonArena({
       <form
         ref={formRef}
         onSubmit={handleSubmit}
+        noValidate
         aria-busy={isLoading}
         className="w-full max-w-3xl mb-6 sm:mb-8 p-4 sm:p-5 rounded-2xl border border-zinc-800 bg-zinc-950/90 backdrop-blur-xl shadow-2xl flex flex-col gap-3"
       >
@@ -309,10 +285,10 @@ export function ComparisonArena({
               <span
                 id="contender1-error"
                 role="alert"
-                className="text-rose-400 text-xs mt-1 flex items-start gap-1 font-sans break-all max-w-full overflow-hidden"
+                className="mt-1.5 flex items-start gap-1.5 text-xs leading-relaxed text-rose-300 [overflow-wrap:anywhere]"
               >
-                <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                <span className="break-all overflow-hidden">{user1Error}</span>
+                <AlertCircle aria-hidden="true" className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                <span className="min-w-0">{user1Error}</span>
               </span>
             )}
           </div>
@@ -364,10 +340,10 @@ export function ComparisonArena({
               <span
                 id="contender2-error"
                 role="alert"
-                className="text-rose-400 text-xs mt-1 flex items-start gap-1 font-sans break-all max-w-full overflow-hidden"
+                className="mt-1.5 flex items-start gap-1.5 text-xs leading-relaxed text-rose-300 [overflow-wrap:anywhere]"
               >
-                <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                <span className="break-all overflow-hidden">{user2Error}</span>
+                <AlertCircle aria-hidden="true" className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                <span className="min-w-0">{user2Error}</span>
               </span>
             )}
           </div>
@@ -390,39 +366,19 @@ export function ComparisonArena({
         </div>
       </form>
 
-      {/* General Error Alert */}
-      {generalError && (
-        <div role="alert" className="w-full max-w-2xl mb-6 sm:mb-8 p-3.5 sm:p-4 rounded-xl border border-rose-500/40 bg-rose-950/30 text-rose-300 flex items-start gap-3 backdrop-blur-md">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
-          <div className="flex-1 min-w-0 text-sm">
-            <p className="font-semibold text-rose-200">Couldn’t compare these profiles</p>
-            <p className="text-rose-300/90 text-xs mt-0.5 [overflow-wrap:anywhere]">{generalError}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Fallback Selectable Share Modal if clipboard fails */}
-      {fallbackShareUrl && (
-        <div className="w-full max-w-2xl mb-6 p-4 rounded-xl border border-amber-500/40 bg-zinc-950 text-zinc-200 flex flex-col gap-2 shadow-2xl">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-300">Copy Share Link:</span>
-            <button
-              type="button"
-              onClick={() => setFallbackShareUrl(null)}
-              className="text-xs text-zinc-400 hover:text-white"
-            >
-              ✕ Close
-            </button>
-          </div>
-          <input
-            type="text"
-            readOnly
-            aria-label="Matchup link"
-            value={fallbackShareUrl}
-            onClick={(e) => e.currentTarget.select()}
-            className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 font-mono text-xs text-zinc-200 select-all"
-          />
-          <span className="text-xs text-zinc-400">Select the link to copy it.</span>
+      {notice && !isLoading && (
+        <div className="mb-6 w-full max-w-3xl">
+          <ComparisonNotice
+            title={notice.title}
+            action={
+              <button type="button" onClick={() => formRef.current?.requestSubmit()}
+                className="min-h-[44px] rounded-lg border border-zinc-700 bg-zinc-900 px-3 text-sm font-semibold text-white hover:bg-zinc-800">
+                Retry
+              </button>
+            }
+          >
+            <p>{notice.retryAt ? <>Try again after <time dateTime={notice.retryAt}>{formatComparisonDate(notice.retryAt)}</time>.</> : notice.message}</p>
+          </ComparisonNotice>
         </div>
       )}
 
@@ -462,12 +418,10 @@ export function ComparisonArena({
             </div>
 
             {/* Tiebreaker / Win Headline */}
-            <div
+            {!comparison.summary.winnerWithheld && <div
               className={cn(
                 "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold mb-2 border",
-                comparison.summary.winnerWithheld
-                  ? "bg-amber-500/15 border-amber-500/30 text-amber-300"
-                  : comparison.summary.overallWinner === 1
+                comparison.summary.overallWinner === 1
                   ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-300"
                   : comparison.summary.overallWinner === 2
                   ? "bg-amber-500/15 border-amber-500/30 text-amber-300"
@@ -484,15 +438,20 @@ export function ComparisonArena({
                     : "text-zinc-400"
                 )}
               />
-              <span>{!comparison.summary.isComplete ? "Partial GitHub data" :
-                comparison.summary.isTiebreaker ? "Tier-score tiebreaker" : comparison.summary.winMargin}</span>
-            </div>
+              <span>{comparison.summary.isTiebreaker ? "Tier-score tiebreaker" : comparison.summary.winMargin}</span>
+            </div>}
 
             <h2 className="max-w-full text-base sm:text-2xl font-extrabold text-white tracking-tight px-2 [overflow-wrap:anywhere]">
-              {comparison.summary.headline}
+              {comparison.summary.winnerWithheld ? "Winner unavailable" : comparison.summary.headline}
             </h2>
-            {comparison.summary.withheldReason && (
-              <p className="mt-2 text-sm text-zinc-300">{comparison.summary.withheldReason}</p>
+            {!comparison.summary.isComplete && (
+              <div className="mt-3 w-full max-w-lg">
+                <ComparisonNotice tone="warning" title="Some GitHub stats are unavailable">
+                  <p>{comparison.summary.winnerWithheld
+                    ? "The missing stats could change the outcome. You can still explore the available metrics below."
+                    : "The available stats are enough to determine the winner. Missing values are marked below."}</p>
+                </ComparisonNotice>
+              </div>
             )}
 
             {/* Top Action Buttons (Next to Summary) */}
@@ -500,6 +459,7 @@ export function ComparisonArena({
               <button
                 type="button"
                 onClick={handleShare}
+                ref={shareButtonRef}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-semibold text-xs transition-all active:scale-95 shadow-sm min-h-[44px]"
               >
                 {copiedLink ? (
@@ -531,6 +491,26 @@ export function ComparisonArena({
                 className="py-1.5 px-3.5 text-xs"
               />
             </div>
+            {fallbackShareUrl && (
+              <div className="mt-3 w-full max-w-lg">
+                <ComparisonNotice title="Copy the matchup link" tone="warning"
+                  action={
+                    <button type="button" className="min-h-[44px] px-2 text-sm text-zinc-300 hover:text-white"
+                      onClick={() => {
+                        setFallbackShareUrl(null);
+                        shareButtonRef.current?.focus();
+                      }}>
+                      Done
+                    </button>
+                  }
+                >
+                  <p>Automatic sharing is unavailable. Select the link to copy it.</p>
+                  <input ref={shareInputRef} readOnly aria-label="Matchup link" value={fallbackShareUrl}
+                    onFocus={(e) => e.currentTarget.select()}
+                    className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 font-mono text-xs text-zinc-200" />
+                </ComparisonNotice>
+              </div>
+            )}
 
             {/* Quick Referral Prompt for Incoming Visitors */}
             <div className="mt-3 pt-3 border-t border-zinc-800/80 flex items-center justify-center gap-2 text-xs font-mono text-zinc-400 flex-wrap">
