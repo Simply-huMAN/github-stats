@@ -4,12 +4,20 @@
 
 [![MyGitStats Live](https://img.shields.io/badge/MyGitStats-mygitstats.dev-6366f1?style=for-the-badge&logo=googlechrome&logoColor=white)](https://mygitstats.dev)
 [![MyGitStats Card Studio](https://img.shields.io/badge/MyGitStats-Card_Studio-4f46e5?style=for-the-badge&logo=sparkles)](https://mygitstats.dev/card)
+[![MyGitStats Compare](https://img.shields.io/badge/MyGitStats-Developer_Showdown-f59e0b?style=for-the-badge&logo=swords)](https://mygitstats.dev/compare)
 [![MyGitStats Wrapped](https://img.shields.io/badge/MyGitStats-GitHub_Wrapped_2026-ec4899?style=for-the-badge&logo=github)](https://mygitstats.dev/wrapped)
 
 > 🌐 **Official Website**: [https://mygitstats.dev](https://mygitstats.dev)  
 > 🎨 **MyGitStats Studio**: [https://mygitstats.dev/card](https://mygitstats.dev/card)  
+> ⚔️ **Developer Showdown**: [https://mygitstats.dev/compare](https://mygitstats.dev/compare)  
 > 🎆 **MyGitStats Wrapped**: [https://mygitstats.dev/wrapped](https://mygitstats.dev/wrapped)  
 > 📦 **GitHub Repository**: [https://github.com/Simply-huMAN/github-stats](https://github.com/Simply-huMAN/github-stats)
+
+### ⚔️ Popular Developer Showdowns
+Compare open-source builders side-by-side:
+- **[Linus Torvalds vs shadcn](https://mygitstats.dev/compare/torvalds/vs/shadcn)** — Linux Kernel Legend vs Modern UI
+- **[Dan Abramov vs Evan You](https://mygitstats.dev/compare/gaearon/vs/yyx990803)** — React vs Vue Ecosystem Creators
+- **[Lee Robinson vs Addy Osmani](https://mygitstats.dev/compare/leerob/vs/addyosmani)** — Next.js vs Chrome Web Platform
 
 ---
 
@@ -85,17 +93,10 @@ This repository is optimized for **Docker Standalone** deployment on Render, red
 
 ## CI/CD & Release Workflows
 
-Inspired by `quizo`, this repository includes GitHub Actions workflows under `.github/workflows/`:
-
-- **`.github/workflows/snapshot.yml`**:
-  - Triggers on pull requests and pushes to `working`, `dev`, or `feature/*`.
-  - Runs dependencies caching, linting, TypeScript typechecking, and Next.js standalone build validation.
-  - Deploys snapshot to Render if `RENDER_DEPLOY_HOOK` is configured.
-- **`.github/workflows/release.yml`**:
-  - Triggers on push to `main` or manually via **Run workflow** (`workflow_dispatch`).
-  - Accepts a `version` input (e.g. `0.1.0` or `1.0.0`).
-  - Validates SemVer format, archives standalone artifacts, and creates a formal **GitHub Release** with changelog.
-  - Dispatches automated webhook deploy to Render if `secrets.RENDER_DEPLOY_HOOK` is set in GitHub repository secrets.
+- [Feature Snapshot CI](.github/workflows/snapshot.yml) runs comparison tests, TypeScript checks, and a Next.js standalone build for pull requests and configured snapshot branches.
+- [Release Workflow](.github/workflows/release.yml) runs the same checks on pushes to `main` and on manual runs. Both workflows upload the standalone build as a GitHub Actions artifact.
+- Render deploys from `main` after CI checks pass when managed by the [Render Blueprint](render.yaml). For a service configured manually, set **Auto-Deploy** to **After CI Checks Pass** in Render.
+- After merging, open **Release Workflow → Run workflow**, select `main`, and leave the version blank to use `package.json`. A supplied version must match the package and lockfile and have a changelog entry. The workflow creates a GitHub Release and tags the exact commit it built.
 
 ---
 
@@ -103,7 +104,7 @@ Inspired by `quizo`, this repository includes GitHub Actions workflows under `.g
 
 ```
 ├── .github/workflows/
-│   ├── release.yml             # Release & deploy workflow
+│   ├── release.yml             # Main CI & GitHub Release workflow
 │   └── snapshot.yml            # Feature PR & snapshot CI
 ├── app/
 │   ├── api/stats/route.ts      # GitHub stats aggregator API route

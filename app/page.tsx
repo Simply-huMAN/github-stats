@@ -14,6 +14,8 @@ import {
   Code2,
   Share2,
   Zap,
+  Swords,
+  Trophy,
 } from "lucide-react";
 
 export default function PlatformLandingPage() {
@@ -91,7 +93,7 @@ export default function PlatformLandingPage() {
           </button>
         </form>
 
-        {/* Sample profiles */}
+        {/* Sample profiles & Showdown Shortcut */}
         <div className="mt-3.5 flex items-center gap-2 text-xs text-zinc-500 flex-wrap justify-center font-mono">
           <span>Popular profiles:</span>
           {["shadcn", "torvalds", "kentcdodds", "leerob", "gaearon"].map((handle) => (
@@ -106,46 +108,54 @@ export default function PlatformLandingPage() {
           ))}
         </div>
 
-        {/* Dual Product Highlight Cards */}
-        <div className="mt-16 w-full grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+        {/* Compare GitHub Profiles Hero CTA */}
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <Link
+            href="/compare"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-xs sm:text-sm font-semibold text-amber-300 transition-all shadow-sm active:scale-95 group"
+          >
+            <Swords className="w-4 h-4 text-amber-400 group-hover:rotate-12 transition-transform" />
+            <span>Compare GitHub profiles</span>
+            <ArrowRight className="w-3.5 h-3.5 opacity-70 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        </div>
+
+        {/* Triple Product Highlight Cards */}
+        <div className="mt-16 w-full grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
           {/* Product 1: GitHub Wrapped (Hero) */}
-          <div className="relative rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-[#120d2b] via-[#0a0718] to-black border border-indigo-500/40 shadow-2xl shadow-indigo-950/60 flex flex-col justify-between overflow-hidden group">
+          <div className="relative rounded-3xl p-6 bg-gradient-to-br from-[#120d2b] via-[#0a0718] to-black border border-indigo-500/40 shadow-2xl shadow-indigo-950/60 flex flex-col justify-between overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
             <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-300 text-[11px] font-mono font-semibold uppercase">
-                  Flagship Experience
+                  Flagship
                 </span>
                 <Sparkles className="w-5 h-5 text-indigo-400" />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                GitHub Wrapped 2026
+              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                GitHub Wrapped
               </h2>
               <p className="mt-2 text-xs sm:text-sm text-zinc-300 leading-relaxed">
-                Turn a year of coding into a captivating 6-chapter visual story. Discover your longest contribution streak, top languages, standout repos, and data-driven developer archetype.
+                Turn a year of coding into a captivating visual story. Discover streaks, top languages, and data-driven developer archetypes.
               </p>
 
-              <div className="mt-6 space-y-2 text-xs text-zinc-400 font-mono">
+              <div className="mt-5 space-y-2 text-xs text-zinc-400 font-mono">
                 <div className="flex items-center gap-2">
                   <Flame className="w-3.5 h-3.5 text-amber-400" />
                   <span>365-day commit velocity &amp; streaks</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Code2 className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Byte-weighted language breakdown</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Share2 className="w-3.5 h-3.5 text-pink-400" />
-                  <span>Shareable cards for X, LinkedIn &amp; Stories</span>
+                  <span>Language distribution breakdown</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
-              <span className="text-xs font-mono text-zinc-400">100% Free • No OAuth Needed</span>
+            <div className="mt-8 pt-5 border-t border-white/10 flex items-center justify-between">
+              <span className="text-[11px] font-mono text-zinc-400">100% Free • No OAuth</span>
               <Link
                 href="/wrapped"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md group-hover:scale-105"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md group-hover:scale-105"
               >
                 <span>Launch Wrapped</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -153,47 +163,84 @@ export default function PlatformLandingPage() {
             </div>
           </div>
 
-          {/* Product 2: Stats Card Studio (Utility) */}
-          <div className="relative rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-[#121217] via-[#09090c] to-black border border-zinc-800 shadow-2xl flex flex-col justify-between overflow-hidden group">
+          {/* Product 2: Stats Card Studio */}
+          <div className="relative rounded-3xl p-6 bg-gradient-to-br from-[#121217] via-[#09090c] to-black border border-zinc-800 shadow-2xl flex flex-col justify-between overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
             <div>
               <div className="flex items-center justify-between mb-4">
                 <span className="px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-[11px] font-mono font-semibold uppercase">
-                  Profile Utility
+                  Profile Cards
                 </span>
                 <CreditCard className="w-5 h-5 text-cyan-400" />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                Developer Card Studio
+              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                Card Studio
               </h2>
               <p className="mt-2 text-xs sm:text-sm text-zinc-300 leading-relaxed">
-                Design custom developer badges and performance tier cards. Choose from 8 city themes, avatar geometries, and export 3x retina PNGs for your README and portfolio.
+                Design custom developer badges and performance tier cards. Choose from 8 city themes, avatar geometries, and export 3x retina PNGs.
               </p>
 
-              <div className="mt-6 space-y-2 text-xs text-zinc-400 font-mono">
+              <div className="mt-5 space-y-2 text-xs text-zinc-400 font-mono">
                 <div className="flex items-center gap-2">
                   <Zap className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>8 City Themes (Tokyo, Berlin, Bangalore...)</span>
+                  <span>8 City Themes (Tokyo, Berlin...)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Mythic, Gold &amp; Bronze performance tiers</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Star className="w-3.5 h-3.5 text-amber-400" />
-                  <span>3x Retina PNG export engine</span>
+                  <span>Mythic, Gold &amp; Bronze tiers</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
-              <span className="text-xs font-mono text-zinc-400">README Image &amp; PNG</span>
+            <div className="mt-8 pt-5 border-t border-white/10 flex items-center justify-between">
+              <span className="text-[11px] font-mono text-zinc-400">README Image &amp; PNG</span>
               <Link
                 href="/card"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold border border-zinc-700 transition-all group-hover:scale-105"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold border border-zinc-700 transition-all group-hover:scale-105"
               >
                 <span>Customize Card</span>
                 <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Product 3: Developer Showdown (New) */}
+          <div className="relative rounded-3xl p-6 bg-gradient-to-br from-[#1a1309] via-[#0d0a06] to-black border border-amber-500/40 shadow-2xl shadow-amber-950/40 flex flex-col justify-between overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[11px] font-mono font-semibold uppercase">
+                  New Feature
+                </span>
+                <Swords className="w-5 h-5 text-amber-400" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                Developer Showdown
+              </h2>
+              <p className="mt-2 text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                Compare any two GitHub users head-to-head. Compare weighted tiers, star counts, follower reach, and contribution momentum.
+              </p>
+
+              <div className="mt-5 space-y-2 text-xs text-zinc-400 font-mono">
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Category winners &amp; score deltas</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Share2 className="w-3.5 h-3.5 text-orange-400" />
+                  <span>Downloadable battle cards for socials</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 pt-5 border-t border-white/10 flex items-center justify-between">
+              <span className="text-[11px] font-mono text-zinc-400">Side-by-Side Analysis</span>
+              <Link
+                href="/compare"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-zinc-950 text-xs font-extrabold transition-all shadow-md group-hover:scale-105"
+              >
+                <span>Enter Arena</span>
+                <ArrowRight className="w-3.5 h-3.5 text-zinc-950" />
               </Link>
             </div>
           </div>

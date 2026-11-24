@@ -1,12 +1,13 @@
 {
   "name": "github-stats",
-  "version": "0.3.5",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "node --experimental-strip-types scripts/test-comparison.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
