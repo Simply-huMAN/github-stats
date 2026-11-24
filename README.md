@@ -93,17 +93,10 @@ This repository is optimized for **Docker Standalone** deployment on Render, red
 
 ## CI/CD & Release Workflows
 
-Inspired by `quizo`, this repository includes GitHub Actions workflows under `.github/workflows/`:
-
-- **`.github/workflows/snapshot.yml`**:
-  - Triggers on pull requests and pushes to `working`, `dev`, or `feature/*`.
-  - Runs dependencies caching, linting, TypeScript typechecking, and Next.js standalone build validation.
-  - Deploys snapshot to Render if `RENDER_DEPLOY_HOOK` is configured.
-- **`.github/workflows/release.yml`**:
-  - Triggers on push to `main` or manually via **Run workflow** (`workflow_dispatch`).
-  - Accepts a `version` input (e.g. `0.1.0` or `1.0.0`).
-  - Validates SemVer format, archives standalone artifacts, and creates a formal **GitHub Release** with changelog.
-  - Dispatches automated webhook deploy to Render if `secrets.RENDER_DEPLOY_HOOK` is set in GitHub repository secrets.
+- [Feature Snapshot CI](.github/workflows/snapshot.yml) runs comparison tests, TypeScript checks, and a Next.js standalone build for pull requests and configured snapshot branches.
+- [Release Workflow](.github/workflows/release.yml) runs the same checks on pushes to `main` and on manual runs. Both workflows upload the standalone build as a GitHub Actions artifact.
+- Render deploys from `main` after CI checks pass when managed by the [Render Blueprint](render.yaml). For a service configured manually, set **Auto-Deploy** to **After CI Checks Pass** in Render.
+- After merging, open **Release Workflow → Run workflow**, select `main`, and leave the version blank to use `package.json`. A supplied version must match the package and lockfile and have a changelog entry. The workflow creates a GitHub Release and tags the exact commit it built.
 
 ---
 
@@ -111,7 +104,7 @@ Inspired by `quizo`, this repository includes GitHub Actions workflows under `.g
 
 ```
 ├── .github/workflows/
-│   ├── release.yml             # Release & deploy workflow
+│   ├── release.yml             # Main CI & GitHub Release workflow
 │   └── snapshot.yml            # Feature PR & snapshot CI
 ├── app/
 │   ├── api/stats/route.ts      # GitHub stats aggregator API route

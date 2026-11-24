@@ -9,7 +9,7 @@ services:
     plan: free
     region: oregon
     branch: main
-    autoDeploy: true
+    autoDeployTrigger: checksPass
     healthCheckPath: /
     envVars:
       - key: NODE_ENV

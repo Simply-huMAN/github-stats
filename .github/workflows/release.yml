@@ -2,81 +2,39 @@ name: Release Workflow
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. 0.3.0 or 1.0.0)'
-        required: true
-        default: '0.3.5'
+        description: 'Version matching package.json (leave blank to use the package version)'
+        required: false
+        type: string
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   NODE_VERSION: '22'
-  RELEASE_VERSION: ${{ github.event.inputs.version || '0.3.5' }}
 
 jobs:
-  setup:
-    name: Setup Dependencies
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci || npm install
-
-  lint:
-    name: Lint & Typecheck
-    runs-on: ubuntu-latest
-    needs: setup
-    continue-on-error: true
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci || npm install
-
-      - name: Run ESLint
-        run: npm run lint || true
-
-      - name: Run TypeScript typecheck
-        run: npx tsc --noEmit
-
   build:
     name: Next.js Standalone Build
     runs-on: ubuntu-latest
-    needs: [setup, lint]
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm ci
+
+      - name: Run comparison tests
+        run: npm test
+
+      - name: Typecheck
+        run: npx tsc --noEmit
 
       - name: Build Next.js Application
         env:
@@ -88,78 +46,69 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nextjs-standalone-build
+          include-hidden-files: true
+          if-no-files-found: error
           path: |
             .next/standalone
             .next/static
             public
+            !**/.env*
           retention-days: 7
 
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     needs: build
-    if: |
-      github.ref == 'refs/heads/main' &&
-      github.event_name == 'workflow_dispatch'
-
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Validate version format
-        run: |
-          if [[ ! "${RELEASE_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Invalid version format '${RELEASE_VERSION}'. Use SemVer X.Y.Z (e.g. 0.1.0)"
-            exit 1
-          fi
-
-      - name: Check for existing tag
-        id: check_tag
-        run: |
-          if git rev-parse "v${RELEASE_VERSION}" >/dev/null 2>&1; then
-            echo "ERROR: Tag v${RELEASE_VERSION} already exists. Aborting release."
-            exit 1
-          fi
-
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/setup-node@v4
         with:
-          name: nextjs-standalone-build
-          path: build-artifacts
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: Extract Release Notes from CHANGELOG
-        run: node scripts/extract-changelog.mjs "${{ env.RELEASE_VERSION }}"
+      - name: Validate release version
+        id: version
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: |
+          package_version=$(node -p "require('./package.json').version")
+          lock_version=$(node -p "require('./package-lock.json').version")
+          version="${REQUESTED_VERSION:-$package_version}"
+
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Use a version in X.Y.Z format."
+            exit 1
+          fi
+          if [[ "$version" != "$package_version" || "$version" != "$lock_version" ]]; then
+            echo "::error::The release version must match package.json and package-lock.json."
+            exit 1
+          fi
+          if ! grep -Fq "## [$version]" CHANGELOG.md; then
+            echo "::error::Add a changelog entry for the release version."
+            exit 1
+          fi
+          if git show-ref --verify --quiet "refs/tags/v$version"; then
+            echo "::error::Tag v$version already exists."
+            exit 1
+          fi
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Extract release notes
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
+        run: node scripts/extract-changelog.mjs "$RELEASE_VERSION"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ env.RELEASE_VERSION }}
-          name: Release v${{ env.RELEASE_VERSION }}
+          tag_name: v${{ steps.version.outputs.value }}
+          target_commitish: ${{ github.sha }}
+          name: Release v${{ steps.version.outputs.value }}
           body_path: release_notes.md
           generate_release_notes: false
           draft: false
           prerelease: false
-
-  deploy:
-    name: Deploy to Render
-    runs-on: ubuntu-latest
-    needs: [build, release]
-    if: |
-      always() &&
-      needs.build.result == 'success' &&
-      (needs.release.result == 'success' || needs.release.result == 'skipped') &&
-      github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Trigger Render Deploy Hook
-        run: |
-          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
-            echo "RENDER_DEPLOY_HOOK is not set in GitHub repository secrets."
-            echo "To enable automated deployment, add RENDER_DEPLOY_HOOK in Settings -> Secrets and variables -> Actions."
-            exit 0
-          fi
-          echo "Triggering Render deployment webhook..."
-          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
-          echo "Deployment hook successfully dispatched to Render."
