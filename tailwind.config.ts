@@ -11,6 +11,15 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        "site-panel": "var(--panel)",
+        "site-inset": "var(--panel-inset)",
+        "site-line": "var(--line)",
+        "site-control": "var(--control-line)",
+        "site-muted": "var(--muted)",
+        "site-green": "var(--green)",
+      },
+      fontFamily: {
+        mono: ["JetBrains Mono", "ui-monospace", "Consolas", "monospace"],
       },
       boxShadow: {
         "glow-bronze": "0 0 25px -5px rgba(180, 83, 9, 0.25)",

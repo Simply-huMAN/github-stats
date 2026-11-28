@@ -89,7 +89,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#070709",
+  themeColor: "#0a0c0e",
 };
 
 const jsonLd = [
@@ -189,7 +189,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="bg-zinc-950 text-zinc-100 antialiased selection:bg-indigo-500 selection:text-white flex flex-col min-h-screen">
+      <body className="antialiased flex flex-col min-h-screen">
         <Navbar />
         <div className="flex-1">{children}</div>
         <Footer />
