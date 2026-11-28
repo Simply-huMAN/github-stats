@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { StatsCard } from "@/components/StatsCard";
+import { CardStyleToggle } from "@/components/CardStyleToggle";
 import { getHeatmapPalette } from "@/components/ContributionHeatmap";
 import { DEFAULT_CARD_OPTIONS, EXAMPLE_CARD } from "@/lib/previewCard";
 import { CITY_THEMES } from "@/lib/themes/cityThemes";
 import { validateGitHubUsername } from "@/lib/validation";
-import type { ThemeMode } from "@/types/builder";
+import type { CardStyle, ThemeMode } from "@/types/builder";
 
 const cityThemes = Object.values(CITY_THEMES);
 const tier = EXAMPLE_CARD.tier.tier;
@@ -31,6 +32,7 @@ export default function HomePage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [theme, setTheme] = useState<ThemeMode>("auto");
+  const [cardStyle, setCardStyle] = useState<CardStyle>("minimal");
   const [formError, setFormError] = useState("");
 
   useEffect(() => {
@@ -48,7 +50,7 @@ export default function HomePage() {
       return;
     }
 
-    const params = new URLSearchParams({ user: result.cleanUsername });
+    const params = new URLSearchParams({ user: result.cleanUsername, style: cardStyle });
     if (theme !== "auto") params.set("theme", theme);
     router.push(`/card?${params.toString()}`);
   }
@@ -85,6 +87,7 @@ export default function HomePage() {
                 aria-describedby={formError ? "home-username-error" : undefined}
               />
               {theme !== "auto" && <input type="hidden" name="theme" value={theme} />}
+              <input type="hidden" name="style" value={cardStyle} />
               <button type="submit" className="site-button site-button-primary whitespace-nowrap">
                 Create card <ArrowRight size={15} className="hidden sm:block" aria-hidden="true" />
               </button>
@@ -96,10 +99,10 @@ export default function HomePage() {
 
         <figure className="min-w-0 max-w-[540px]">
           <figcaption className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 font-mono text-[11px] text-site-muted">
-            <span>Example card</span>
-            <span>Sample data</span>
+            <span>Sample card</span>
+            <CardStyleToggle value={cardStyle} onChange={setCardStyle} />
           </figcaption>
-          <StatsCard data={EXAMPLE_CARD} customizerOptions={{ ...DEFAULT_CARD_OPTIONS, themeMode: theme }} />
+          <StatsCard data={EXAMPLE_CARD} customizerOptions={{ ...DEFAULT_CARD_OPTIONS, cardStyle, themeMode: theme }} />
           <div className="mt-2 flex flex-wrap items-center gap-x-1 gap-y-1" role="group" aria-label="Preview themes">
             <button
               type="button"
@@ -109,7 +112,10 @@ export default function HomePage() {
               title="Default"
               onClick={() => setTheme("auto")}
             >
-              <span className="h-3.5 w-3.5 rounded-[3px] bg-site-green ring-offset-2 ring-offset-background group-aria-pressed:ring-1 group-aria-pressed:ring-foreground" />
+              <span
+                className="h-3.5 w-3.5 rounded-[3px] ring-offset-2 ring-offset-background group-aria-pressed:ring-1 group-aria-pressed:ring-foreground"
+                style={{ backgroundColor: getHeatmapPalette("auto", tier, cardStyle === "minimal")[4] }}
+              />
             </button>
             {cityThemes.map((city) => (
               <button

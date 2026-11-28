@@ -34,7 +34,8 @@ const HEATMAP_PALETTES: Record<string, [string, string, string, string, string]>
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-export function getHeatmapPalette(theme: ThemeMode, tier: TierType) {
+export function getHeatmapPalette(theme: ThemeMode, tier: TierType, useClassicAuto = false) {
+  if (theme === "auto" && useClassicAuto) return HEATMAP_PALETTES.classic;
   const palette = HEATMAP_PALETTES[theme];
   return Array.isArray(palette) ? palette : HEATMAP_PALETTES[tier] ?? HEATMAP_PALETTES.classic;
 }
@@ -46,9 +47,7 @@ export function ContributionHeatmap({
   className,
   compact = false,
 }: ContributionHeatmapProps) {
-  const palette = compact && themeMode === "auto"
-    ? HEATMAP_PALETTES.classic
-    : getHeatmapPalette(themeMode, tier);
+  const palette = getHeatmapPalette(themeMode, tier, compact);
 
   const weeks = calendar?.weeks || [];
   const totalContributions = calendar?.totalContributions ?? 0;

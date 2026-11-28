@@ -4,10 +4,11 @@ import type { CustomizerOptions } from "@/types/builder";
 import type { StatsResponse } from "@/types/stats";
 
 export const DEFAULT_CARD_OPTIONS: CustomizerOptions = {
+  cardStyle: "showcase",
   themeMode: "auto",
   avatarFrame: "squircle",
   avatarBadge: "tier-icon",
-  cardBackground: "pure-minimal",
+  cardBackground: "ambient-glow",
   showHeatmap: true,
 };
 
@@ -22,7 +23,7 @@ const sampleDate = new Date("2026-11-28T00:00:00Z");
 export const EXAMPLE_CARD: StatsResponse = {
   user: {
     username: "example",
-    name: "Example Developer",
+    name: "Alex Morgan",
     avatarUrl: "",
     bio: null,
     company: null,

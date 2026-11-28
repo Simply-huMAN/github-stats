@@ -5,6 +5,7 @@ import Link from "next/link";
 import { StatsResponse } from "@/types/stats";
 import { CustomizerOptions } from "@/types/builder";
 import { StatsCard } from "@/components/StatsCard";
+import { CardStyleToggle } from "@/components/CardStyleToggle";
 import { DownloadButton } from "@/components/DownloadButton";
 import { CustomizerToolbar } from "@/components/builder/CustomizerToolbar";
 import {
@@ -89,9 +90,12 @@ export default function CardStudioPage() {
     const params = new URLSearchParams(window.location.search);
     const userParam = sanitizeGitHubUsername(params.get("user"));
     const themeParam = params.get("theme") as CustomizerOptions["themeMode"];
+    const styleParam = params.get("style");
+    const style = styleParam === "minimal" || styleParam === "showcase" ? styleParam : undefined;
     const frameParam = params.get("frame") as CustomizerOptions["avatarFrame"];
     const badgeParam = params.get("badge") as CustomizerOptions["avatarBadge"];
     const bgParam = params.get("bg") as CustomizerOptions["cardBackground"];
+    const legacyMinimal = !style && bgParam === "pure-minimal";
     const heatmapParam = params.get("heatmap");
     const showHeatmap = heatmapParam !== null ? heatmapParam !== "false" && heatmapParam !== "0" : undefined;
 
@@ -100,13 +104,15 @@ export default function CardStudioPage() {
       fetchStats(userParam);
     }
 
-    if (themeParam || frameParam || badgeParam || bgParam || showHeatmap !== undefined) {
+    if (style || themeParam || frameParam || badgeParam || bgParam || showHeatmap !== undefined) {
       setCustomizerOptions((prev) => ({
+        cardStyle: style ?? (legacyMinimal ? "minimal" : prev.cardStyle),
         themeMode: themeParam && (Object.hasOwn(CITY_THEMES, themeParam)
           || ["auto", "Bronze", "Gold", "Mythic"].includes(themeParam)) ? themeParam : prev.themeMode,
         avatarFrame: frameParam && Object.hasOwn(AVATAR_FRAME_CONFIG, frameParam) ? frameParam : prev.avatarFrame,
         avatarBadge: badgeParam && Object.hasOwn(AVATAR_BADGE_CONFIG, badgeParam) ? badgeParam : prev.avatarBadge,
-        cardBackground: bgParam && Object.hasOwn(CARD_BACKGROUND_CONFIG, bgParam) ? bgParam : prev.cardBackground,
+        cardBackground: !legacyMinimal && bgParam && Object.hasOwn(CARD_BACKGROUND_CONFIG, bgParam)
+          ? bgParam : prev.cardBackground,
         showHeatmap: showHeatmap !== undefined ? showHeatmap : prev.showHeatmap,
       }));
     }
@@ -249,10 +255,17 @@ export default function CardStudioPage() {
     fetchStats(trimmed);
   }
 
+  function updateOptions(options: CustomizerOptions) {
+    setCustomizerOptions(options);
+    setShareStatus("idle");
+    setExportError(false);
+  }
+
   async function handleCopyShareLink() {
     const url = new URL(window.location.href);
     url.pathname = "/card";
     url.searchParams.set("user", statsData.user.username);
+    url.searchParams.set("style", customizerOptions.cardStyle);
     if (customizerOptions.themeMode !== "auto") {
       url.searchParams.set("theme", customizerOptions.themeMode);
     } else {
@@ -348,9 +361,12 @@ export default function CardStudioPage() {
         </div>
 
         <section aria-labelledby="studio-preview" className="min-w-0 max-w-[540px] lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <div className="mb-2 flex items-center justify-between gap-3 font-mono text-xs text-site-muted">
-            <h2 id="studio-preview">Card preview</h2>
-            {statsData === INITIAL_DEMO_DATA && <span>Sample data</span>}
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2 font-mono text-xs text-site-muted">
+            <h2 id="studio-preview">{statsData === INITIAL_DEMO_DATA ? "Sample card" : "Card preview"}</h2>
+            <CardStyleToggle
+              value={customizerOptions.cardStyle}
+              onChange={(cardStyle) => updateOptions({ ...customizerOptions, cardStyle })}
+            />
           </div>
           <StatsCard ref={cardRef} data={statsData} customizerOptions={customizerOptions} />
 
@@ -358,6 +374,7 @@ export default function CardStudioPage() {
             <DownloadButton
               cardRef={cardRef}
               username={statsData.user.username}
+              cardStyle={customizerOptions.cardStyle}
               tier={customizerOptions.themeMode === "auto" ? statsData.tier.tier : customizerOptions.themeMode}
               onError={() => setExportError(true)}
               onSuccess={() => setExportError(false)}
@@ -384,14 +401,8 @@ export default function CardStudioPage() {
 
         <CustomizerToolbar
           options={customizerOptions}
-          onChange={(options) => {
-            setCustomizerOptions(options);
-            setShareStatus("idle");
-          }}
-          onReset={() => {
-            setCustomizerOptions(DEFAULT_CARD_OPTIONS);
-            setShareStatus("idle");
-          }}
+          onChange={updateOptions}
+          onReset={() => updateOptions(DEFAULT_CARD_OPTIONS)}
         />
       </div>
     </main>

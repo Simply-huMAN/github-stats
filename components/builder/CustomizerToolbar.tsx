@@ -36,6 +36,9 @@ const themeChoices = [
 
 export function CustomizerToolbar({ options, onChange, onReset }: CustomizerToolbarProps) {
   const [category, setCategory] = useState<(typeof categories)[number]["key"]>("themeMode");
+  const hasBackdrops = options.cardStyle === "showcase";
+  const visibleCategories = hasBackdrops ? categories : categories.filter(({ key }) => key !== "cardBackground");
+  const activeCategory = !hasBackdrops && category === "cardBackground" ? "themeMode" : category;
   const showHeatmap = options.showHeatmap !== false;
 
   const choices = {
@@ -71,11 +74,11 @@ export function CustomizerToolbar({ options, onChange, onReset }: CustomizerTool
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-1 border-b border-site-line pb-3 min-[380px]:grid-cols-4" role="group" aria-label="Appearance settings">
-        {categories.map(({ key, label }) => (
+        {visibleCategories.map(({ key, label }) => (
           <button
             key={key}
             type="button"
-            aria-pressed={category === key}
+            aria-pressed={activeCategory === key}
             onClick={() => setCategory(key)}
             className="rounded-md px-1 py-2 font-mono text-xs text-site-muted hover:text-foreground aria-pressed:bg-site-inset aria-pressed:text-foreground aria-pressed:ring-1 aria-pressed:ring-inset aria-pressed:ring-site-control"
           >
@@ -84,18 +87,18 @@ export function CustomizerToolbar({ options, onChange, onReset }: CustomizerTool
         ))}
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2 min-[480px]:grid-cols-3" role="group" aria-label={categories.find(({ key }) => key === category)?.label}>
-        {choices[category].map(({ id, label, sample }) => (
+      <div className="mt-3 grid grid-cols-2 gap-2 min-[480px]:grid-cols-3" role="group" aria-label={categories.find(({ key }) => key === activeCategory)?.label}>
+        {choices[activeCategory].map(({ id, label, sample }) => (
           <button
             key={id}
             type="button"
-            aria-pressed={options[category] === id}
-            onClick={() => onChange({ ...options, [category]: id })}
+            aria-pressed={options[activeCategory] === id}
+            onClick={() => onChange({ ...options, [activeCategory]: id })}
             className="flex min-h-14 flex-col justify-between gap-2 rounded-md border border-site-line bg-site-inset px-2.5 py-2 text-left text-xs text-site-muted hover:border-site-control hover:text-foreground aria-pressed:border-site-green aria-pressed:text-foreground"
           >
             <span className="flex min-h-5 w-full items-center justify-between gap-1" aria-hidden="true">
               {sample}
-              {options[category] === id && <Check size={13} className="text-site-green" />}
+              {options[activeCategory] === id && <Check size={13} className="text-site-green" />}
             </span>
             {label}
           </button>

@@ -20,7 +20,7 @@ import {
   AVATAR_BADGE_CONFIG,
   CARD_BACKGROUND_CONFIG,
 } from "@/lib/themes/frameStyles";
-import { ContributionHeatmap } from "@/components/ContributionHeatmap";
+import { ContributionHeatmap, getHeatmapPalette } from "@/components/ContributionHeatmap";
 import { BrandMark } from "@/components/BrandMark";
 import { generateSyntheticCalendar } from "@/lib/contributions";
 import { cn } from "@/lib/utils";
@@ -140,10 +140,13 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
   }, [data.tier, stats, forceTier]);
 
   const activeTier = tierDetails.tier;
+  const themeMode = customizerOptions?.themeMode ?? "auto";
+  const isMinimal = customizerOptions?.cardStyle === "minimal";
+  const markColor = getHeatmapPalette(themeMode, activeTier, isMinimal)[4];
 
   // 2. Resolve Active Visual Theme (City Theme vs Tier Theme)
   const resolvedTheme = useMemo(() => {
-    const selectedMode = customizerOptions?.themeMode || "auto";
+    const selectedMode = themeMode;
 
     if (selectedMode !== "auto" && selectedMode in CITY_THEMES) {
       const city = CITY_THEMES[selectedMode as keyof typeof CITY_THEMES];
@@ -188,7 +191,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
       avatarBorder: tierTheme.avatarBorder,
       glowDot: tierTheme.glowDot,
     };
-  }, [customizerOptions?.themeMode, activeTier, tierDetails.badgeLabel]);
+  }, [themeMode, activeTier, tierDetails.badgeLabel]);
 
   // 3. Resolve Avatar Frame & Badge Options
   const frameConfig = AVATAR_FRAME_CONFIG[customizerOptions?.avatarFrame || "squircle"];
@@ -217,8 +220,10 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
     return generateSyntheticCalendar(user.username, stats.activeContributions, stats.publicRepos);
   }, [data.calendar, user.username, stats.activeContributions, stats.publicRepos]);
 
-  if (customizerOptions?.cardBackground === "pure-minimal") {
-    const themeMode = customizerOptions.themeMode;
+  const initials = (user.name || user.username).trim().split(/\s+/)
+    .slice(0, 2).map((word) => word[0]).join("").toUpperCase();
+
+  if (isMinimal) {
     const isCityTheme = Object.hasOwn(CITY_THEMES, themeMode);
     const city = isCityTheme ? CITY_THEMES[themeMode as keyof typeof CITY_THEMES] : undefined;
     const metrics = [
@@ -227,8 +232,6 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
       ["Repos", stats.publicRepos],
       ["Activity", stats.activeContributions],
     ] as const;
-    const initials = (user.name || user.username).trim().split(/\s+/)
-      .slice(0, 2).map((word) => word[0]).join("").toUpperCase();
 
     return (
       <div
@@ -291,7 +294,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
         <div className="mt-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-site-line pt-3 font-mono text-[10px] text-site-muted">
           <span>{city?.name ?? "GitHub stats"}</span>
           <span className="inline-flex items-center gap-1.5">
-            <BrandMark size={11} /> mygitstats.dev
+            <BrandMark size={13} color={markColor} /> mygitstats.dev
           </span>
         </div>
       </div>
@@ -303,7 +306,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
       ref={ref}
       style={{
         backgroundColor: resolvedTheme.baseBgColor,
-        backgroundImage: `${resolvedTheme.ambientBg}, ${resolvedTheme.linearGradient}`,
+        backgroundImage: bgConfig.id === "pure-minimal" ? "none" : `${resolvedTheme.ambientBg}, ${resolvedTheme.linearGradient}`,
         colorScheme: "dark",
       }}
       className={cn(
@@ -330,25 +333,28 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <div className="relative flex-shrink-0">
             {/* User Avatar with selected Frame Shape */}
-            <div className={cn("overflow-hidden transition-all", frameConfig.wrapperClassName)}>
+            <div className={cn("relative grid h-11 w-11 place-items-center overflow-hidden bg-black/40 transition-all sm:h-16 sm:w-16", frameConfig.wrapperClassName)}>
+              <span className="font-mono text-xs" style={{ color: markColor }} aria-hidden="true">{initials}</span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              {avatarSrc && <img
                 key={user.username}
                 src={avatarSrc}
                 alt={user.name || user.username}
                 crossOrigin="anonymous"
                 onError={(e) => {
                   // Fallback to direct avatarUrl if proxy fails
-                  if (e.currentTarget.src !== user.avatarUrl) {
+                  if (e.currentTarget.getAttribute("src") !== user.avatarUrl) {
                     e.currentTarget.src = user.avatarUrl;
+                  } else {
+                    e.currentTarget.hidden = true;
                   }
                 }}
                 className={cn(
-                  "w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 object-cover border-2 shadow-md transition-all",
+                  "absolute inset-0 size-full object-cover border-2 shadow-md transition-all",
                   frameConfig.imgClassName,
                   resolvedTheme.avatarBorder
                 )}
-              />
+              />}
             </div>
 
             {/* Custom Avatar Badge */}
@@ -491,7 +497,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
             resolvedTheme.watermarkColor
           )}
         >
-          <BrandMark size={11} />
+          <BrandMark size={13} color={markColor} />
           <span className="font-semibold tracking-normal lowercase">mygitstats.dev</span>
         </div>
       </div>

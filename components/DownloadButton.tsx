@@ -4,6 +4,7 @@ import React, { useState, useCallback } from "react";
 import { Download, Loader2, CheckCircle2 } from "lucide-react";
 import { toPng } from "html-to-image";
 import { cn } from "@/lib/utils";
+import type { CardStyle } from "@/types/builder";
 
 export interface DownloadButtonProps {
   /**
@@ -14,6 +15,7 @@ export interface DownloadButtonProps {
    * GitHub handle for naming the downloaded PNG
    */
   username: string;
+  cardStyle: CardStyle;
   /**
    * Assigned tier for the badge/filename
    */
@@ -39,6 +41,7 @@ export interface DownloadButtonProps {
 export function DownloadButton({
   cardRef,
   username,
+  cardStyle,
   tier = "tier",
   baseBgColor,
   className,
@@ -62,7 +65,7 @@ export function DownloadButton({
       await new Promise((resolve) => setTimeout(resolve, 120));
 
       const sanitizedUsername = username.replace(/[^a-zA-Z0-9_-]/g, "");
-      const outputFilename = `${sanitizedUsername}-github-${tier.toLowerCase()}-card.png`;
+      const outputFilename = `${sanitizedUsername}-github-${tier.toLowerCase()}-${cardStyle}-card.png`;
 
       // Export high-resolution PNG using html-to-image
       // Setting skipFonts to true prevents Brave Shields / ad blockers from stalling or blocking font requests
@@ -97,7 +100,7 @@ export function DownloadButton({
     } finally {
       setIsExporting(false);
     }
-  }, [cardRef, username, tier, baseBgColor, onSuccess, onError]);
+  }, [cardRef, username, tier, cardStyle, baseBgColor, onSuccess, onError]);
 
   return (
     <button
