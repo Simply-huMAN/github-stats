@@ -21,7 +21,7 @@ export function CardStyleToggle({ value, onChange }: {
           type="button"
           aria-pressed={value === style.value}
           onClick={() => onChange(style.value)}
-          className="min-h-7 rounded px-2.5 font-mono text-xs text-site-muted hover:text-foreground aria-pressed:bg-foreground aria-pressed:text-background"
+          className="min-h-11 rounded px-2.5 font-mono text-xs text-site-muted hover:text-foreground aria-pressed:bg-foreground aria-pressed:text-background sm:min-h-7"
         >
           {style.label}
         </button>

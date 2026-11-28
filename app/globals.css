@@ -58,7 +58,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 42px;
+  min-height: 44px;
   padding: 8px 14px;
   border: 1px solid var(--control-line);
   border-radius: 6px;
@@ -196,10 +196,11 @@ body {
     display: flex;
   }
 
-  .site-nav > a {
+  .site-nav > a,
+  .site-nav > .site-button {
     display: flex;
     align-items: center;
-    min-height: 42px;
+    min-height: 44px;
     padding: 6px 10px;
   }
 }

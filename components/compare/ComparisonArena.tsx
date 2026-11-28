@@ -11,21 +11,17 @@ import { ComparisonMetricsTable } from "./ComparisonMetricsTable";
 import { BattleCardDownload } from "./BattleCardDownload";
 import { ComparisonNotice } from "./ComparisonNotice";
 import {
-  Swords,
+  ArrowRight,
   ArrowLeftRight,
   ArrowUpDown,
   Share2,
+  Link2,
   Check,
-  AlertCircle,
   Loader2,
-  Trophy,
-  Sparkles,
-  Info,
   ChevronDown,
-  ChevronUp,
   RotateCcw,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { BrandMark } from "@/components/BrandMark";
 import { formatComparisonDate } from "@/lib/comparisonFormat";
 
 const CURATED_MATCHUPS = [
@@ -63,13 +59,12 @@ export function ComparisonArena({
   const startedInitialFetch = useRef(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [fallbackShareUrl, setFallbackShareUrl] = useState<string | null>(null);
-  const [showFormulaInfo, setShowFormulaInfo] = useState(false);
 
   const arenaRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const user1InputRef = useRef<HTMLInputElement>(null);
   const user2InputRef = useRef<HTMLInputElement>(null);
-  const shareButtonRef = useRef<HTMLButtonElement>(null);
+  const copyButtonRef = useRef<HTMLButtonElement>(null);
   const shareInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -78,13 +73,6 @@ export function ComparisonArena({
       shareInputRef.current?.select();
     }
   }, [fallbackShareUrl]);
-
-  // Auto-focus second field if field 1 was prefilled via shortcut (e.g. /compare?user1=leerob)
-  useEffect(() => {
-    if (initialUser1 && !initialUser2) {
-      user2InputRef.current?.focus();
-    }
-  }, [initialUser1, initialUser2]);
 
   function handleInput1Change(val: string) {
     setUser1Input(val);
@@ -191,472 +179,239 @@ export function ComparisonArena({
   }
 
   function handleCompareAnother() {
-    formRef.current?.scrollIntoView({ behavior: "smooth" });
-    user1InputRef.current?.focus();
+    formRef.current?.scrollIntoView();
+    user1InputRef.current?.focus({ preventScroll: true });
+  }
+
+  function matchupUrl() {
+    if (!comparison) return null;
+    const u1 = comparison.user1.user.username;
+    const u2 = comparison.user2.user.username;
+    return `${window.location.origin}/compare/${encodeURIComponent(u1)}/vs/${encodeURIComponent(u2)}`;
   }
 
   async function handleShare() {
-    if (!comparison || typeof window === "undefined") return;
-    const u1 = comparison.user1.user.username;
-    const u2 = comparison.user2.user.username;
-    const shareUrl = `${window.location.origin}/compare/${encodeURIComponent(u1)}/vs/${encodeURIComponent(u2)}`;
-    const title = `${u1} vs ${u2} — GitHub Developer Showdown`;
-    const text = `Check out this GitHub developer battle: ${u1} vs ${u2} on MyGitStats!`;
-
-    // Try native Mobile Share Sheet first (iOS Safari / Android Chrome)
-    if (navigator?.share) {
+    const url = matchupUrl();
+    if (!url || !comparison) return;
+    const title = `${comparison.user1.user.username} vs ${comparison.user2.user.username} | MyGitStats`;
+    if (navigator.share) {
       try {
-        await navigator.share({ title, text, url: shareUrl });
+        await navigator.share({ title, url });
         return;
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
       }
     }
+    await copyMatchupLink();
+  }
 
+  async function copyMatchupLink() {
+    const url = matchupUrl();
+    if (!url) return;
     try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareUrl);
-        setCopiedLink(true);
-        setTimeout(() => setCopiedLink(false), 2500);
-      } else {
-        throw new Error("Clipboard API unavailable");
-      }
+      await navigator.clipboard.writeText(url);
+      setCopiedLink(true);
+      setFallbackShareUrl(null);
+      setTimeout(() => setCopiedLink(false), 2500);
     } catch {
-      // Fallback: offer a selectable link input dialog if clipboard writing fails
-      setFallbackShareUrl(shareUrl);
+      setFallbackShareUrl(url);
     }
   }
 
+  const handleCompareWith = (username: string) => {
+    setUser1Input(username);
+    setUser2Input("");
+    setFeedback({});
+    formRef.current?.scrollIntoView();
+    user2InputRef.current?.focus({ preventScroll: true });
+  };
+
+  const inputs = [
+    { id: "contender1", label: "Profile 1", ref: user1InputRef, value: user1Input, error: user1Error, onChange: handleInput1Change },
+    { id: "contender2", label: "Profile 2", ref: user2InputRef, value: user2Input, error: user2Error, onChange: handleInput2Change },
+  ];
+
   return (
-    <div className="w-full flex flex-col items-center">
-      {/* SIMPLIFIED FORM */}
+    <div className="w-full space-y-6 sm:space-y-8">
       <form
         ref={formRef}
         onSubmit={handleSubmit}
         noValidate
         aria-busy={isLoading}
-        className="w-full max-w-3xl mb-6 sm:mb-8 p-4 sm:p-5 rounded-2xl border border-zinc-800 bg-zinc-950/90 backdrop-blur-xl shadow-2xl flex flex-col gap-3"
+        className="scroll-mt-24 rounded-lg border border-site-line bg-site-panel p-3 sm:p-5"
       >
-        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2.5">
-          <span className="text-xs sm:text-sm font-semibold text-zinc-300">
-            Compare two GitHub profiles
-          </span>
+        <div className="grid grid-cols-[minmax(0,1fr)_44px] items-start gap-3 sm:grid-cols-[minmax(0,1fr)_44px_minmax(0,1fr)_auto]">
+          {inputs.map(({ id, label, ref, value, error, onChange }, index) => (
+            <div key={id} className={index === 0 ? "min-w-0" : "col-start-1 row-start-2 min-w-0 sm:col-start-3 sm:row-start-1"}>
+              <label htmlFor={id} className="mb-2 block font-mono text-xs text-site-muted">{label}</label>
+              <input
+                id={id}
+                ref={ref}
+                type="text"
+                disabled={isLoading}
+                autoCapitalize="none"
+                spellCheck={false}
+                value={value}
+                onChange={(event) => onChange(event.target.value)}
+                placeholder="Username or GitHub URL"
+                aria-describedby={error ? id + "-error" : undefined}
+                aria-invalid={Boolean(error)}
+                className="site-input font-mono aria-invalid:border-rose-400"
+                required
+              />
+              {error && (
+                <p id={id + "-error"} role="alert" className="mt-2 text-xs leading-relaxed text-rose-300 [overflow-wrap:anywhere]">{error}</p>
+              )}
+            </div>
+          ))}
           <button
             type="button"
-            onClick={handleTryRandomExample}
+            onClick={handleSwap}
             disabled={isLoading}
-            className="inline-flex items-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors active:scale-95"
+            className="site-button col-start-2 row-span-2 row-start-1 min-h-11 w-11 self-center px-0 sm:row-span-1 sm:mt-6 sm:self-start"
+            title="Swap profiles"
+            aria-label="Swap profiles"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>Try an example</span>
+            <ArrowUpDown size={16} className="sm:hidden" aria-hidden="true" />
+            <ArrowLeftRight size={16} className="hidden sm:block" aria-hidden="true" />
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="site-button site-button-primary col-span-2 min-h-11 sm:col-span-1 sm:col-start-4 sm:row-start-1 sm:mt-6"
+          >
+            {isLoading ? <Loader2 size={16} className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <ArrowRight size={16} aria-hidden="true" />}
+            Compare profiles
           </button>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full">
-          {/* Contender 1 Input with connected label and aria tags */}
-          <div className="relative flex-1 min-w-0 max-w-full w-full flex flex-col">
-            <label
-              htmlFor="contender1-input"
-              className="text-[11px] font-mono font-bold text-indigo-400 mb-1"
-            >
-              Contender 1
-            </label>
-            <input
-              id="contender1-input"
-              ref={user1InputRef}
-              type="text"
-              disabled={isLoading}
-              autoCapitalize="none"
-              spellCheck={false}
-              value={user1Input}
-              onChange={(e) => handleInput1Change(e.target.value)}
-              placeholder="Username or GitHub URL"
-              aria-describedby={user1Error ? "contender1-error" : undefined}
-              aria-invalid={Boolean(user1Error)}
-              className={cn(
-                "w-full px-3.5 sm:px-4 py-2.5 rounded-xl bg-zinc-900 border text-white placeholder-zinc-500 font-mono text-base sm:text-sm min-h-[44px] focus:outline-none focus:ring-2",
-                user1Error
-                  ? "border-rose-500 focus:ring-rose-500/50"
-                  : "border-zinc-700/60 focus:ring-indigo-500/50 focus:border-indigo-500"
-              )}
-              required
-            />
-            {user1Error && (
-              <span
-                id="contender1-error"
-                role="alert"
-                className="mt-1.5 flex items-start gap-1.5 text-xs leading-relaxed text-rose-300 [overflow-wrap:anywhere]"
-              >
-                <AlertCircle aria-hidden="true" className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                <span className="min-w-0">{user1Error}</span>
-              </span>
-            )}
-          </div>
-
-          {/* Swap Button (Min 44px tap target on mobile and desktop) */}
-          <div className="flex sm:flex-col items-center justify-center pt-0 sm:pt-4 shrink-0">
-            <button
-              type="button"
-              onClick={handleSwap}
-              disabled={isLoading}
-              className="p-3 sm:p-2.5 rounded-xl border border-zinc-700/60 bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0 shadow-sm"
-              title="Swap contenders"
-              aria-label="Swap contenders"
-            >
-              <ArrowUpDown className="w-4 h-4 sm:hidden text-amber-400" />
-              <ArrowLeftRight className="w-4 h-4 hidden sm:block text-amber-400" />
-            </button>
-          </div>
-
-          {/* Contender 2 Input with connected label and aria tags */}
-          <div className="relative flex-1 min-w-0 max-w-full w-full flex flex-col">
-            <label
-              htmlFor="contender2-input"
-              className="text-[11px] font-mono font-bold text-amber-400 mb-1"
-            >
-              Contender 2
-            </label>
-            <input
-              id="contender2-input"
-              ref={user2InputRef}
-              type="text"
-              disabled={isLoading}
-              autoCapitalize="none"
-              spellCheck={false}
-              value={user2Input}
-              onChange={(e) => handleInput2Change(e.target.value)}
-              placeholder="Username or GitHub URL"
-              aria-describedby={user2Error ? "contender2-error" : undefined}
-              aria-invalid={Boolean(user2Error)}
-              className={cn(
-                "w-full px-3.5 sm:px-4 py-2.5 rounded-xl bg-zinc-900 border text-white placeholder-zinc-500 font-mono text-base sm:text-sm min-h-[44px] focus:outline-none focus:ring-2",
-                user2Error
-                  ? "border-rose-500 focus:ring-rose-500/50"
-                  : "border-zinc-700/60 focus:ring-amber-500/50 focus:border-amber-500"
-              )}
-              required
-            />
-            {user2Error && (
-              <span
-                id="contender2-error"
-                role="alert"
-                className="mt-1.5 flex items-start gap-1.5 text-xs leading-relaxed text-rose-300 [overflow-wrap:anywhere]"
-              >
-                <AlertCircle aria-hidden="true" className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                <span className="min-w-0">{user2Error}</span>
-              </span>
-            )}
-          </div>
-
-          {/* Compare Profiles Button */}
-          <div className="pt-0 sm:pt-4 shrink-0">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="site-button site-button-primary min-h-[44px] w-full shrink-0 sm:w-auto"
-            >
-              {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-zinc-950" />
-              ) : (
-                <Swords className="w-4 h-4 text-zinc-950" />
-              )}
-              <span>Compare profiles</span>
-            </button>
-          </div>
-        </div>
+        <button type="button" onClick={handleTryRandomExample} disabled={isLoading} className="mt-2 min-h-11 rounded text-sm text-site-muted underline decoration-site-control underline-offset-4 hover:text-foreground disabled:opacity-50">
+          Try an example
+        </button>
       </form>
 
       {notice && !isLoading && (
-        <div className="mb-6 w-full max-w-3xl">
-          <ComparisonNotice
-            title={notice.title}
-            action={
-              <button type="button" onClick={() => formRef.current?.requestSubmit()}
-                className="min-h-[44px] rounded-lg border border-zinc-700 bg-zinc-900 px-3 text-sm font-semibold text-white hover:bg-zinc-800">
-                Retry
-              </button>
-            }
-          >
-            <p>{notice.retryAt ? <>Try again after <time dateTime={notice.retryAt}>{formatComparisonDate(notice.retryAt)}</time>.</> : notice.message}</p>
-          </ComparisonNotice>
-        </div>
+        <ComparisonNotice
+          title={notice.title}
+          action={<button type="button" onClick={() => formRef.current?.requestSubmit()} className="site-button min-h-11">Retry</button>}
+        >
+          <p>{notice.retryAt ? <>Try again after <time dateTime={notice.retryAt}>{formatComparisonDate(notice.retryAt)}</time>.</> : notice.message}</p>
+        </ComparisonNotice>
       )}
 
-      {/* Loading Skeleton */}
       {isLoading && (
-        <div role="status" className="w-full max-w-4xl py-12 sm:py-16 flex flex-col items-center justify-center gap-3 sm:gap-4">
-          <div className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 animate-pulse shadow-glow-gold">
-            <Swords className="w-7 h-7 sm:w-8 sm:h-8 text-amber-400 animate-bounce" />
-          </div>
-          <p className="text-xs sm:text-sm font-mono text-zinc-400 text-center px-4">
-            Comparing GitHub profiles…
-          </p>
-        </div>
+        <p role="status" className="flex items-center gap-2 border-t border-site-line py-5 font-mono text-xs text-site-muted">
+          <Loader2 size={15} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />
+          Comparing GitHub profiles…
+        </p>
       )}
 
-      {/* RESULT AND ACTIONS FIRST */}
       {!isLoading && comparison && (
-        <div className="w-full max-w-4xl flex flex-col gap-4 sm:gap-6 animate-fade-in">
-          {/* Top Result & Action Bar (Above Profile Cards) */}
-          <div
-            className={cn(
-              "w-full p-4 sm:p-5 rounded-lg border bg-site-panel text-center flex flex-col items-center",
-              comparison.summary.winnerWithheld
-                ? "border-amber-500/40 text-amber-300"
-                : comparison.summary.overallWinner === 1
-                ? "border-indigo-500/40"
-                : comparison.summary.overallWinner === 2
-                ? "border-amber-500/40"
-                : "border-site-line"
-            )}
-          >
-            {/* Contender Handles */}
-            <div className="flex items-center justify-center gap-2 text-xs sm:text-sm font-mono font-bold mb-1.5 flex-wrap px-2">
-              <span className="text-indigo-400 break-all">@{comparison.user1.user.username}</span>
-              <span className="text-zinc-500 font-mono text-xs font-normal">vs</span>
-              <span className="text-amber-400 break-all">@{comparison.user2.user.username}</span>
-            </div>
+        <section aria-labelledby="matchup-result">
+          <div ref={arenaRef} className="min-w-0 space-y-5 bg-background">
+            <div className="rounded-lg border border-site-line bg-site-panel p-4 sm:p-5">
+              <p className="mb-2 font-mono text-xs text-site-muted [overflow-wrap:anywhere]">
+                @{comparison.user1.user.username} <span className="px-1">vs</span> @{comparison.user2.user.username}
+              </p>
+              <h2 id="matchup-result" className="text-xl font-semibold leading-tight tracking-tight [overflow-wrap:anywhere] sm:text-2xl">
+                {comparison.summary.winnerWithheld ? "Winner unavailable" : comparison.summary.headline}
+              </h2>
 
-            {/* Tiebreaker / Win Headline */}
-            {!comparison.summary.winnerWithheld && <div
-              className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold mb-2 border",
-                comparison.summary.overallWinner === 1
-                  ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-300"
-                  : comparison.summary.overallWinner === 2
-                  ? "bg-amber-500/15 border-amber-500/30 text-amber-300"
-                  : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400"
+              {!comparison.summary.isComplete && (
+                <div className="mt-3">
+                  <ComparisonNotice tone="warning" title="Some GitHub stats are unavailable">
+                    <p>{comparison.summary.winnerWithheld
+                      ? "The missing stats could change the outcome. You can still explore the available metrics below."
+                      : "The available stats are enough to determine the winner. Missing values are marked below."}</p>
+                  </ComparisonNotice>
+                </div>
               )}
-            >
-              <Trophy
-                className={cn(
-                  "w-3.5 h-3.5",
-                  comparison.summary.overallWinner === 1
-                    ? "text-indigo-400"
-                    : comparison.summary.overallWinner === 2
-                    ? "text-amber-400"
-                    : "text-zinc-400"
-                )}
-              />
-              <span>{comparison.summary.isTiebreaker ? "Tier-score tiebreaker" : comparison.summary.winMargin}</span>
-            </div>}
 
-            <h2 className="max-w-full text-base sm:text-2xl font-extrabold text-white tracking-tight px-2 [overflow-wrap:anywhere]">
-              {comparison.summary.winnerWithheld ? "Winner unavailable" : comparison.summary.headline}
-            </h2>
-            {!comparison.summary.isComplete && (
-              <div className="mt-3 w-full max-w-lg">
-                <ComparisonNotice tone="warning" title="Some GitHub stats are unavailable">
-                  <p>{comparison.summary.winnerWithheld
-                    ? "The missing stats could change the outcome. You can still explore the available metrics below."
-                    : "The available stats are enough to determine the winner. Missing values are marked below."}</p>
-                </ComparisonNotice>
+              <div data-export-ignore="true" className="mt-4 flex flex-wrap items-start gap-2">
+                <button type="button" onClick={handleShare} aria-label="Share matchup" className="site-button min-h-11">
+                  <Share2 size={15} aria-hidden="true" /> Share
+                </button>
+                <button type="button" onClick={copyMatchupLink} ref={copyButtonRef} className="site-button min-h-11">
+                  {copiedLink ? <Check size={15} className="text-site-green" aria-hidden="true" /> : <Link2 size={15} aria-hidden="true" />}
+                  <span aria-live="polite">{copiedLink ? "Link copied" : "Copy link"}</span>
+                </button>
+                <BattleCardDownload arenaRef={arenaRef} user1={comparison.user1.user.username} user2={comparison.user2.user.username} />
+                <button type="button" onClick={handleCompareAnother} className="site-button min-h-11">
+                  <RotateCcw size={15} aria-hidden="true" /> Compare another
+                </button>
               </div>
-            )}
-
-            {/* Top Action Buttons (Next to Summary) */}
-            <div className="mt-3 flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
-              <button
-                type="button"
-                onClick={handleShare}
-                ref={shareButtonRef}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-semibold text-xs transition-all active:scale-95 shadow-sm min-h-[44px]"
-              >
-                {copiedLink ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-emerald-400 font-bold">Copied Link!</span>
-                  </>
-                ) : (
-                  <>
-                    <Share2 className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>Share Matchup</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleCompareAnother}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-semibold text-xs transition-all active:scale-95 shadow-sm min-h-[44px]"
-              >
-                <RotateCcw className="w-3.5 h-3.5 text-zinc-400" />
-                <span>Compare another</span>
-              </button>
-
-              <BattleCardDownload
-                arenaRef={arenaRef}
-                user1={comparison.user1.user.username}
-                user2={comparison.user2.user.username}
-                className="py-1.5 px-3.5 text-xs"
-              />
+              {fallbackShareUrl && (
+                <div data-export-ignore="true" className="mt-3">
+                  <ComparisonNotice
+                    title="Copy the matchup link"
+                    tone="warning"
+                    action={<button type="button" className="site-button min-h-11" onClick={() => {
+                      setFallbackShareUrl(null);
+                      copyButtonRef.current?.focus();
+                    }}>Done</button>}
+                  >
+                    <input ref={shareInputRef} readOnly aria-label="Matchup link" value={fallbackShareUrl}
+                      onFocus={(event) => event.currentTarget.select()}
+                      className="site-input mt-2 font-mono" />
+                  </ComparisonNotice>
+                </div>
+              )}
             </div>
-            {fallbackShareUrl && (
-              <div className="mt-3 w-full max-w-lg">
-                <ComparisonNotice title="Copy the matchup link" tone="warning"
-                  action={
-                    <button type="button" className="min-h-[44px] px-2 text-sm text-zinc-300 hover:text-white"
-                      onClick={() => {
-                        setFallbackShareUrl(null);
-                        shareButtonRef.current?.focus();
-                      }}>
-                      Done
-                    </button>
-                  }
-                >
-                  <p>Automatic sharing is unavailable. Select the link to copy it.</p>
-                  <input ref={shareInputRef} readOnly aria-label="Matchup link" value={fallbackShareUrl}
-                    onFocus={(e) => e.currentTarget.select()}
-                    className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 font-mono text-xs text-zinc-200" />
-                </ComparisonNotice>
-              </div>
-            )}
 
-            {/* Quick Referral Prompt for Incoming Visitors */}
-            <div className="mt-3 pt-3 border-t border-zinc-800/80 flex items-center justify-center gap-2 text-xs font-mono text-zinc-400 flex-wrap">
-              <span className="text-zinc-500 text-[11px]">Compare your profile:</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setUser1Input(comparison.user1.user.username);
-                  setUser2Input("");
-                  formRef.current?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="px-2 py-0.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] transition-colors"
-              >
-                vs @{comparison.user1.user.username}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setUser1Input(comparison.user2.user.username);
-                  setUser2Input("");
-                  formRef.current?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="px-2 py-0.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] transition-colors"
-              >
-                vs @{comparison.user2.user.username}
-              </button>
+            <div className="grid min-w-0 grid-cols-2 gap-2.5 sm:gap-4">
+              {[comparison.user1, comparison.user2].map((profile, index) => (
+                <ComparisonCard
+                  key={profile.user.username}
+                  data={profile}
+                  isOverallWinner={comparison.summary.overallWinner === index + 1}
+                  contenderLabel={`Profile ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            <ComparisonMetricsTable metrics={comparison.metrics} user1Name={comparison.user1.user.username} user2Name={comparison.user2.user.username} />
+
+            <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 border-t border-site-line pt-3 font-mono text-[11px] text-site-muted">
+              <span className="inline-flex items-center gap-1.5"><BrandMark size={13} color="#39d353" /> mygitstats.dev</span>
+              <time dateTime={comparison.comparedAt}>Compared {formatComparisonDate(comparison.comparedAt)}</time>
             </div>
           </div>
 
-          {/* Exportable Battle Arena Ref Target */}
-          <div
-            ref={arenaRef}
-            className="w-full p-3 sm:p-6 rounded-2xl sm:rounded-3xl border border-zinc-800 bg-[#070709] shadow-2xl flex flex-col gap-4 sm:gap-6"
-          >
-            {/* Contender Cards Face-Off Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 relative">
-              {/* User 1 Card (Indigo Theme) */}
-              <ComparisonCard
-                data={comparison.user1}
-                isOverallWinner={comparison.summary.overallWinner === 1}
-                winsCount={comparison.summary.user1Wins}
-                contenderLabel="Contender 1"
-                colorTheme="indigo"
-              />
-
-              {/* Desktop Central Floating VS Badge */}
-              <div
-                data-export-ignore="false"
-                className="hidden md:flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 items-center justify-center w-12 h-12 rounded-full bg-zinc-950 border-2 border-indigo-500/40 shadow-xl shadow-indigo-500/20 text-white font-extrabold font-mono text-sm"
-              >
-                VS
-              </div>
-
-              {/* Mobile Centered VS Divider */}
-              <div className="flex md:hidden items-center justify-center -my-1 z-10">
-                <span className="px-3 py-0.5 rounded-full bg-zinc-900 border border-zinc-700 text-[11px] font-mono font-bold text-zinc-300 shadow-md">
-                  VS
-                </span>
-              </div>
-
-              {/* User 2 Card (Amber / Yellow-Orange Theme) */}
-              <ComparisonCard
-                data={comparison.user2}
-                isOverallWinner={comparison.summary.overallWinner === 2}
-                winsCount={comparison.summary.user2Wins}
-                contenderLabel="Contender 2"
-                colorTheme="amber"
-              />
+          <details className="group mt-6 rounded-lg border border-site-line bg-site-panel px-3 sm:px-4">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded py-2 text-sm font-medium [&::-webkit-details-marker]:hidden">
+              How is the winner calculated?
+              <ChevronDown size={16} className="shrink-0 text-site-muted group-open:rotate-180" aria-hidden="true" />
+            </summary>
+            <div className="space-y-2 border-t border-site-line py-3 text-sm leading-relaxed text-site-muted">
+              <p>The profile that leads in more categories wins. If both lead in the same number of categories, the higher tier score breaks the tie. Matching tier scores result in a tie.</p>
+              <p className="font-mono text-xs">Tier score = stars × 3 + followers × 1.5 + min(public repos, 50) + recent contributions × 0.5</p>
+              <p>Recent activity is estimated from up to 100 public events per profile. If missing stats could change the outcome, the winner is withheld.</p>
             </div>
+          </details>
 
-            {/* Metrics Breakdown Table */}
-            <ComparisonMetricsTable
-              metrics={comparison.metrics}
-              user1Name={comparison.user1.user.name || comparison.user1.user.username}
-              user2Name={comparison.user2.user.name || comparison.user2.user.username}
-            />
-
-            {/* Watermark & Accurate Data Ingestion Details */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-1 text-[10px] sm:text-[11px] font-mono text-zinc-500 pt-2 border-t border-zinc-900">
-              <span>mygitstats.dev</span>
-              <time dateTime={comparison.comparedAt}>
-                Compared {formatComparisonDate(comparison.comparedAt)}
-              </time>
-            </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="text-xs text-site-muted">Compare your profile</span>
+            {[comparison.user1, comparison.user2].map(({ user }) => (
+              <button key={user.username} type="button" onClick={() => handleCompareWith(user.username)} className="site-button min-h-11 max-w-full [overflow-wrap:anywhere]">
+                vs @{user.username}
+              </button>
+            ))}
           </div>
-
-          {/* Transparent Scoring Formula Accordion */}
-          <div className="w-full rounded-xl border border-zinc-800/80 bg-zinc-950/60 p-3 text-xs text-zinc-400">
-            <button
-              type="button"
-              onClick={() => setShowFormulaInfo(!showFormulaInfo)}
-              aria-expanded={showFormulaInfo}
-              className="w-full flex items-center justify-between text-left font-mono text-zinc-400 hover:text-zinc-200 transition-colors"
-            >
-              <span className="flex items-center gap-1.5 font-semibold">
-                <Info className="hidden sm:inline-block w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                How are showdown winners & tier scores calculated?
-              </span>
-              {showFormulaInfo ? <ChevronUp className="w-4 h-4 shrink-0" /> : <ChevronDown className="w-4 h-4 shrink-0" />}
-            </button>
-
-            {showFormulaInfo && (
-              <div className="mt-3 pt-3 border-t border-zinc-800/80 space-y-2 text-zinc-400 font-sans leading-relaxed">
-                <p>
-                  <strong>Category Victories:</strong> The showdown winner is determined by majority category wins across 6 metrics (Tier Score, Stars, Followers, Contributions, Repositories, Seniority).
-                </p>
-                <p>
-                  <strong>Tiebreaker Rule:</strong> If category wins are equal, the match tie is broken by the overall <strong>Performance Tier Score</strong>. If tier scores are also identical, the match is ruled a dead heat.
-                </p>
-                <p>
-                  <strong>Tier Score Formula:</strong>{" "}
-                  <code className="text-zinc-300 font-mono text-[11px] bg-zinc-900 px-1 py-0.5 rounded">
-                    Score = (Total Stars × 3.0) + (Followers × 1.5) + (min(Public Repos, 50) × 1.0) + (Active Contributions × 0.5)
-                  </code>
-                </p>
-                <p className="text-[11px] text-zinc-500">
-                  Recent activity is estimated from up to 100 public events per user. When missing data could change the outcome, the comparison withholds the winner.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+        </section>
       )}
 
-      {/* Popular Open-Source Showdowns */}
-      <div className="w-full max-w-4xl mt-10 sm:mt-12 pt-6 sm:pt-8 border-t border-zinc-800/80">
-        <h3 className="text-xs sm:text-sm font-mono uppercase tracking-wider font-bold text-zinc-400 mb-3">
-          Popular Open-Source Showdowns
-        </h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
-          {CURATED_MATCHUPS.map((match) => (
-            <button
-              key={`${match.u1}-${match.u2}`}
-              onClick={() => handleSelectMatchup(match.u1, match.u2)}
-              disabled={isLoading}
-              className="p-3 rounded-xl border border-zinc-800/80 bg-zinc-950 hover:bg-zinc-900/80 hover:border-amber-500/40 text-left transition-all group flex flex-col gap-0.5"
-            >
-              <span className="text-xs font-bold text-zinc-200 group-hover:text-amber-300 transition-colors truncate">
-                {match.u1} <span className="text-zinc-500 font-normal">vs</span> {match.u2}
-              </span>
-              <span className="text-[11px] text-zinc-500 line-clamp-1">{match.label}</span>
+      <section aria-labelledby="example-matchups" className="border-t border-site-line pt-5">
+        <h2 id="example-matchups" className="mb-3 text-sm font-semibold">Example matchups</h2>
+        <div className="grid gap-2 sm:grid-cols-3">
+          {CURATED_MATCHUPS.map(({ u1, u2, label }) => (
+            <button key={u1} type="button" onClick={() => handleSelectMatchup(u1, u2)} disabled={isLoading}
+              className="min-h-11 rounded-lg border border-site-line bg-site-panel px-3 py-2.5 text-left hover:border-site-control disabled:opacity-50">
+              <span className="block font-mono text-xs">{u1} <span className="text-site-muted">vs</span> {u2}</span>
+              <span className="mt-1 block text-xs text-site-muted">{label}</span>
             </button>
           ))}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
