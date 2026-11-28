@@ -5,6 +5,7 @@ import { Footer } from "@/components/navigation/Footer";
 import "./globals.css";
 
 const BASE_URL = "https://mygitstats.dev";
+const SITE_DESCRIPTION = "Create a stats card from a public GitHub profile. Choose a city theme, download a PNG, or share your card.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -13,8 +14,7 @@ export const metadata: Metadata = {
     default: "MyGitStats — Developer Stats Cards & GitHub Wrapped",
     template: "%s | MyGitStats",
   },
-  description:
-    "Turn your GitHub activity into beautiful developer performance tier cards, city-themed profiles, and shareable annual Wrapped stories.",
+  description: SITE_DESCRIPTION,
   keywords: [
     "GitHub stats",
     "GitHub stats card",
@@ -53,8 +53,7 @@ export const metadata: Metadata = {
     url: BASE_URL,
     siteName: "MyGitStats",
     title: "MyGitStats — Developer Stats Cards & GitHub Wrapped",
-    description:
-      "Turn your GitHub activity into beautiful developer performance tier cards, city-themed profiles, and shareable annual Wrapped stories.",
+    description: SITE_DESCRIPTION,
     images: [
       {
         url: "/og-image.png",
@@ -68,8 +67,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MyGitStats — Developer Stats Cards & GitHub Wrapped",
-    description:
-      "Turn your GitHub activity into beautiful developer performance tier cards, city-themed profiles, and shareable annual Wrapped stories.",
+    description: SITE_DESCRIPTION,
     images: ["/og-image.png"],
   },
   robots: {
@@ -99,8 +97,7 @@ const jsonLd = [
     name: "MyGitStats",
     alternateName: ["mygitstats.dev", "MyGitStats App", "MyGitStats Developer Cards"],
     url: BASE_URL,
-    description:
-      "Turn your GitHub activity into beautiful developer performance tier cards, city-themed profiles, and shareable annual Wrapped stories.",
+    description: SITE_DESCRIPTION,
     sameAs: ["https://github.com/Simply-huMAN/github-stats"],
   },
   {
@@ -109,8 +106,7 @@ const jsonLd = [
     name: "MyGitStats",
     url: BASE_URL,
     sameAs: ["https://github.com/Simply-huMAN/github-stats"],
-    description:
-      "Turn your GitHub activity into beautiful developer performance tier cards, city-themed profiles, and shareable annual Wrapped stories.",
+    description: SITE_DESCRIPTION,
     applicationCategory: "DeveloperApplication",
     operatingSystem: "All",
     featureList: [

@@ -353,7 +353,7 @@ export function ComparisonArena({
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-extrabold text-sm min-h-[44px] flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-95 transition-all shrink-0"
+              className="site-button site-button-primary min-h-[44px] w-full shrink-0 sm:w-auto"
             >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin text-zinc-950" />
@@ -400,14 +400,14 @@ export function ComparisonArena({
           {/* Top Result & Action Bar (Above Profile Cards) */}
           <div
             className={cn(
-              "w-full p-4 sm:p-5 rounded-2xl border text-center flex flex-col items-center shadow-lg transition-all",
+              "w-full p-4 sm:p-5 rounded-lg border bg-site-panel text-center flex flex-col items-center",
               comparison.summary.winnerWithheld
-                ? "border-amber-500/40 bg-zinc-950/90 text-amber-300"
+                ? "border-amber-500/40 text-amber-300"
                 : comparison.summary.overallWinner === 1
-                ? "border-indigo-500/40 bg-gradient-to-r from-indigo-950/50 via-zinc-950 to-indigo-950/20 shadow-indigo-950/40"
+                ? "border-indigo-500/40"
                 : comparison.summary.overallWinner === 2
-                ? "border-amber-500/40 bg-gradient-to-r from-amber-950/50 via-zinc-950 to-orange-950/20 shadow-amber-950/40"
-                : "border-zinc-800 bg-zinc-950/80 shadow-black/40"
+                ? "border-amber-500/40"
+                : "border-site-line"
             )}
           >
             {/* Contender Handles */}
