@@ -20,7 +20,8 @@ import {
   AVATAR_BADGE_CONFIG,
   CARD_BACKGROUND_CONFIG,
 } from "@/lib/themes/frameStyles";
-import { ContributionHeatmap } from "@/components/ContributionHeatmap";
+import { ContributionHeatmap, getHeatmapPalette } from "@/components/ContributionHeatmap";
+import { BrandMark } from "@/components/BrandMark";
 import { generateSyntheticCalendar } from "@/lib/contributions";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +39,7 @@ function formatNumber(num: number): string {
   if (num >= 1_000) {
     return (num / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
   }
-  return num.toLocaleString();
+  return num.toLocaleString("en-US");
 }
 
 const TIER_THEME_CONFIG: Record<
@@ -123,6 +124,22 @@ const TIER_THEME_CONFIG: Record<
   },
 };
 
+const SITE_GREEN_THEME = {
+  baseBgColor: "#0e1216",
+  linearGradient: "linear-gradient(145deg, #101b15, #0e1216 60%, #0a0c0e)",
+  ambientBg: "radial-gradient(circle at 12% 12%, rgba(57, 211, 83, 0.14), transparent 48%)",
+  outerContainer: "border border-[#345242] text-foreground",
+  borderGlow: "shadow-[0_12px_32px_-20px_rgba(57,211,83,0.35)]",
+  topStripe: "bg-site-green",
+  badgeStyle: "border border-[#345242] bg-[#122319] text-site-green",
+  accentGradient: "text-site-green",
+  metricCardBg: "border border-site-line bg-site-inset",
+  metricIconColor: "text-site-green",
+  watermarkColor: "text-site-muted",
+  avatarBorder: "border-[#345242]",
+  glowDot: "bg-[#183322] text-site-green",
+};
+
 export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function StatsCard(
   { data, className, forceTier, customizerOptions },
   ref
@@ -139,55 +156,17 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
   }, [data.tier, stats, forceTier]);
 
   const activeTier = tierDetails.tier;
+  const themeMode = customizerOptions?.themeMode ?? "auto";
+  const isMinimal = customizerOptions?.cardStyle === "minimal";
+  const markColor = getHeatmapPalette(themeMode, activeTier)[4];
 
-  // 2. Resolve Active Visual Theme (City Theme vs Tier Theme)
+  // Resolve the card palette independently of its layout and tier.
   const resolvedTheme = useMemo(() => {
-    const selectedMode = customizerOptions?.themeMode || "auto";
-
-    if (selectedMode !== "auto" && selectedMode in CITY_THEMES) {
-      const city = CITY_THEMES[selectedMode as keyof typeof CITY_THEMES];
-      return {
-        baseBgColor: city.baseBgColor,
-        linearGradient: city.linearGradient,
-        outerContainer: city.outerContainer,
-        ambientBg: city.ambientBg,
-        borderGlow: city.borderGlow,
-        topStripe: city.topStripe,
-        badgeStyle: city.badgeStyle,
-        badgeLabel: tierDetails.badgeLabel || `${activeTier} Tier`,
-        accentColor: city.accentColor,
-        accentGradient: city.accentGradient,
-        metricCardBg: city.metricCardBg,
-        metricIconColor: city.metricIconColor,
-        watermarkColor: city.watermarkColor,
-        avatarBorder: city.avatarBorder,
-        glowDot: city.glowDot,
-      };
-    }
-
-    const tierTheme =
-      selectedMode !== "auto" && (selectedMode === "Bronze" || selectedMode === "Gold" || selectedMode === "Mythic")
-        ? TIER_THEME_CONFIG[selectedMode]
-        : TIER_THEME_CONFIG[activeTier];
-
-    return {
-      baseBgColor: tierTheme.baseBgColor,
-      linearGradient: tierTheme.linearGradient,
-      outerContainer: tierTheme.outerContainer,
-      ambientBg: tierTheme.ambientBg,
-      borderGlow: tierTheme.borderGlow,
-      topStripe: tierTheme.topStripe,
-      badgeStyle: tierTheme.badgeStyle,
-      badgeLabel: tierDetails.badgeLabel || `${activeTier} Tier`,
-      accentColor: tierTheme.accentColor,
-      accentGradient: tierTheme.accentGradient,
-      metricCardBg: tierTheme.metricCardBg,
-      metricIconColor: tierTheme.metricIconColor,
-      watermarkColor: tierTheme.watermarkColor,
-      avatarBorder: tierTheme.avatarBorder,
-      glowDot: tierTheme.glowDot,
-    };
-  }, [customizerOptions?.themeMode, activeTier, tierDetails.badgeLabel]);
+    if (themeMode === "site-green") return SITE_GREEN_THEME;
+    if (Object.hasOwn(CITY_THEMES, themeMode)) return CITY_THEMES[themeMode as keyof typeof CITY_THEMES];
+    if (themeMode === "Bronze" || themeMode === "Gold" || themeMode === "Mythic") return TIER_THEME_CONFIG[themeMode];
+    return TIER_THEME_CONFIG[activeTier];
+  }, [themeMode, activeTier]);
 
   // 3. Resolve Avatar Frame & Badge Options
   const frameConfig = AVATAR_FRAME_CONFIG[customizerOptions?.avatarFrame || "squircle"];
@@ -216,12 +195,93 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
     return generateSyntheticCalendar(user.username, stats.activeContributions, stats.publicRepos);
   }, [data.calendar, user.username, stats.activeContributions, stats.publicRepos]);
 
+  const initials = (user.name || user.username).trim().split(/\s+/)
+    .slice(0, 2).map((word) => word[0]).join("").toUpperCase();
+
+  if (isMinimal) {
+    const isCityTheme = Object.hasOwn(CITY_THEMES, themeMode);
+    const city = isCityTheme ? CITY_THEMES[themeMode as keyof typeof CITY_THEMES] : undefined;
+    const metrics = [
+      ["Stars", stats.totalStars],
+      ["Followers", stats.followers],
+      ["Repos", stats.publicRepos],
+      ["Activity", stats.activeContributions],
+    ] as const;
+
+    return (
+      <div
+        ref={ref}
+        style={{ backgroundColor: themeMode === "auto" ? "#0e1216" : resolvedTheme.baseBgColor }}
+        className={cn("w-full max-w-[540px] rounded-[10px] border border-site-line p-4 sm:p-5", className)}
+      >
+        <div className="flex items-center gap-3">
+          <div className="relative shrink-0">
+            <div className={cn("relative grid h-10 w-10 place-items-center overflow-hidden border border-site-line bg-site-inset", frameConfig.wrapperClassName)}>
+              <span className="font-mono text-xs text-site-green" aria-hidden="true">{initials}</span>
+              {avatarSrc && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={user.username}
+                  src={avatarSrc}
+                  alt=""
+                  crossOrigin="anonymous"
+                  onError={(event) => {
+                    const image = event.currentTarget;
+                    if (image.getAttribute("src") !== user.avatarUrl) {
+                      image.src = user.avatarUrl;
+                    } else {
+                      image.hidden = true;
+                    }
+                  }}
+                  className={cn("absolute inset-0 size-full object-cover", frameConfig.imgClassName)}
+                />
+              )}
+            </div>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-semibold">{user.name || user.username}</div>
+            <div className="truncate font-mono text-xs text-site-muted">@{user.username}</div>
+          </div>
+          <span className={cn(
+            "inline-flex shrink-0 items-center gap-1.5 rounded border border-site-line px-2 py-1 font-mono text-[10px] uppercase tracking-wide",
+            themeMode === "site-green" ? "text-site-green" : activeTier === "Mythic" ? "text-[#e3b341]" : "text-site-muted"
+          )}>
+            <span aria-hidden="true">{badgeConfig.renderIcon(activeTier)}</span>
+            {activeTier}
+          </span>
+        </div>
+
+        <dl className="mt-4 grid grid-cols-4 gap-px overflow-hidden rounded-md border border-site-line bg-site-line">
+          {metrics.map(([label, value]) => (
+            <div key={label} className="bg-site-inset px-1.5 py-2.5 sm:px-3">
+              <dt className="font-mono text-[10px] text-site-muted">{label}</dt>
+              <dd className="mt-0.5 font-mono text-sm tabular-nums sm:text-lg">
+                <span title={value.toLocaleString("en-US")}>{formatNumber(value)}</span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+
+        {customizerOptions.showHeatmap !== false && (
+          <ContributionHeatmap calendar={calendarData} themeMode={themeMode} tier={activeTier} compact />
+        )}
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-site-line pt-3 font-mono text-[10px] text-site-muted">
+          <span>{city?.name ?? (themeMode === "site-green" ? "Site Green" : "GitHub stats")}</span>
+          <span className="inline-flex items-center gap-1.5">
+            <BrandMark size={13} color={markColor} /> mygitstats.dev
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={ref}
       style={{
         backgroundColor: resolvedTheme.baseBgColor,
-        backgroundImage: `${resolvedTheme.ambientBg}, ${resolvedTheme.linearGradient}`,
+        backgroundImage: bgConfig.id === "pure-minimal" ? "none" : `${resolvedTheme.ambientBg}, ${resolvedTheme.linearGradient}`,
         colorScheme: "dark",
       }}
       className={cn(
@@ -248,25 +308,28 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <div className="relative flex-shrink-0">
             {/* User Avatar with selected Frame Shape */}
-            <div className={cn("overflow-hidden transition-all", frameConfig.wrapperClassName)}>
+            <div className={cn("relative grid h-11 w-11 place-items-center overflow-hidden bg-black/40 transition-all sm:h-16 sm:w-16", frameConfig.wrapperClassName)}>
+              <span className="font-mono text-xs" style={{ color: markColor }} aria-hidden="true">{initials}</span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              {avatarSrc && <img
                 key={user.username}
                 src={avatarSrc}
                 alt={user.name || user.username}
                 crossOrigin="anonymous"
                 onError={(e) => {
                   // Fallback to direct avatarUrl if proxy fails
-                  if (e.currentTarget.src !== user.avatarUrl) {
+                  if (e.currentTarget.getAttribute("src") !== user.avatarUrl) {
                     e.currentTarget.src = user.avatarUrl;
+                  } else {
+                    e.currentTarget.hidden = true;
                   }
                 }}
                 className={cn(
-                  "w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 object-cover border-2 shadow-md transition-all",
+                  "absolute inset-0 size-full object-cover border-2 shadow-md transition-all",
                   frameConfig.imgClassName,
                   resolvedTheme.avatarBorder
                 )}
-              />
+              />}
             </div>
 
             {/* Custom Avatar Badge */}
@@ -307,7 +370,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           )}
         >
           {badgeConfig.renderIcon(activeTier)}
-          <span>{resolvedTheme.badgeLabel}</span>
+          <span>{tierDetails.badgeLabel || `${activeTier} Tier`}</span>
         </div>
       </div>
 
@@ -391,15 +454,15 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
       {customizerOptions?.showHeatmap !== false && (
         <ContributionHeatmap
           calendar={calendarData}
-          themeMode={customizerOptions?.themeMode || "auto"}
+          themeMode={themeMode}
           tier={activeTier}
         />
       )}
 
-      {/* Footer: Verified & Watermark */}
+      {/* Card source and watermark */}
       <div className="relative z-10 mt-3.5 sm:mt-5 pt-2.5 sm:pt-3 border-t border-white/10 flex flex-wrap sm:flex-nowrap items-center justify-between gap-1.5 sm:gap-2 text-xs">
         <div className="flex items-center gap-1.5 text-zinc-400 text-[9px] sm:text-[11px]">
-          <span>Verified via GitHub API</span>
+          <span>Public GitHub profile</span>
         </div>
 
         {/* Watermark */}
@@ -409,10 +472,8 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
             resolvedTheme.watermarkColor
           )}
         >
-          <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", resolvedTheme.glowDot)} />
+          <BrandMark size={13} color={markColor} />
           <span className="font-semibold tracking-normal lowercase">mygitstats.dev</span>
-          <span className="opacity-40">•</span>
-          <span className="opacity-80 tracking-wider uppercase">verified tier</span>
         </div>
       </div>
     </div>

@@ -6,7 +6,6 @@ import { fetchUserStats, getComparisonFailure } from "@/lib/statsFetcher";
 import { getComparisonFeedback, validateComparisonForm } from "@/lib/comparisonFeedback";
 import { buildUserComparison } from "@/lib/comparisonEngine";
 import { ComparisonResult } from "@/types/compare";
-import { Swords } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -103,38 +102,26 @@ export default async function BattlePage({ params }: BattlePageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col items-center px-3 py-6 sm:px-4 sm:py-10 md:py-14 selection:bg-amber-500/30">
-      {/* Background ambient lighting */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-12 left-1/2 -translate-x-1/2 w-[600px] h-[350px] rounded-full bg-gradient-to-tr from-amber-600/10 via-orange-600/10 to-yellow-500/10 blur-[130px]" />
-      </div>
-
-      <div className="relative z-10 w-full max-w-5xl flex flex-col items-center">
-        {/* Hero Tagline */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 text-xs font-mono font-semibold mb-3 sm:mb-4 backdrop-blur-md">
-          <Swords className="w-3.5 h-3.5 text-amber-400" />
-          <span>Developer Showdown</span>
-        </div>
-
-        <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight text-center max-w-3xl leading-tight px-2 break-words">
-          <span className="text-indigo-400 break-all">{val.user1 || user1}</span>{" "}
-          <span className="text-zinc-500 font-mono text-xl sm:text-3xl md:text-4xl">vs</span>{" "}
-          <span className="text-amber-400 break-all">{val.user2 || user2}</span>
+    <main className="site-container py-9 sm:py-14">
+      <div className="mb-8">
+        <h1 className="break-words text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">
+          <span>{val.user1 || user1}</span>{" "}
+          <span className="font-mono text-xl text-site-muted sm:text-3xl">vs</span>{" "}
+          <span>{val.user2 || user2}</span>
         </h1>
 
-        <p className="mt-2.5 sm:mt-3 text-xs sm:text-base text-zinc-400 text-center max-w-xl leading-relaxed mb-6 sm:mb-8 px-2">
-          Head-to-head GitHub developer comparison of performance tier scores, stars, reach, and activity.
+        <p className="mt-3 leading-relaxed text-site-muted">
+          Public GitHub stats and performance tiers, side by side.
         </p>
-
-        {/* Comparison Arena Component with Server-Rendered Initial Data */}
-        <ComparisonArena
-          key={`${user1}/vs/${user2}`}
-          initialData={initialData}
-          initialUser1={val.user1 || user1}
-          initialUser2={val.user2 || user2}
-          initialFeedback={initialFeedback}
-        />
       </div>
+
+      <ComparisonArena
+        key={`${user1}/vs/${user2}`}
+        initialData={initialData}
+        initialUser1={val.user1 || user1}
+        initialUser2={val.user2 || user2}
+        initialFeedback={initialFeedback}
+      />
     </main>
   );
 }

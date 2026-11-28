@@ -10,7 +10,8 @@ export type CityThemeId =
   | "frankfurt"
   | "shanghai";
 
-export type ThemeMode = "auto" | TierType | CityThemeId;
+export type ThemeMode = "site-green" | "auto" | TierType | CityThemeId;
+export type CardStyle = "minimal" | "showcase";
 
 export type AvatarFrameStyle =
   | "squircle"
@@ -34,6 +35,7 @@ export type CardBackgroundStyle =
   | "pure-minimal";
 
 export interface CustomizerOptions {
+  cardStyle: CardStyle;
   themeMode: ThemeMode;
   avatarFrame: AvatarFrameStyle;
   avatarBadge: AvatarBadgeStyle;

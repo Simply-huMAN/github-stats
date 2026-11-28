@@ -1,11 +1,11 @@
 {
   "name": "MyGitStats — Developer Stats Cards & GitHub Wrapped",
   "short_name": "MyGitStats",
-  "description": "Turn your GitHub activity into beautiful developer performance tier cards, city-themed profiles, and shareable annual Wrapped stories.",
+  "description": "Create a stats card from a public GitHub profile, choose a city theme, and export a PNG.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#070709",
-  "theme_color": "#070709",
+  "background_color": "#0a0c0e",
+  "theme_color": "#0a0c0e",
   "icons": [
     {
       "src": "/icon-48.png",

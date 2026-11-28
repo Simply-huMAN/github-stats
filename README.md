@@ -13,6 +13,21 @@
 > 🎆 **MyGitStats Wrapped**: [https://mygitstats.dev/wrapped](https://mygitstats.dev/wrapped)  
 > 📦 **GitHub Repository**: [https://github.com/Simply-huMAN/github-stats](https://github.com/Simply-huMAN/github-stats)
 
+## Card styles
+
+**Minimal** uses a compact layout with four stats and a contribution heatmap.
+
+<img src="docs/images/minimal-card.png" width="540" alt="Minimal MyGitStats card for Simply-huMAN in the Tokyo theme">
+
+<details>
+<summary>See the Showcase style</summary>
+
+**Showcase** adds the original layered city backdrop, profile details, and tier breakdown.
+
+<img src="docs/images/showcase-card.png" width="540" alt="Showcase MyGitStats card for Simply-huMAN in the Tokyo theme">
+
+</details>
+
 ### ⚔️ Popular Developer Showdowns
 Compare open-source builders side-by-side:
 - **[Linus Torvalds vs shadcn](https://mygitstats.dev/compare/torvalds/vs/shadcn)** — Linux Kernel Legend vs Modern UI
@@ -38,17 +53,19 @@ Compare open-source builders side-by-side:
 - **High-Quality PNG Export**:
   - Exports crisp 3x retina PNG images directly from the card DOM node.
   - Built-in CORS safeguards for GitHub avatars to prevent tainted canvas errors.
-  - Elegant, discreet watermark badge (`mygitstats.dev • verified tier`).
+  - A MyGitStats watermark that uses the active card palette.
 
 ---
 
-## 🚀 Embed MyGitStats in Your GitHub Profile README
+## Add a card to your GitHub profile README
 
-Add your custom stats card to your GitHub profile README by linking back to your live [MyGitStats](https://mygitstats.dev) card:
+Open [Card Studio](https://mygitstats.dev/card), enter your GitHub username, and choose **Minimal** or **Showcase**. Download the PNG and commit it alongside your profile README. Replace the filename and username in the example below with your own.
 
 ```markdown
-[![MyGitStats](https://mygitstats.dev/og-image.png)](https://mygitstats.dev/card?user=YOUR_USERNAME)
+[![My GitHub stats](./my-github-stats.png)](https://mygitstats.dev/card?user=YOUR_USERNAME&style=minimal)
 ```
+
+Use `style=showcase` for a Showcase card, or use **Copy card link** in Studio to carry over your theme and other settings. The README image is a snapshot. Download a fresh PNG whenever you want to update it.
 
 ---
 

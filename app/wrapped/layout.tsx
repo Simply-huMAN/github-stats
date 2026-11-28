@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 
+const description = "Preview the chapters of a GitHub year in review, including activity, languages, and standout repositories.";
+
 export const metadata: Metadata = {
   title: "GitHub Wrapped — Developer Year in Review",
-  description:
-    "Explore your annual GitHub contributions, streak milestones, pull requests, and coding achievements.",
+  description,
   alternates: {
     canonical: "/wrapped",
   },
   openGraph: {
     title: "GitHub Wrapped — Developer Year in Review | MyGitStats",
-    description:
-      "Explore your annual GitHub contributions, streak milestones, pull requests, and coding achievements.",
+    description,
     url: "https://mygitstats.dev/wrapped",
   },
 };

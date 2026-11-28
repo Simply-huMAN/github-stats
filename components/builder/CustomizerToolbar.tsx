@@ -1,23 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  Sparkles,
-  Sliders,
-  Crop,
-  ShieldAlert,
-  Layers,
-  RotateCcw,
-  Check,
-  GitCommit,
-} from "lucide-react";
-import {
-  CustomizerOptions,
-  CityThemeId,
-  AvatarFrameStyle,
-  AvatarBadgeStyle,
-  CardBackgroundStyle,
-} from "@/types/builder";
+import { useState } from "react";
+import { Check, RotateCcw } from "lucide-react";
+import { getHeatmapPalette } from "@/components/ContributionHeatmap";
 import { CITY_THEMES } from "@/lib/themes/cityThemes";
 import {
   AVATAR_FRAME_CONFIG,
@@ -25,303 +10,111 @@ import {
   CARD_BACKGROUND_CONFIG,
 } from "@/lib/themes/frameStyles";
 import { cn } from "@/lib/utils";
+import type { CustomizerOptions } from "@/types/builder";
 
-export interface CustomizerToolbarProps {
+interface CustomizerToolbarProps {
   options: CustomizerOptions;
   onChange: (options: CustomizerOptions) => void;
   onReset: () => void;
-  className?: string;
 }
 
-type TabType = "theme" | "frame" | "badge" | "background";
+const categories = [
+  { key: "themeMode", label: "Theme" },
+  { key: "avatarFrame", label: "Frame" },
+  { key: "avatarBadge", label: "Badge" },
+  { key: "cardBackground", label: "Backdrop" },
+] as const;
 
-export function CustomizerToolbar({
-  options,
-  onChange,
-  onReset,
-  className,
-}: CustomizerToolbarProps) {
-  const [activeTab, setActiveTab] = useState<TabType>("theme");
+const themeChoices = [
+  { id: "site-green" as const, name: "Site Green", color: getHeatmapPalette("site-green", "Mythic")[4] },
+  { id: "auto" as const, name: "Tier colors", color: getHeatmapPalette("auto", "Mythic")[4] },
+  ...Object.values(CITY_THEMES).map((city) => ({
+    id: city.id,
+    name: city.name,
+    color: getHeatmapPalette(city.id, "Mythic")[4],
+  })),
+];
 
-  const cityThemeKeys = Object.keys(CITY_THEMES) as CityThemeId[];
-  const frameKeys = Object.keys(AVATAR_FRAME_CONFIG) as AvatarFrameStyle[];
-  const badgeKeys = Object.keys(AVATAR_BADGE_CONFIG) as AvatarBadgeStyle[];
-  const bgKeys = Object.keys(CARD_BACKGROUND_CONFIG) as CardBackgroundStyle[];
+export function CustomizerToolbar({ options, onChange, onReset }: CustomizerToolbarProps) {
+  const [category, setCategory] = useState<(typeof categories)[number]["key"]>("themeMode");
+  const hasBackdrops = options.cardStyle === "showcase";
+  const visibleCategories = hasBackdrops ? categories : categories.filter(({ key }) => key !== "cardBackground");
+  const activeCategory = !hasBackdrops && category === "cardBackground" ? "themeMode" : category;
+  const showHeatmap = options.showHeatmap !== false;
+
+  const choices = {
+    themeMode: themeChoices.map((theme) => ({
+      id: theme.id,
+      label: theme.name,
+      sample: <span className="size-3 rounded-sm" style={{ backgroundColor: theme.color }} />,
+    })),
+    avatarFrame: Object.values(AVATAR_FRAME_CONFIG).map((frame) => ({
+      id: frame.id,
+      label: frame.label,
+      sample: <span className={cn("size-5 border border-site-control bg-site-panel", frame.imgClassName)} />,
+    })),
+    avatarBadge: Object.values(AVATAR_BADGE_CONFIG).map((badge) => ({
+      id: badge.id,
+      label: badge.label,
+      sample: badge.renderIcon("Gold"),
+    })),
+    cardBackground: Object.values(CARD_BACKGROUND_CONFIG).map((background) => ({
+      id: background.id,
+      label: background.label,
+      sample: <span className="h-4 w-5 rounded border border-site-control bg-site-panel" style={background.overlayStyle} />,
+    })),
+  };
 
   return (
-    <div
-      className={cn(
-        "w-full max-w-2xl rounded-xl sm:rounded-2xl bg-zinc-900/95 border border-zinc-800 p-3 sm:p-4 shadow-2xl backdrop-blur-xl select-none",
-        className
-      )}
-    >
-      {/* Category Tabs Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80 gap-2">
-        <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-black/40 rounded-xl border border-zinc-800 text-xs overflow-x-auto">
-          <button
-            type="button"
-            onClick={() => setActiveTab("theme")}
-            className={cn(
-              "flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg font-medium transition-all text-xs whitespace-nowrap",
-              activeTab === "theme"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                : "text-zinc-400 hover:text-zinc-200"
-            )}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Themes</span>
-          </button>
+    <section aria-labelledby="card-appearance" className="min-w-0 rounded-lg border border-site-line bg-site-panel p-3 sm:p-4">
+      <div className="flex items-center justify-between gap-3">
+        <h2 id="card-appearance" className="text-sm font-semibold">Appearance</h2>
+        <button type="button" onClick={onReset} className="inline-flex items-center gap-1.5 rounded px-1 py-2 font-mono text-xs text-site-muted hover:text-foreground">
+          <RotateCcw size={13} aria-hidden="true" /> Reset
+        </button>
+      </div>
 
+      <div className="mt-2 grid grid-cols-2 gap-1 border-b border-site-line pb-3 min-[380px]:grid-cols-4" role="group" aria-label="Appearance settings">
+        {visibleCategories.map(({ key, label }) => (
           <button
+            key={key}
             type="button"
-            onClick={() => setActiveTab("frame")}
-            className={cn(
-              "flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg font-medium transition-all text-xs whitespace-nowrap",
-              activeTab === "frame"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                : "text-zinc-400 hover:text-zinc-200"
-            )}
+            aria-pressed={activeCategory === key}
+            onClick={() => setCategory(key)}
+            className="rounded-md px-1 py-2 font-mono text-xs text-site-muted hover:text-foreground aria-pressed:bg-site-inset aria-pressed:text-foreground aria-pressed:ring-1 aria-pressed:ring-inset aria-pressed:ring-site-control"
           >
-            <Crop className="w-3.5 h-3.5" />
-            <span>Frame</span>
+            {label}
           </button>
+        ))}
+      </div>
 
+      <div className="mt-3 grid grid-cols-2 gap-2 min-[480px]:grid-cols-3" role="group" aria-label={categories.find(({ key }) => key === activeCategory)?.label}>
+        {choices[activeCategory].map(({ id, label, sample }) => (
           <button
+            key={id}
             type="button"
-            onClick={() => setActiveTab("badge")}
-            className={cn(
-              "flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg font-medium transition-all text-xs whitespace-nowrap",
-              activeTab === "badge"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                : "text-zinc-400 hover:text-zinc-200"
-            )}
+            aria-pressed={options[activeCategory] === id}
+            onClick={() => onChange({ ...options, [activeCategory]: id })}
+            className="flex min-h-14 flex-col justify-between gap-2 rounded-md border border-site-line bg-site-inset px-2.5 py-2 text-left text-xs text-site-muted hover:border-site-control hover:text-foreground aria-pressed:border-site-green aria-pressed:text-foreground"
           >
-            <ShieldAlert className="w-3.5 h-3.5" />
-            <span>Badge</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("background")}
-            className={cn(
-              "flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg font-medium transition-all text-xs whitespace-nowrap",
-              activeTab === "background"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                : "text-zinc-400 hover:text-zinc-200"
-            )}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Backdrop</span>
-          </button>
-        </div>
-
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-          {/* Heatmap Toggle */}
-          <button
-            type="button"
-            onClick={() =>
-              onChange({
-                ...options,
-                showHeatmap: options.showHeatmap === false ? true : false,
-              })
-            }
-            className={cn(
-              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all border",
-              options.showHeatmap !== false
-                ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-300 shadow-sm shadow-emerald-950/40"
-                : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400 hover:text-zinc-200"
-            )}
-            title="Toggle Commit Activity Heatmap on Card"
-          >
-            <GitCommit className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Heatmap</span>
-            <span className={cn(
-              "font-mono text-[10px] px-1 py-0.2 rounded font-bold uppercase",
-              options.showHeatmap !== false
-                ? "bg-emerald-500/20 text-emerald-300"
-                : "bg-zinc-700 text-zinc-400"
-            )}>
-              {options.showHeatmap !== false ? "ON" : "OFF"}
+            <span className="flex min-h-5 w-full items-center justify-between gap-1" aria-hidden="true">
+              {sample}
+              {options[activeCategory] === id && <Check size={13} className="text-site-green" />}
             </span>
+            {label}
           </button>
-
-          <button
-            type="button"
-            onClick={onReset}
-            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-mono text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors flex-shrink-0"
-            title="Reset customization to default"
-          >
-            <RotateCcw className="w-3 h-3" />
-            <span className="hidden sm:inline">Reset</span>
-          </button>
-        </div>
+        ))}
       </div>
 
-      {/* Tab Panels */}
-      <div className="pt-3">
-        {/* Tab 1: Themes (City Themes & Auto Tier) */}
-        {activeTab === "theme" && (
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between text-xs text-zinc-400">
-              <span>Select City or Performance Style:</span>
-              <span className="font-mono text-indigo-400 text-[11px] capitalize">
-                {options.themeMode === "auto" ? "Auto (Calculated Tier)" : options.themeMode}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 sm:gap-2">
-              {/* Default Auto Option */}
-              <button
-                type="button"
-                onClick={() => onChange({ ...options, themeMode: "auto" })}
-                className={cn(
-                  "p-2 rounded-xl text-left border transition-all relative flex flex-col justify-between h-14 sm:h-16",
-                  options.themeMode === "auto"
-                    ? "bg-indigo-950/40 border-indigo-500 shadow-md ring-1 ring-indigo-400/30 text-white"
-                    : "bg-black/30 border-zinc-800 text-zinc-300 hover:border-zinc-700"
-                )}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span className="w-3 h-3 rounded-full bg-gradient-to-tr from-amber-400 via-indigo-400 to-zinc-400" />
-                  {options.themeMode === "auto" && <Check className="w-3 h-3 text-indigo-400" />}
-                </div>
-                <div>
-                  <div className="text-[11px] sm:text-xs font-bold leading-tight">Tier Auto</div>
-                  <div className="text-[9px] text-zinc-500 font-mono">Calculated</div>
-                </div>
-              </button>
-
-              {/* 8 City Themes */}
-              {cityThemeKeys.map((cityKey) => {
-                const city = CITY_THEMES[cityKey];
-                const isSelected = options.themeMode === cityKey;
-                return (
-                  <button
-                    key={cityKey}
-                    type="button"
-                    onClick={() => onChange({ ...options, themeMode: cityKey })}
-                    className={cn(
-                      "p-2 rounded-xl text-left border transition-all relative flex flex-col justify-between h-14 sm:h-16",
-                      isSelected
-                        ? "bg-zinc-800/90 border-indigo-400 shadow-lg ring-1 ring-indigo-400/40 text-white"
-                        : "bg-black/30 border-zinc-800 text-zinc-300 hover:border-zinc-700"
-                    )}
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <span className={cn("w-3.5 h-3.5 rounded-full bg-gradient-to-r shadow-sm", city.swatch)} />
-                      {isSelected && <Check className="w-3 h-3 text-cyan-400" />}
-                    </div>
-                    <div>
-                      <div className="text-[11px] sm:text-xs font-bold leading-tight">{city.name}</div>
-                      <div className="text-[9px] text-zinc-500 truncate">{city.tagline.split(" ")[0]}</div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 2: Avatar Frame */}
-        {activeTab === "frame" && (
-          <div className="space-y-2.5">
-            <div className="text-xs text-zinc-400">Choose Avatar Frame Geometry:</div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 sm:gap-2">
-              {frameKeys.map((frameKey) => {
-                const frame = AVATAR_FRAME_CONFIG[frameKey];
-                const isSelected = options.avatarFrame === frameKey;
-                return (
-                  <button
-                    key={frameKey}
-                    type="button"
-                    onClick={() => onChange({ ...options, avatarFrame: frameKey })}
-                    className={cn(
-                      "p-2.5 sm:p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 sm:gap-2",
-                      isSelected
-                        ? "bg-indigo-950/40 border-indigo-500 text-white shadow-md ring-1 ring-indigo-400/40"
-                        : "bg-black/30 border-zinc-800 text-zinc-300 hover:border-zinc-700"
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "w-7 h-7 sm:w-8 sm:h-8 bg-zinc-800 border-2 border-zinc-500 transition-all",
-                        frame.imgClassName
-                      )}
-                    />
-                    <span className="text-[11px] sm:text-xs font-medium truncate w-full">{frame.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 3: Avatar Badge */}
-        {activeTab === "badge" && (
-          <div className="space-y-2.5">
-            <div className="text-xs text-zinc-400">Choose Badge Style:</div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 sm:gap-2">
-              {badgeKeys.map((badgeKey) => {
-                const badge = AVATAR_BADGE_CONFIG[badgeKey];
-                const isSelected = options.avatarBadge === badgeKey;
-                return (
-                  <button
-                    key={badgeKey}
-                    type="button"
-                    onClick={() => onChange({ ...options, avatarBadge: badgeKey })}
-                    className={cn(
-                      "p-2.5 sm:p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 sm:gap-2",
-                      isSelected
-                        ? "bg-indigo-950/40 border-indigo-500 text-white shadow-md ring-1 ring-indigo-400/40"
-                        : "bg-black/30 border-zinc-800 text-zinc-300 hover:border-zinc-700"
-                    )}
-                  >
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-indigo-400">
-                      {badge.renderIcon("Gold")}
-                    </div>
-                    <span className="text-[11px] sm:text-xs font-medium truncate w-full">{badge.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 4: Card Backdrop Overlays */}
-        {activeTab === "background" && (
-          <div className="space-y-2.5">
-            <div className="text-xs text-zinc-400">Choose Background Texture:</div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 sm:gap-2">
-              {bgKeys.map((bgKey) => {
-                const bg = CARD_BACKGROUND_CONFIG[bgKey];
-                const isSelected = options.cardBackground === bgKey;
-                return (
-                  <button
-                    key={bgKey}
-                    type="button"
-                    onClick={() => onChange({ ...options, cardBackground: bgKey })}
-                    className={cn(
-                      "p-2.5 sm:p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 sm:gap-2",
-                      isSelected
-                        ? "bg-indigo-950/40 border-indigo-500 text-white shadow-md ring-1 ring-indigo-400/40"
-                        : "bg-black/30 border-zinc-800 text-zinc-300 hover:border-zinc-700"
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-800 border border-zinc-700",
-                        bg.overlayClass
-                      )}
-                      style={bg.overlayStyle}
-                    />
-                    <span className="text-[11px] sm:text-xs font-medium truncate w-full">{bg.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+      <label className="mt-4 inline-flex min-h-8 cursor-pointer items-center gap-2 font-mono text-xs text-site-muted">
+        <input
+          type="checkbox"
+          className="size-4 accent-site-green"
+          checked={showHeatmap}
+          onChange={(event) => onChange({ ...options, showHeatmap: event.target.checked })}
+        />
+        Show contribution heatmap
+      </label>
+    </section>
   );
 }

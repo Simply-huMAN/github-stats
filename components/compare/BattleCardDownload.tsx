@@ -2,28 +2,26 @@
 
 import React, { useState, useCallback } from "react";
 import { Download, Loader2, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { ComparisonNotice } from "./ComparisonNotice";
 
 interface BattleCardDownloadProps {
   arenaRef: React.RefObject<HTMLDivElement>;
   user1: string;
   user2: string;
-  className?: string;
 }
 
 export function BattleCardDownload({
   arenaRef,
   user1,
   user2,
-  className,
 }: BattleCardDownloadProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
   const [exportFailed, setExportFailed] = useState(false);
 
   const handleDownload = useCallback(async () => {
-    if (!arenaRef.current) return;
+    const arena = arenaRef.current;
+    if (!arena) return;
 
     try {
       setIsExporting(true);
@@ -34,10 +32,14 @@ export function BattleCardDownload({
       // Dynamically load html-to-image only when the user requests a download
       const { toPng } = await import("html-to-image");
 
-      const dataUrl = await toPng(arenaRef.current, {
+      const dataUrl = await toPng(arena, {
         cacheBust: true,
+        includeQueryParams: true,
+        skipFonts: true,
         pixelRatio: 2,
-        backgroundColor: "#070709",
+        backgroundColor: getComputedStyle(arena).backgroundColor,
+        imagePlaceholder:
+          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E",
         filter: (node) => {
           if (node instanceof HTMLElement && node.dataset.exportIgnore === "true") {
             return false;
@@ -50,7 +52,9 @@ export function BattleCardDownload({
       const link = document.createElement("a");
       link.download = filename;
       link.href = dataUrl;
+      document.body.appendChild(link);
       link.click();
+      link.remove();
 
       setDownloaded(true);
       setTimeout(() => setDownloaded(false), 2500);
@@ -63,34 +67,27 @@ export function BattleCardDownload({
   }, [arenaRef, user1, user2]);
 
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="flex min-w-0 flex-col items-start gap-2">
       <button
         type="button"
         onClick={handleDownload}
         disabled={isExporting}
-        className={cn(
-          "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 shadow-md min-h-[44px]",
-          downloaded
-            ? "bg-emerald-600 text-white"
-            : "bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-zinc-950 font-bold active:scale-95 shadow-amber-500/20",
-          isExporting && "opacity-80 cursor-wait",
-          className
-        )}
+        className="site-button min-h-11"
       >
         {isExporting ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin text-zinc-950" />
-            <span>Generating PNG...</span>
+            <Loader2 size={15} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />
+            <span>Exporting PNG…</span>
           </>
         ) : downloaded ? (
           <>
-            <Check className="w-4 h-4" />
-            <span>Downloaded Battle Card!</span>
+            <Check size={15} className="text-site-green" aria-hidden="true" />
+            <span aria-live="polite">Downloaded</span>
           </>
         ) : (
           <>
-            <Download className="w-4 h-4 text-zinc-950" />
-            <span>{exportFailed ? "Try download again" : "Download Battle Card"}</span>
+            <Download size={15} aria-hidden="true" />
+            <span>{exportFailed ? "Retry download" : "Download PNG"}</span>
           </>
         )}
       </button>

@@ -2,14 +2,205 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: Inter;
+  src: url("/fonts/inter.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+}
+
 :root {
-  --background: #09090b;
-  --foreground: #fafafa;
+  color-scheme: dark;
+  --background: #0a0c0e;
+  --foreground: #e9eef4;
+  --panel: #0e1216;
+  --panel-inset: #0c1014;
+  --line: #252e37;
+  --control-line: #596773;
+  --muted: #929eac;
+  --green: #39d353;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   min-height: 100vh;
+}
+
+::selection {
+  background: #234c30;
+  color: var(--foreground);
+}
+
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+.site-container {
+  width: min(100%, 1120px);
+  padding-inline: clamp(16px, 4vw, 32px);
+  margin-inline: auto;
+}
+
+.site-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--control-line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
+}
+
+.site-button:hover {
+  background: var(--panel);
+  border-color: var(--muted);
+}
+
+.site-button-primary {
+  border-color: var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.site-button-primary:hover {
+  border-color: white;
+  background: white;
+}
+
+.site-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.site-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--control-line);
+  border-radius: 6px;
+  background: var(--panel-inset);
+  color: var(--foreground);
+  font-size: 1rem;
+}
+
+.site-input::placeholder {
+  color: var(--muted);
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--line);
+  background: var(--background);
+}
+
+.site-header-inner {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.site-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2.5vw, 28px);
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.site-nav > a:hover,
+.site-nav > a[aria-current="page"],
+.site-footer a:hover {
+  color: var(--foreground);
+}
+
+.site-nav > .site-button {
+  min-height: 36px;
+  padding: 6px 10px;
+}
+
+.site-menu-toggle {
+  display: none;
+}
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.site-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px 24px;
+  padding-block: 24px;
+  font-family: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 580px) {
+  .site-header-inner {
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  .site-brand,
+  .site-menu-toggle {
+    margin-block: 10px;
+  }
+
+  .site-menu-toggle {
+    display: inline-flex;
+    padding-inline: 11px;
+  }
+
+  .site-nav {
+    display: none;
+    flex: 0 0 100%;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0;
+    padding-bottom: 12px;
+  }
+
+  .site-nav[data-open="true"] {
+    display: flex;
+  }
+
+  .site-nav > a,
+  .site-nav > .site-button {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 6px 10px;
+  }
 }
