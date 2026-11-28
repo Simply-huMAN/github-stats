@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo, FormEvent } from "react";
+import React, { useState, useRef, useEffect, FormEvent } from "react";
 import Link from "next/link";
 import { StatsResponse } from "@/types/stats";
 import { CustomizerOptions } from "@/types/builder";
@@ -12,16 +12,15 @@ import {
   NotificationErrorType,
 } from "@/components/NotificationAlert";
 import { CITY_THEMES } from "@/lib/themes/cityThemes";
+import { AVATAR_BADGE_CONFIG, AVATAR_FRAME_CONFIG, CARD_BACKGROUND_CONFIG } from "@/lib/themes/frameStyles";
 import { generateSyntheticCalendar } from "@/lib/contributions";
+import { DEFAULT_CARD_OPTIONS } from "@/lib/previewCard";
+import { sanitizeGitHubUsername } from "@/lib/validation";
 import {
-  Search,
-  Github,
   RefreshCw,
   Share2,
   Check,
-  Sparkles,
   ArrowRight,
-  Swords,
 } from "lucide-react";
 
 const INITIAL_DEMO_DATA: StatsResponse = {
@@ -63,14 +62,6 @@ const INITIAL_DEMO_DATA: StatsResponse = {
   fetchedAt: new Date().toISOString(),
 };
 
-const DEFAULT_OPTIONS: CustomizerOptions = {
-  themeMode: "auto",
-  avatarFrame: "squircle",
-  avatarBadge: "tier-icon",
-  cardBackground: "ambient-glow",
-  showHeatmap: true,
-};
-
 interface ErrorState {
   type: NotificationErrorType;
   title: string;
@@ -86,8 +77,9 @@ export default function CardStudioPage() {
   const [statsData, setStatsData] = useState<StatsResponse>(INITIAL_DEMO_DATA);
   const [isLoading, setIsLoading] = useState(false);
   const [errorState, setErrorState] = useState<ErrorState | null>(null);
-  const [customizerOptions, setCustomizerOptions] = useState<CustomizerOptions>(DEFAULT_OPTIONS);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [customizerOptions, setCustomizerOptions] = useState<CustomizerOptions>(DEFAULT_CARD_OPTIONS);
+  const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "error">("idle");
+  const [exportError, setExportError] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -95,7 +87,7 @@ export default function CardStudioPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    const userParam = params.get("user");
+    const userParam = sanitizeGitHubUsername(params.get("user"));
     const themeParam = params.get("theme") as CustomizerOptions["themeMode"];
     const frameParam = params.get("frame") as CustomizerOptions["avatarFrame"];
     const badgeParam = params.get("badge") as CustomizerOptions["avatarBadge"];
@@ -103,38 +95,25 @@ export default function CardStudioPage() {
     const heatmapParam = params.get("heatmap");
     const showHeatmap = heatmapParam !== null ? heatmapParam !== "false" && heatmapParam !== "0" : undefined;
 
-    if (userParam && userParam !== usernameInput) {
+    if (userParam) {
       setUsernameInput(userParam);
       fetchStats(userParam);
     }
 
     if (themeParam || frameParam || badgeParam || bgParam || showHeatmap !== undefined) {
       setCustomizerOptions((prev) => ({
-        themeMode: themeParam || prev.themeMode,
-        avatarFrame: frameParam || prev.avatarFrame,
-        avatarBadge: badgeParam || prev.avatarBadge,
-        cardBackground: bgParam || prev.cardBackground,
+        themeMode: themeParam && (Object.hasOwn(CITY_THEMES, themeParam)
+          || ["auto", "Bronze", "Gold", "Mythic"].includes(themeParam)) ? themeParam : prev.themeMode,
+        avatarFrame: frameParam && Object.hasOwn(AVATAR_FRAME_CONFIG, frameParam) ? frameParam : prev.avatarFrame,
+        avatarBadge: badgeParam && Object.hasOwn(AVATAR_BADGE_CONFIG, badgeParam) ? badgeParam : prev.avatarBadge,
+        cardBackground: bgParam && Object.hasOwn(CARD_BACKGROUND_CONFIG, bgParam) ? bgParam : prev.cardBackground,
         showHeatmap: showHeatmap !== undefined ? showHeatmap : prev.showHeatmap,
       }));
     }
   }, []);
 
-  // Solid base background color for export
-  const currentBaseBgColor = useMemo(() => {
-    if (customizerOptions.themeMode !== "auto" && customizerOptions.themeMode in CITY_THEMES) {
-      return CITY_THEMES[customizerOptions.themeMode as keyof typeof CITY_THEMES].baseBgColor;
-    }
-    const tier = statsData.tier?.tier || "Mythic";
-    if (tier === "Gold") return "#140e05";
-    if (tier === "Bronze") return "#121214";
-    return "#08051a";
-  }, [customizerOptions.themeMode, statsData.tier]);
-
   async function fetchStats(userToFetch: string) {
-    let trimmed = userToFetch.trim().replace(/^@+/, "");
-    if (trimmed.includes("github.com/")) {
-      trimmed = trimmed.split("github.com/")[1]?.split("/")[0]?.replace(/^@+/, "") || trimmed;
-    }
+    const trimmed = sanitizeGitHubUsername(userToFetch);
     if (!trimmed) return;
 
     setIsLoading(true);
@@ -230,6 +209,7 @@ export default function CardStudioPage() {
 
       setStatsData(data);
       setErrorState(null);
+      setShareStatus("idle");
     } catch (err: unknown) {
       clearTimeout(timeoutTimer);
 
@@ -264,16 +244,12 @@ export default function CardStudioPage() {
 
   function handleSearch(e: FormEvent) {
     e.preventDefault();
-    let trimmed = usernameInput.trim().replace(/^@+/, "");
-    if (trimmed.includes("github.com/")) {
-      trimmed = trimmed.split("github.com/")[1]?.split("/")[0]?.replace(/^@+/, "") || trimmed;
-    }
+    const trimmed = sanitizeGitHubUsername(usernameInput);
     setUsernameInput(trimmed);
     fetchStats(trimmed);
   }
 
-  function handleCopyShareLink() {
-    if (typeof window === "undefined") return;
+  async function handleCopyShareLink() {
     const url = new URL(window.location.href);
     url.pathname = "/card";
     url.searchParams.set("user", statsData.user.username);
@@ -291,159 +267,132 @@ export default function CardStudioPage() {
       url.searchParams.delete("heatmap");
     }
 
-    navigator.clipboard.writeText(url.toString());
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2500);
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      setShareStatus("copied");
+    } catch {
+      setShareStatus("error");
+    }
   }
 
   return (
-    <main className="min-h-screen bg-[#070709] text-zinc-100 flex flex-col items-center px-3 sm:px-4 py-8 sm:py-10 md:py-14 selection:bg-indigo-500/40">
-      {/* Background ambient lighting */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-indigo-600/10 blur-[130px]" />
-        <div className="absolute top-1/3 -right-40 w-96 h-96 rounded-full bg-cyan-500/10 blur-[140px]" />
+    <main className="site-container py-9 sm:py-14">
+      <div className="mb-8 max-w-2xl">
+        <h1 className="text-4xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">Card Studio</h1>
+        <p className="mt-3 leading-relaxed text-site-muted">
+          Build and export a card from any public GitHub profile.
+        </p>
       </div>
 
-      <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
-        {/* Banner linking to Wrapped */}
-        <Link
-          href={`/wrapped?user=${encodeURIComponent(statsData.user.username)}`}
-          className="mb-6 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-medium text-amber-300 hover:bg-amber-500/15 transition-all group shadow-sm"
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Want your full year review? Try <strong>GitHub Wrapped 2026</strong></span>
-          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform opacity-70" />
-        </Link>
+      <div className="grid items-start gap-6 border-t border-site-line pt-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.16fr)] lg:gap-x-12 lg:gap-y-5">
+        <div>
+          <form onSubmit={handleSearch} className="max-w-lg">
+            <label htmlFor="studio-username" className="mb-2 block font-mono text-xs text-site-muted">GitHub username</label>
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+              <input
+                id="studio-username"
+                type="text"
+                value={usernameInput}
+                onChange={(event) => setUsernameInput(event.target.value)}
+                className="site-input font-mono"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                required
+              />
+              <button type="submit" disabled={isLoading || !usernameInput.trim()} className="site-button">
+                {isLoading && <RefreshCw size={14} className="animate-spin" aria-hidden="true" />}
+                {isLoading ? "Loading…" : "Load profile"}
+              </button>
+            </div>
+          </form>
 
-        {/* Studio Header */}
-        <div className="text-center space-y-2 mb-6 sm:mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-800/80 border border-zinc-700/60 text-xs font-mono text-zinc-300">
-            <Github className="w-3.5 h-3.5" />
-            <span>Developer Card Studio</span>
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[11px] text-site-muted">
+            <span>Try</span>
+            {["shadcn", "torvalds", "kentcdodds", "leerob", "gaearon"].map((handle) => (
+              <button
+                key={handle}
+                type="button"
+                disabled={isLoading}
+                onClick={() => {
+                  setUsernameInput(handle);
+                  fetchStats(handle);
+                }}
+                className="underline decoration-site-control underline-offset-4 hover:text-foreground disabled:opacity-50"
+              >
+                @{handle}
+              </button>
+            ))}
           </div>
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-            Custom Developer Card Studio
-          </h1>
-          <p className="text-xs sm:text-sm md:text-base text-zinc-400 max-w-xl mx-auto px-2">
-            Personalize your GitHub stats with 8 city-inspired themes, custom frames, badges, and export retina-crisp 3x PNGs for your README and portfolio.
-          </p>
+
+          {errorState && (
+            <div className="mt-4">
+              <NotificationAlert
+                type={errorState.type}
+                title={errorState.title}
+                message={errorState.message}
+                details={errorState.details}
+                suggestions={errorState.suggestions}
+                username={errorState.username}
+                resetTime={errorState.resetTime}
+                isRetrying={isLoading}
+                onRetry={() => fetchStats(errorState.username || usernameInput)}
+                onDismiss={() => setErrorState(null)}
+                onSelectSample={(sampleHandle) => {
+                  setUsernameInput(sampleHandle);
+                  fetchStats(sampleHandle);
+                }}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Search Form */}
-        <form onSubmit={handleSearch} className="w-full max-w-md flex items-center gap-2 mb-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-            <input
-              type="text"
-              value={usernameInput}
-              onChange={(e) => setUsernameInput(e.target.value)}
-              placeholder="Enter GitHub handle (e.g. torvalds)"
-              className="w-full pl-10 pr-4 py-2.5 bg-zinc-900/90 border border-zinc-800 rounded-xl text-base sm:text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all font-mono"
-            />
+        <section aria-labelledby="studio-preview" className="min-w-0 max-w-[540px] lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <div className="mb-2 flex items-center justify-between gap-3 font-mono text-xs text-site-muted">
+            <h2 id="studio-preview">Card preview</h2>
+            {statsData === INITIAL_DEMO_DATA && <span>Sample data</span>}
           </div>
-          <button
-            type="submit"
-            disabled={isLoading || !usernameInput.trim()}
-            className="px-4 sm:px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 disabled:opacity-50 disabled:pointer-events-none text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2 flex-shrink-0"
-          >
-            {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Fetch"}
-          </button>
-        </form>
+          <StatsCard ref={cardRef} data={statsData} customizerOptions={customizerOptions} />
 
-        {/* Quick Sample Links */}
-        <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-zinc-500 mb-6 sm:mb-8 flex-wrap justify-center">
-          <span>Quick profiles:</span>
-          {["shadcn", "torvalds", "kentcdodds", "leerob", "gaearon"].map((handle) => (
-            <button
-              key={handle}
-              type="button"
-              onClick={() => {
-                setUsernameInput(handle);
-                fetchStats(handle);
-              }}
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-mono transition-colors"
-            >
-              @{handle}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <DownloadButton
+              cardRef={cardRef}
+              username={statsData.user.username}
+              tier={customizerOptions.themeMode === "auto" ? statsData.tier.tier : customizerOptions.themeMode}
+              onError={() => setExportError(true)}
+              onSuccess={() => setExportError(false)}
+            />
+            <button type="button" onClick={handleCopyShareLink} className="site-button">
+              {shareStatus === "copied" ? <Check size={15} aria-hidden="true" /> : <Share2 size={15} aria-hidden="true" />}
+              {shareStatus === "copied" ? "Link copied" : "Copy card link"}
             </button>
-          ))}
-        </div>
-
-        {/* Error & Notification Banner */}
-        {errorState && (
-          <div className="w-full flex justify-center mb-6">
-            <NotificationAlert
-              type={errorState.type}
-              title={errorState.title}
-              message={errorState.message}
-              details={errorState.details}
-              suggestions={errorState.suggestions}
-              username={errorState.username}
-              resetTime={errorState.resetTime}
-              isRetrying={isLoading}
-              onRetry={() => fetchStats(errorState.username || usernameInput)}
-              onDismiss={() => setErrorState(null)}
-              onSelectSample={(sampleHandle) => {
-                setUsernameInput(sampleHandle);
-                fetchStats(sampleHandle);
-              }}
-            />
           </div>
-        )}
+          <div role="status" className="mt-2 text-sm text-site-muted">
+            {exportError && <p>Couldn’t download the PNG. Try again.</p>}
+            {shareStatus === "error" && "Couldn’t copy the link. Check your browser’s clipboard permissions and try again."}
+          </div>
 
-        {/* Live Card Canvas */}
-        <div className="w-full flex justify-center py-2 px-1">
-          <StatsCard
-            ref={cardRef}
-            data={statsData}
-            customizerOptions={customizerOptions}
-          />
-        </div>
+          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 font-mono text-xs text-site-muted">
+            <Link href={`/wrapped?user=${encodeURIComponent(statsData.user.username)}`} className="inline-flex items-center gap-1.5 hover:text-foreground">
+              Open Wrapped <ArrowRight size={13} aria-hidden="true" />
+            </Link>
+            <Link href={`/compare?user1=${encodeURIComponent(statsData.user.username)}`} className="inline-flex items-center gap-1.5 hover:text-foreground">
+              Compare profile <ArrowRight size={13} aria-hidden="true" />
+            </Link>
+          </div>
+        </section>
 
-        {/* Action Controls: Download, Share & Compare */}
-        <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 w-full max-w-sm sm:max-w-none">
-          <DownloadButton
-            cardRef={cardRef}
-            username={statsData.user.username}
-            tier={customizerOptions.themeMode === "auto" ? statsData.tier.tier : customizerOptions.themeMode}
-            baseBgColor={currentBaseBgColor}
-            className="w-full sm:w-auto"
-          />
-
-          <Link
-            href={`/compare?user1=${encodeURIComponent(statsData.user.username)}`}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm active:scale-95"
-          >
-            <Swords className="w-4 h-4 text-amber-400" />
-            <span>Compare this profile</span>
-          </Link>
-
-          <button
-            type="button"
-            onClick={handleCopyShareLink}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 border border-zinc-700 shadow-sm"
-          >
-            {copiedLink ? (
-              <>
-                <Check className="w-4 h-4 text-emerald-400" />
-                <span className="text-emerald-300">Link Copied!</span>
-              </>
-            ) : (
-              <>
-                <Share2 className="w-4 h-4 text-zinc-400" />
-                <span>Share Card Link</span>
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Customizer Toolbar */}
-        <div className="w-full mt-10 flex justify-center">
-          <CustomizerToolbar
-            options={customizerOptions}
-            onChange={setCustomizerOptions}
-            onReset={() => setCustomizerOptions(DEFAULT_OPTIONS)}
-          />
-        </div>
+        <CustomizerToolbar
+          options={customizerOptions}
+          onChange={(options) => {
+            setCustomizerOptions(options);
+            setShareStatus("idle");
+          }}
+          onReset={() => {
+            setCustomizerOptions(DEFAULT_CARD_OPTIONS);
+            setShareStatus("idle");
+          }}
+        />
       </div>
     </main>
   );

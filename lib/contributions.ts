@@ -22,16 +22,15 @@ function createSeededRandom(seed: string) {
 export function generateSyntheticCalendar(
   username: string,
   activeCount: number = 180,
-  reposCount: number = 25
+  reposCount: number = 25,
+  endDate = new Date()
 ): ContributionCalendar {
   const rng = createSeededRandom(`${username}-calendar-v1`);
   const weeks: ContributionWeek[] = [];
-  const today = new Date();
-  
   // 52 weeks = 364 days. Calculate start date so last day is today
   const totalDays = 52 * 7;
-  const startDate = new Date(today);
-  startDate.setDate(today.getDate() - totalDays + 1);
+  const startDate = new Date(endDate);
+  startDate.setUTCDate(endDate.getUTCDate() - totalDays + 1);
 
   // Determine baseline density based on active activity and repos
   const activityDensity = Math.min(0.85, Math.max(0.18, (activeCount * 1.5 + reposCount * 3) / 450));
@@ -44,7 +43,7 @@ export function generateSyntheticCalendar(
 
     for (let d = 0; d < 7; d++) {
       const curDate = new Date(startDate);
-      curDate.setDate(startDate.getDate() + (w * 7 + d));
+      curDate.setUTCDate(startDate.getUTCDate() + (w * 7 + d));
       const dateStr = curDate.toISOString().split("T")[0];
 
       // Weekdays (Mon=1..Fri=5) have higher commit probability than weekends (Sun=0, Sat=6)

@@ -40,7 +40,7 @@ export function DownloadButton({
   cardRef,
   username,
   tier = "tier",
-  baseBgColor = "#080614",
+  baseBgColor,
   className,
   onSuccess,
   onError,
@@ -49,7 +49,8 @@ export function DownloadButton({
   const [hasExported, setHasExported] = useState(false);
 
   const handleDownload = useCallback(async () => {
-    if (!cardRef.current) {
+    const card = cardRef.current;
+    if (!card) {
       console.error("[DownloadButton] Target card DOM ref is not attached.");
       return;
     }
@@ -67,13 +68,13 @@ export function DownloadButton({
       // Setting skipFonts to true prevents Brave Shields / ad blockers from stalling or blocking font requests
       // Setting explicit solid backgroundColor guarantees the PNG is 100% opaque across all browsers and image viewers
       // Setting includeQueryParams to true ensures html-to-image does NOT strip avatar query params and cross-contaminate users' avatars
-      const dataUrl = await toPng(cardRef.current, {
+      const dataUrl = await toPng(card, {
         cacheBust: true,
         includeQueryParams: true,
         pixelRatio: 3, // 3x crisp export for retina/print quality
         quality: 1,
         skipFonts: true,
-        backgroundColor: baseBgColor,
+        backgroundColor: baseBgColor ?? getComputedStyle(card).backgroundColor,
         imagePlaceholder:
           "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2318181b'/%3E%3C/svg%3E",
       });
@@ -104,27 +105,24 @@ export function DownloadButton({
       onClick={handleDownload}
       disabled={isExporting}
       className={cn(
-        "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all duration-200 select-none",
-        "bg-white/10 hover:bg-white/15 active:scale-[0.98] text-white backdrop-blur-sm border border-white/20 shadow-lg",
-        "disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100",
-        hasExported && "bg-emerald-500/20 border-emerald-500/50 text-emerald-300",
+        "site-button site-button-primary",
         className
       )}
     >
       {isExporting ? (
         <>
-          <Loader2 className="w-4 h-4 animate-spin text-zinc-300" />
-          <span>Generating High-Res PNG...</span>
+          <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+          <span>Exporting PNG…</span>
         </>
       ) : hasExported ? (
         <>
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          <span>Downloaded Card!</span>
+          <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
+          <span>Downloaded</span>
         </>
       ) : (
         <>
-          <Download className="w-4 h-4 text-zinc-300" />
-          <span>Download Card PNG</span>
+          <Download className="w-4 h-4" aria-hidden="true" />
+          <span>Download PNG</span>
         </>
       )}
     </button>
