@@ -16,7 +16,7 @@ export interface ContributionHeatmapProps {
 
 const HEATMAP_PALETTES: Record<string, [string, string, string, string, string]> = {
   // Classic GitHub emerald green
-  classic: ["rgba(255, 255, 255, 0.06)", "#0e4429", "#006d32", "#26a641", "#39d353"],
+  "site-green": ["rgba(255, 255, 255, 0.06)", "#0e4429", "#006d32", "#26a641", "#39d353"],
   // City themes
   tokyo: ["rgba(255, 255, 255, 0.06)", "#1e1b4b", "#4338ca", "#818cf8", "#06b6d4"],
   berlin: ["rgba(255, 255, 255, 0.06)", "#27272a", "#52525b", "#a1a1aa", "#f4f4f5"],
@@ -34,10 +34,9 @@ const HEATMAP_PALETTES: Record<string, [string, string, string, string, string]>
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-export function getHeatmapPalette(theme: ThemeMode, tier: TierType, useClassicAuto = false) {
-  if (theme === "auto" && useClassicAuto) return HEATMAP_PALETTES.classic;
+export function getHeatmapPalette(theme: ThemeMode, tier: TierType) {
   const palette = HEATMAP_PALETTES[theme];
-  return Array.isArray(palette) ? palette : HEATMAP_PALETTES[tier] ?? HEATMAP_PALETTES.classic;
+  return Array.isArray(palette) ? palette : HEATMAP_PALETTES[tier] ?? HEATMAP_PALETTES["site-green"];
 }
 
 export function ContributionHeatmap({
@@ -47,7 +46,7 @@ export function ContributionHeatmap({
   className,
   compact = false,
 }: ContributionHeatmapProps) {
-  const palette = getHeatmapPalette(themeMode, tier, compact);
+  const palette = getHeatmapPalette(themeMode, tier);
 
   const weeks = calendar?.weeks || [];
   const totalContributions = calendar?.totalContributions ?? 0;

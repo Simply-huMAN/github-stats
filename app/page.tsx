@@ -6,18 +6,13 @@ import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { StatsCard } from "@/components/StatsCard";
 import { CardStyleToggle } from "@/components/CardStyleToggle";
-import { getHeatmapPalette } from "@/components/ContributionHeatmap";
 import { DEFAULT_CARD_OPTIONS, EXAMPLE_CARD } from "@/lib/previewCard";
-import { CITY_THEMES } from "@/lib/themes/cityThemes";
 import { validateGitHubUsername } from "@/lib/validation";
-import type { CardStyle, ThemeMode } from "@/types/builder";
-
-const cityThemes = Object.values(CITY_THEMES);
-const tier = EXAMPLE_CARD.tier.tier;
+import type { CardStyle } from "@/types/builder";
 
 const steps = [
   { title: "Enter a username", detail: "Start with any public GitHub profile." },
-  { title: "Choose a theme", detail: "Pick a city palette, frame, and badge. Show or hide the heatmap." },
+  { title: "Customize in Studio", detail: "Pick a palette, frame, and badge. Show or hide the heatmap." },
   { title: "Download or share", detail: "Export a high-resolution PNG or copy a link to your card." },
 ];
 
@@ -31,7 +26,6 @@ const wrappedTopics = [
 export default function HomePage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
-  const [theme, setTheme] = useState<ThemeMode>("auto");
   const [cardStyle, setCardStyle] = useState<CardStyle>("minimal");
   const [formError, setFormError] = useState("");
 
@@ -51,7 +45,6 @@ export default function HomePage() {
     }
 
     const params = new URLSearchParams({ user: result.cleanUsername, style: cardStyle });
-    if (theme !== "auto") params.set("theme", theme);
     router.push(`/card?${params.toString()}`);
   }
 
@@ -63,7 +56,7 @@ export default function HomePage() {
             Create a GitHub stats card
           </h1>
           <p className="mt-4 max-w-[43ch] text-base leading-relaxed text-site-muted sm:mt-5 sm:text-[17px]">
-            Put your GitHub stats and contribution heatmap on a card. Choose a city theme, then download it or share a link.
+            Put your GitHub stats and contribution heatmap on a card. Customize it in Studio, then download it or share a link.
           </p>
 
           <form action="/card" onSubmit={openCard} className="mt-6 max-w-[480px] sm:mt-8">
@@ -86,7 +79,6 @@ export default function HomePage() {
                 aria-invalid={Boolean(formError)}
                 aria-describedby={formError ? "home-username-error" : undefined}
               />
-              {theme !== "auto" && <input type="hidden" name="theme" value={theme} />}
               <input type="hidden" name="style" value={cardStyle} />
               <button type="submit" className="site-button site-button-primary whitespace-nowrap">
                 Create card <ArrowRight size={15} className="hidden sm:block" aria-hidden="true" />
@@ -102,38 +94,7 @@ export default function HomePage() {
             <span>Sample card</span>
             <CardStyleToggle value={cardStyle} onChange={setCardStyle} />
           </figcaption>
-          <StatsCard data={EXAMPLE_CARD} customizerOptions={{ ...DEFAULT_CARD_OPTIONS, cardStyle, themeMode: theme }} />
-          <div className="mt-2 flex flex-wrap items-center gap-x-1 gap-y-1" role="group" aria-label="Preview themes">
-            <button
-              type="button"
-              className="group grid h-9 w-7 place-items-center rounded"
-              aria-label="Default"
-              aria-pressed={theme === "auto"}
-              title="Default"
-              onClick={() => setTheme("auto")}
-            >
-              <span
-                className="h-3.5 w-3.5 rounded-[3px] ring-offset-2 ring-offset-background group-aria-pressed:ring-1 group-aria-pressed:ring-foreground"
-                style={{ backgroundColor: getHeatmapPalette("auto", tier, cardStyle === "minimal")[4] }}
-              />
-            </button>
-            {cityThemes.map((city) => (
-              <button
-                key={city.id}
-                type="button"
-                className="group grid h-9 w-7 place-items-center rounded"
-                aria-label={city.name}
-                aria-pressed={theme === city.id}
-                title={city.name}
-                onClick={() => setTheme(city.id)}
-              >
-                <span
-                  className="h-3.5 w-3.5 rounded-[3px] ring-offset-2 ring-offset-background group-aria-pressed:ring-1 group-aria-pressed:ring-foreground"
-                  style={{ backgroundColor: getHeatmapPalette(city.id, tier)[4] }}
-                />
-              </button>
-            ))}
-          </div>
+          <StatsCard data={EXAMPLE_CARD} customizerOptions={{ ...DEFAULT_CARD_OPTIONS, cardStyle }} />
         </figure>
       </section>
 

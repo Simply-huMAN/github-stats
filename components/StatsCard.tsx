@@ -124,6 +124,22 @@ const TIER_THEME_CONFIG: Record<
   },
 };
 
+const SITE_GREEN_THEME = {
+  baseBgColor: "#0e1216",
+  linearGradient: "linear-gradient(145deg, #101b15, #0e1216 60%, #0a0c0e)",
+  ambientBg: "radial-gradient(circle at 12% 12%, rgba(57, 211, 83, 0.14), transparent 48%)",
+  outerContainer: "border border-[#345242] text-foreground",
+  borderGlow: "shadow-[0_12px_32px_-20px_rgba(57,211,83,0.35)]",
+  topStripe: "bg-site-green",
+  badgeStyle: "border border-[#345242] bg-[#122319] text-site-green",
+  accentGradient: "text-site-green",
+  metricCardBg: "border border-site-line bg-site-inset",
+  metricIconColor: "text-site-green",
+  watermarkColor: "text-site-muted",
+  avatarBorder: "border-[#345242]",
+  glowDot: "bg-[#183322] text-site-green",
+};
+
 export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function StatsCard(
   { data, className, forceTier, customizerOptions },
   ref
@@ -142,56 +158,15 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
   const activeTier = tierDetails.tier;
   const themeMode = customizerOptions?.themeMode ?? "auto";
   const isMinimal = customizerOptions?.cardStyle === "minimal";
-  const markColor = getHeatmapPalette(themeMode, activeTier, isMinimal)[4];
+  const markColor = getHeatmapPalette(themeMode, activeTier)[4];
 
-  // 2. Resolve Active Visual Theme (City Theme vs Tier Theme)
+  // Resolve the card palette independently of its layout and tier.
   const resolvedTheme = useMemo(() => {
-    const selectedMode = themeMode;
-
-    if (selectedMode !== "auto" && selectedMode in CITY_THEMES) {
-      const city = CITY_THEMES[selectedMode as keyof typeof CITY_THEMES];
-      return {
-        baseBgColor: city.baseBgColor,
-        linearGradient: city.linearGradient,
-        outerContainer: city.outerContainer,
-        ambientBg: city.ambientBg,
-        borderGlow: city.borderGlow,
-        topStripe: city.topStripe,
-        badgeStyle: city.badgeStyle,
-        badgeLabel: tierDetails.badgeLabel || `${activeTier} Tier`,
-        accentColor: city.accentColor,
-        accentGradient: city.accentGradient,
-        metricCardBg: city.metricCardBg,
-        metricIconColor: city.metricIconColor,
-        watermarkColor: city.watermarkColor,
-        avatarBorder: city.avatarBorder,
-        glowDot: city.glowDot,
-      };
-    }
-
-    const tierTheme =
-      selectedMode !== "auto" && (selectedMode === "Bronze" || selectedMode === "Gold" || selectedMode === "Mythic")
-        ? TIER_THEME_CONFIG[selectedMode]
-        : TIER_THEME_CONFIG[activeTier];
-
-    return {
-      baseBgColor: tierTheme.baseBgColor,
-      linearGradient: tierTheme.linearGradient,
-      outerContainer: tierTheme.outerContainer,
-      ambientBg: tierTheme.ambientBg,
-      borderGlow: tierTheme.borderGlow,
-      topStripe: tierTheme.topStripe,
-      badgeStyle: tierTheme.badgeStyle,
-      badgeLabel: tierDetails.badgeLabel || `${activeTier} Tier`,
-      accentColor: tierTheme.accentColor,
-      accentGradient: tierTheme.accentGradient,
-      metricCardBg: tierTheme.metricCardBg,
-      metricIconColor: tierTheme.metricIconColor,
-      watermarkColor: tierTheme.watermarkColor,
-      avatarBorder: tierTheme.avatarBorder,
-      glowDot: tierTheme.glowDot,
-    };
-  }, [themeMode, activeTier, tierDetails.badgeLabel]);
+    if (themeMode === "site-green") return SITE_GREEN_THEME;
+    if (Object.hasOwn(CITY_THEMES, themeMode)) return CITY_THEMES[themeMode as keyof typeof CITY_THEMES];
+    if (themeMode === "Bronze" || themeMode === "Gold" || themeMode === "Mythic") return TIER_THEME_CONFIG[themeMode];
+    return TIER_THEME_CONFIG[activeTier];
+  }, [themeMode, activeTier]);
 
   // 3. Resolve Avatar Frame & Badge Options
   const frameConfig = AVATAR_FRAME_CONFIG[customizerOptions?.avatarFrame || "squircle"];
@@ -269,7 +244,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           </div>
           <span className={cn(
             "inline-flex shrink-0 items-center gap-1.5 rounded border border-site-line px-2 py-1 font-mono text-[10px] uppercase tracking-wide",
-            activeTier === "Mythic" ? "text-[#e3b341]" : "text-site-muted"
+            themeMode === "site-green" ? "text-site-green" : activeTier === "Mythic" ? "text-[#e3b341]" : "text-site-muted"
           )}>
             <span aria-hidden="true">{badgeConfig.renderIcon(activeTier)}</span>
             {activeTier}
@@ -292,7 +267,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
         )}
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-site-line pt-3 font-mono text-[10px] text-site-muted">
-          <span>{city?.name ?? "GitHub stats"}</span>
+          <span>{city?.name ?? (themeMode === "site-green" ? "Site Green" : "GitHub stats")}</span>
           <span className="inline-flex items-center gap-1.5">
             <BrandMark size={13} color={markColor} /> mygitstats.dev
           </span>
@@ -395,7 +370,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
           )}
         >
           {badgeConfig.renderIcon(activeTier)}
-          <span>{resolvedTheme.badgeLabel}</span>
+          <span>{tierDetails.badgeLabel || `${activeTier} Tier`}</span>
         </div>
       </div>
 
@@ -479,7 +454,7 @@ export const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(function Sta
       {customizerOptions?.showHeatmap !== false && (
         <ContributionHeatmap
           calendar={calendarData}
-          themeMode={customizerOptions?.themeMode || "auto"}
+          themeMode={themeMode}
           tier={activeTier}
         />
       )}

@@ -108,7 +108,7 @@ export default function CardStudioPage() {
       setCustomizerOptions((prev) => ({
         cardStyle: style ?? (legacyMinimal ? "minimal" : prev.cardStyle),
         themeMode: themeParam && (Object.hasOwn(CITY_THEMES, themeParam)
-          || ["auto", "Bronze", "Gold", "Mythic"].includes(themeParam)) ? themeParam : prev.themeMode,
+          || ["site-green", "auto", "Bronze", "Gold", "Mythic"].includes(themeParam)) ? themeParam : prev.themeMode,
         avatarFrame: frameParam && Object.hasOwn(AVATAR_FRAME_CONFIG, frameParam) ? frameParam : prev.avatarFrame,
         avatarBadge: badgeParam && Object.hasOwn(AVATAR_BADGE_CONFIG, badgeParam) ? badgeParam : prev.avatarBadge,
         cardBackground: !legacyMinimal && bgParam && Object.hasOwn(CARD_BACKGROUND_CONFIG, bgParam)
@@ -266,11 +266,7 @@ export default function CardStudioPage() {
     url.pathname = "/card";
     url.searchParams.set("user", statsData.user.username);
     url.searchParams.set("style", customizerOptions.cardStyle);
-    if (customizerOptions.themeMode !== "auto") {
-      url.searchParams.set("theme", customizerOptions.themeMode);
-    } else {
-      url.searchParams.delete("theme");
-    }
+    url.searchParams.set("theme", customizerOptions.themeMode);
     url.searchParams.set("frame", customizerOptions.avatarFrame);
     url.searchParams.set("badge", customizerOptions.avatarBadge);
     url.searchParams.set("bg", customizerOptions.cardBackground);

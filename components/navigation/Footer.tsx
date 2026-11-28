@@ -5,7 +5,7 @@ export function Footer() {
   return (
     <footer className="site-footer">
       <div className="site-container site-footer-inner">
-        <span>mygitstats.dev · Built in Hyderabad</span>
+        <span>mygitstats.dev</span>
         <nav aria-label="Footer navigation" className="flex flex-wrap items-center gap-x-5 gap-y-3">
           <Link href="/card">Card Studio</Link>
           <Link href="/wrapped">Wrapped</Link>

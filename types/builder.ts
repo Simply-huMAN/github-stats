@@ -10,7 +10,7 @@ export type CityThemeId =
   | "frankfurt"
   | "shanghai";
 
-export type ThemeMode = "auto" | TierType | CityThemeId;
+export type ThemeMode = "site-green" | "auto" | TierType | CityThemeId;
 export type CardStyle = "minimal" | "showcase";
 
 export type AvatarFrameStyle =

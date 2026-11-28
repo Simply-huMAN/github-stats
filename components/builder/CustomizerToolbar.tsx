@@ -26,7 +26,8 @@ const categories = [
 ] as const;
 
 const themeChoices = [
-  { id: "auto" as const, name: "Default", color: "#39d353" },
+  { id: "site-green" as const, name: "Site Green", color: getHeatmapPalette("site-green", "Mythic")[4] },
+  { id: "auto" as const, name: "Tier colors", color: getHeatmapPalette("auto", "Mythic")[4] },
   ...Object.values(CITY_THEMES).map((city) => ({
     id: city.id,
     name: city.name,

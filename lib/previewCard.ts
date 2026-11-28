@@ -5,7 +5,7 @@ import type { StatsResponse } from "@/types/stats";
 
 export const DEFAULT_CARD_OPTIONS: CustomizerOptions = {
   cardStyle: "showcase",
-  themeMode: "auto",
+  themeMode: "site-green",
   avatarFrame: "squircle",
   avatarBadge: "tier-icon",
   cardBackground: "ambient-glow",
